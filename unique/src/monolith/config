@@ -1,0 +1,18 @@
+
+ifeq ($(DESIGN),monolith)
+  monolith.state = enable
+endif
+
+monolith.dep = unbase unmath unogl
+
+m.suf=);
+m.pre=\nUNMODULE(
+
+$(D.SRC)/monolith/main.cxx: $(D.SRC)/monolith/modules.hxx
+
+$(D.SRC)/monolith/modules.hxx: 
+	@$(call U.RM,$@)
+	@$(call U.EF,/*\n * Automatic generated modules define header\n */,$@)
+	@$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(monolith.dep))),$@)
+
+.PHONY: $(D.SRC)/monolith/modules.hxx

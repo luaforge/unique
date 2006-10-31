@@ -1,0 +1,16 @@
+
+ifdef mode
+  MODE=$(mode)
+endif
+
+ifdef platform
+  PLATFORM=$(platform)
+endif
+
+ifdef compiler
+  COMPILER=$(compiler)
+endif
+
+ifdef design
+  DESIGN=$(design)
+endif

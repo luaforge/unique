@@ -1,0 +1,26 @@
+## OS Platform
+## linux|win32
+PLATFORM=linux
+
+## Compiler
+## gcc|msvs
+COMPILER=gcc
+
+## Design
+## module|monolith|runable
+DESIGN=module
+#DESIGN=monolith
+
+## Mode
+## test|real
+MODE=real
+#MODE=test
+
+## Debug
+## enable|disable
+DEBUG=enable
+DEBUG=disable
+
+## Main name
+## lunique
+NAME=lunique

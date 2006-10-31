@@ -1,0 +1,13 @@
+##############################
+#
+#  Unique Engine, jan,2006
+# *module: unbase
+# *author: PhoenixIV
+# *description:
+#  Base library build config
+#  
+##############################
+
+unbase.state=enable
+
+unbase.L.l += dl pthread z #bz2

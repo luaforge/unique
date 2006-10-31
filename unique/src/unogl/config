@@ -1,0 +1,16 @@
+#
+#  GL\GLX\X11 library build config
+#
+
+unogl.state = enable
+unogl.dep = unbase unmath
+
+ifeq ($(PLATFORM),linux)
+  unogl.C.I += /usr/include/GL /usr/include/X11 /usr/include/X11/extensions/
+  unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
+  unogl.L.l += GL GLU
+  unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
+endif
+ifeq ($(PLATFORM),win32)
+  unogl.L.l += opengl32 glu32 gdi32 user32 winmm
+endif

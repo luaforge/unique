@@ -1,0 +1,105 @@
+
+####### >> filename and directory >> #######
+## D.SRC    - source  directory
+## D.OBJ    - object  directory
+## D.BIN    - binary  derectory
+## D.LIB    - library directory
+####### << filename and directory << #######
+
+
+####### >> filename extensions >> #######
+## X        - extensions properties
+## X.CXX    - c++ source extension
+## X.OXX    - c++ object extension
+## X.PXX    - toluaxx source extension
+## X.DLL    - dynamic link library extension
+X.DLL=.so
+## X.RUN    - runable file extension
+X.RUN=.x86
+####### << filename and extensions << #######
+
+
+####### >> utilites >> #######
+## U        - utily properties
+## U.EX     - exec call   {$(1)-command}
+ifeq ($(MODE),test)
+  U.EX=$(call U.EH,[shell] $(1))
+else
+  U.EX=$(1)
+endif
+## U.EH     - echo call   {$(1)-string}
+U.EH=echo -ne "$(1) \n"
+## U.EF     - echo to file call {$(1)-string,$(2)-filename}
+U.EF=echo -ne "$(1) \n" >> $(2)
+## U.RM     - remove call {$(1)-files}
+U.RM=rm -f $(1)
+## U.CP     - copy call   {$(1)-from|files,to|file}
+U.CP=cp $(1) $(2)
+## U.MD     - mkdir call  {$(1)-name}
+U.MD=mkdir $(1)
+## U.RD     - rmdir call  {$(1)-name}
+U.RD=rmdir $(1)
+####### << utilites << #######
+
+####### >> toluaxx >> #######
+## P        - integrate preprocessor properties
+## P.XX     - preprocessor call {$(1)-input source, $(2)-output object, $(3)-options}
+P.XX=toluaxx $(1) -o $(2) $(3)
+## P.S      - integrate source call {$(1)-module,$(2)-source}
+P.S=$(addprefix src/$(1)/,$(addsuffix $(X.PXX),$(2)))
+## P.O      - integrate object call {$(1)-module,$(2)-source}
+P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
+## P.FLAGS  - global preprocessor options
+## P.FLAGS.DEBUG   - debug   preprocessor options
+## P.FLAGS.RELEASE - release preprocessor options
+####### << toluaxx << #######
+
+####### >> compiler >> #######
+## C        - compiler properties
+## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
+C.XX=g++ -c $(1) -o $(2) $(3)
+## C.S      - source call {$(1)-module,$(2)-source}
+C.S=$(addprefix $(D.SRC)/$(1)/,$(addsuffix $(X.CXX),$(2)))
+## C.O      - object call {$(1)-module,$(2)-object}
+C.O=$(addprefix $(D.OBJ)/$(1).,$(addsuffix $(X.OXX),$(2)))
+## C.I      - include path call {$(1)-include paths}
+C.I=$(addprefix -I,$(1))
+## C.I.path - global include paths
+C.I.path+=./include/lunique
+## C.FLAGS  - global compiler options
+C.FLAGS+=$(shell pkg-config --cflags lua5.1)
+C.FLAGS+=$(shell pkg-config --cflags toluaxx5.1)
+C.FLAGS+=-D_LINUX=1
+## C.FLAGS.DEBUG   - debug compiler options
+C.FLAGS.DEBUG+=-g -D DEBUG_MODE=1
+## C.FLAGS.RELEASE - release compiler options
+C.FLAGS.RELEASE+=-O3
+####### << compiler << #######
+
+####### >> linker >> #######
+## L        - linker options
+## L.XX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options}
+#L.XX=g++ -shared -o $(2) $(3) $$(filter $(D.LIB)/%,$(1)) $$(filter $(D.OBJ)/%,$(1))
+L.XX=g++ -shared -o $(2) $(3) $(filter $(D.LIB)/%,$(1)) $(filter $(D.OBJ)/%,$(1))
+## L.RX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options}
+L.RX=ld -static $(1) -o $(2) $(3)
+## L.SO     - link library name out call {$(1)-library}
+L.SO=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
+## L.RO     - link runable name out call {$(1)-runable}
+L.RO=$(addprefix $(D.RUN)/,$(addsuffix $(X.RUN),$(1)))
+## L.L      - link path call {$(1)-link paths}
+L.L=$(addprefix -L,$(1))
+## L.l      - link library call {$(1)-libraries}
+L.l=$(addprefix -l,$(1))
+## L.d      - link library name in call {$(1)-library}
+##L.d=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
+L.d=$(addsuffix $(X.DLL),$(1))
+## L.L.path - global link paths
+L.L.path+=$(D.LIB)
+## L.l.name - global libs names
+L.l.name+=c dl
+## L.OPTS   - global linker options
+L.OPTS+=$(shell pkg-config --libs lua5.1)
+L.OPTS+=$(shell pkg-config --libs toluaxx5.1)
+####### << linker << #######
+

@@ -1,0 +1,13 @@
+#
+#  Math3d library build config
+#
+unmath.state=enable
+
+ifeq ($(PLATFORM),linux)
+  unmath.C.I = /usr/include/GL
+  unmath.L.l = GL GLU
+else
+  unmath.L.l = opengl32 glu32
+endif
+
+unmath.dep = unbase
