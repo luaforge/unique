@@ -56,6 +56,10 @@
 ## C.FLAGS  - global compiler options
 ## C.FLAGS.DEBUG   - debug compiler options
 ## C.FLAGS.RELEASE - release compiler options
+## C.FLAGS.OPTIM.* - optimization flags
+## C.FLAGS.OPTIM.DISABLE - don't optimize
+## C.FLAGS.OPTIM.ENSPEED - optimize for speed
+## C.FLAGS.OPTIM.ENSIZE  - optimize for size
 ####### << compiler << #######
 
 

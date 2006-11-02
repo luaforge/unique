@@ -3,7 +3,7 @@
 runable.state = enable
 runable.design = option
 
-runable.dep = unbase unmath unogl
+runable.dep = $(T.target)
 
 m.suf=);
 m.pre=\nUNMODULE(

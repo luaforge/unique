@@ -14,3 +14,11 @@ endif
 ifdef design
   DESIGN=$(design)
 endif
+
+ifdef debug
+  DEBUG=$(debug)
+endif
+
+ifdef optim
+  OPTIM=$(optim)
+endif

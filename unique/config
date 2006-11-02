@@ -1,13 +1,14 @@
+
 ## OS Platform
 ## linux|win32
 PLATFORM=linux
 
 ## Compiler
-## gcc|msvs
+## gcc|mingw
 COMPILER=gcc
 
 ## Design
-## modules|monolith|runable
+## modules|&monolith|&runable
 DESIGN=modules monolith runable
 
 ## Mode
@@ -18,8 +19,12 @@ MODE=real
 ## Debug
 ## enable|disable
 DEBUG=enable
-DEBUG=disable
+#DEBUG=disable
 
 ## Main name
 ## lunique
 NAME=lunique
+
+## Optimize
+## disable|enspeed|ensize
+OPTIM=enspeed

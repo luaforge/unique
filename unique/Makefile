@@ -29,15 +29,26 @@ include opt/$(CONFIG)
 ## >> define variables >>
 T.NAME=$(NAME)
 ## << define variables <<
-## >> linking variables >>
+## >> compiling variables >>
 ifeq ($(DEBUG),enable)
   C.FLAGS+=$(C.FLAGS.DEBUG)
 else
   C.FLAGS+=$(C.FLAGS.RELEASE)
+  ifeq ($(OPTIM),disable)
+    C.FLAGS+=$(C.FLAGS.OPTIM.DISABLE)
+  endif
+  ifeq ($(OPTIM),enspeed)
+    C.FLAGS+=$(C.FLAGS.OPTIM.ENSPEED)
+  endif
+  ifeq ($(OPTIM),ensize)
+    C.FLAGS+=$(C.FLAGS.OPTIM.ENSIZE)
+  endif
 endif
 ifneq ($(C.I.path),)
   C.FLAGS+=$(call C.I,$(C.I.path))
 endif
+## << compiling variables <<
+## >> linking variables >>
 ifneq ($(L.L.path),)
   L.OPTS+=$(call L.L,$(L.L.path)) # lib paths
 endif
@@ -115,6 +126,7 @@ $(call P.O,$(1),%): $(call P.S,$(1),%)
 ###### >> module build rule >>
 ifneq ($$($(1).design),option)
 ifeq ($(findstring modules,$(DESIGN)),modules) # build module
+  T.target+=$(1)
   $(1).target=$(call L.SO,$(1))
 $$($(1).target): $$($(1).obj) $$($(1).modep)
 	@$(call U.EH,Build $(1) module)

@@ -3,7 +3,7 @@
 monolith.state = enable
 monolith.design = option
 
-monolith.dep = unbase unmath unogl
+monolith.dep = $(T.target)
 
 m.suf=);
 m.pre=\nUNMODULE(

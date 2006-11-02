@@ -68,10 +68,17 @@ C.I=$(addprefix -I,$(1))
 ## C.FLAGS  - global compiler options
 C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
 C.FLAGS+=-D_LINUX=1
+## C.FLAGS.OPTIM.* - optimization flags
+## C.FLAGS.OPTIM.DISABLE - Don't optimize.
+C.FLAGS.OPTIM.DISABLE=-O0
+## C.FLAGS.OPTIM.ENSPEED - Optimize for speed.
+C.FLAGS.OPTIM.ENSPEED=-O3
+## C.FLAGS.OPTIM.ENSIZE - Optimize for size.
+C.FLAGS.OPTIM.ENSIZE=-Os
 ## C.FLAGS.DEBUG   - debug compiler options
 C.FLAGS.DEBUG+=-g -D DEBUG_MODE=1
 ## C.FLAGS.RELEASE - release compiler options
-C.FLAGS.RELEASE+=-O3
+C.FLAGS.RELEASE+=
 ####### << compiler << #######
 
 ####### >> linker >> #######
