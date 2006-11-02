@@ -59,17 +59,12 @@ P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
 ## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
 C.XX=g++ -c $(1) -o $(2) $(3)
 ## C.H      - header call {$(1)-module,$(2)-source}
-C.H=$(addprefix $(D.SRC)/$(1)/,$(addsuffix $(X.HXX),$(2)))
 ## C.S      - source call {$(1)-module,$(2)-source}
-C.S=$(addprefix $(D.SRC)/$(1)/,$(addsuffix $(X.CXX),$(2)))
 ## C.O      - full object call {$(1)-module,$(2)-object}
-C.O=$(addprefix $(D.OBJ)/$(1).,$(addsuffix $(X.OXX),$(2)))
 ## C.OO     - only object call {$(1)-object}
-C.OO=$(addprefix $(D.OBJ)/,$(addsuffix $(X.OXX),$(1)))
 ## C.I      - include path call {$(1)-include paths}
 C.I=$(addprefix -I,$(1))
 ## C.I.path - global include paths
-C.I.path+=./include/lunique
 ## C.FLAGS  - global compiler options
 C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
 C.FLAGS+=-D_LINUX=1
@@ -84,11 +79,9 @@ C.FLAGS.RELEASE+=-O3
 ## L.XX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
 L.XX=g++ -shared -o $(2) $(3) $(filter $(call L.SO,%),$(1)) $(filter $(call C.OO,%),$(1))
 ## L.RX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
-L.RX=g++ -static -o $(2) $(3) $(filter $(call L.RO,%),$(1)) $(filter $(call C.OO,%),$(1))
+L.RX=g++ -o $(2) $(3) $(filter $(call L.RO,%),$(1)) $(filter $(call C.OO,%),$(1))
 ## L.SO     - link library name out call {$(1)-library}
-L.SO=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
 ## L.RO     - link runable name out call {$(1)-runable}
-L.RO=$(addprefix $(D.RUN)/,$(addsuffix $(X.RUN),$(1)))
 ## L.L      - link path call {$(1)-link paths}
 L.L=$(addprefix -L,$(1))
 ## L.l      - link library call {$(1)-libraries}
@@ -97,7 +90,6 @@ L.l=$(addprefix -l,$(1))
 ##L.d=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
 L.d=$(addsuffix $(X.DLL),$(1))
 ## L.L.path - global link paths
-L.L.path+=$(D.LIB)
 ## L.l.name - global libs names
 #L.l.name+=c dl
 ## L.OPTS   - global linker options

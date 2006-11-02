@@ -98,3 +98,18 @@ X.OXX=.oxx
 X.PXX=.pxx
 ###### << extensions << #######
 
+###### >> compile patterns >> #######
+C.H=$(addprefix $(D.SRC)/$(1)/,$(addsuffix $(X.HXX),$(2)))
+C.S=$(addprefix $(D.SRC)/$(1)/,$(addsuffix $(X.CXX),$(2)))
+C.O=$(addprefix $(D.OBJ)/$(1).,$(addsuffix $(X.OXX),$(2)))
+C.OO=$(addprefix $(D.OBJ)/,$(addsuffix $(X.OXX),$(1)))
+C.I.path+=./include/lunique
+###### << compile patterns << #######
+
+###### >> link patterns >> #######
+L.SO=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
+L.RO=$(addprefix $(D.RUN)/,$(addsuffix $(X.RUN),$(1)))
+L.L.path+=$(D.LIB)
+###### << link patterns << #######
+
+

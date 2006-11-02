@@ -8,9 +8,7 @@ COMPILER=gcc
 
 ## Design
 ## modules|monolith|runable
-DESIGN=modules
-DESIGN+=monolith
-DESIGN+=runable
+DESIGN=modules monolith runable
 
 ## Mode
 ## test|real
