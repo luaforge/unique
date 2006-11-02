@@ -29,82 +29,178 @@ namespace unbase{
   /*
    *  PATH
    */
+  string PATH::cnstr() const{
+    string r;
+    for(int i=0;i<path.size();i++){
+      r+=path[i]; if(i!=path.size()-1)r+="/";
+    }
+    return r;
+  }
+  void PATH::parse(string _p){
+    path.clear();
+    int t,i,j;
+    for(i=0,t=0;i<_p.length();t=i){
+      i=_p.find("/",i);
+      path.push_back(_p.substr(t,i-t));
+      for(i;_p[i]=='/'&&i<_p.length();i++);
+    }
+  }
   PATH::PATH(){}
-  PATH::PATH(string p):path(p){}
+  PATH::PATH(string _p){parse(_p);}
   PATH::~PATH(){}
-  PATH::operator string(){return path;}
-  int PATH::operator~(){
-    int c=1;
-    for(int i=0;(i=path.find("/",i))<path.length()-1;i++,c++);
-    return c;
+  PATH::operator string()const{return string("PATH(\"")+cnstr()+"\")";}
+  int PATH::operator~()const{return path.size();}
+  string& PATH::operator[](int _n){return path[_n];}
+  void PATH::operator()(int&k/**-1 asnil**/,string&v){
+    if(k==-1){
+      k=0; v=path[k];
+    }else if(k+1>=path.size()){
+      k=-1; v="";
+    }else{
+      k++; v=path[k];
+    }
   }
-  string PATH::operator[](int n){
-    if(n<1||n>~(*this))return "";
-    int p,i,c;
-    for(p=0,i=0,c=1;(i=path.find("/",p))<path.length();c++)
-      if(c==n) return path.substr(p,i-p); else p=i+1;
-    return path.substr(p);
+  PATH PATH::operator|(PATH&_n) const{
+    PATH r;
+    r.path=path;
+    for(int i=0;i<~_n;i++)if(_n[i].length()>0)r.path.push_back(_n[i]);
+    return r;
   }
-  PATH PATH::operator|(const PATH&_n){
-    //string r=path+n.path;
-    //r=r.replace(r.begin(),r.end(),"//","/");
-    string r=path,n=_n.path;
-    //if(n.find("/")==0)n.erase(0);
-    //if(n.rfind("/")==n.length()-1)n.erase(n.length()-1);
-    //if(r.rfind("/")==r.length()-1)r.erase(r.length()-1);
-    return PATH(r+"/"+n);
+  PATH PATH::operator|(string _n)const{PATH _p(_n); return (*this)|_p;}
+  string PATH::operator()()const{return cnstr();}
+  void PATH::operator()(string _n){parse(_n);}
+  
+  /*
+   *  PATHS
+   */
+  PATHS::PATHS(){}
+  PATHS::~PATHS(){}
+  void PATHS::operator()(string&k/**="" asnil**/, PATH*&v){
+    ITER i=cont.begin();
+    if(k!=""){
+      i=cont.find(k);
+      if(i!=cont.end())i++;
+    }
+    if(i==cont.end()){
+      k="";
+      v=NULL;
+    }else{
+      k=i->first;
+      v=i->second;
+    }
   }
+  PATH& PATHS::operator[](string k){
+    return *cont[k];
+  }
+  PATHS::operator string(){
+    string r="PATHS{";
+    int t=r.length();
+    for(ITER i=cont.begin();i!=cont.end();i++){
+      r+=i->first+"="+static_cast<string>(*(i->second))+",";
+    }
+    if(r.length()>t)r.erase(r.length()-1);
+    r+="}";
+    return r;
+  }
+  void PATHS::set(string k, PATH* _p){
+    if(k=="")return;
+    if(_p){
+      cont[k]=_p;
+    }else{
+      cont.erase(k);
+    }
+  }
+  PATH* PATHS::get(string k){
+    if(k=="")return NULL;
+    if(cont.find(k)!=cont.end()){
+      return cont[k];
+    }
+    return NULL;
+  }
+
   /*
    *  NAMES
    */
   NAMES::NAMES(){}
   NAMES::~NAMES(){}
-  void NAMES::operator()(string&type, string&name){
+  void NAMES::operator()(string&k, string&v){
     ITER i=cont.begin();
-    if(type!=""){
-      i=cont.find(type);
+    if(k!=""){
+      i=cont.find(k);
       if(i!=cont.end())i++;
     }
     if(i==cont.end()){
-      type="";
-      name="";
+      k="";
+      v="";
     }else{
-      type=i->first;
-      name=i->second;
+      k=i->first;
+      v=i->second;
     }
   }
-  string& NAMES::operator[](string type){
-    return cont[type];
-  }
-  bool NAMES::pop(string type){
-    ITER i=cont.find(type);
-    if(i==cont.end())return false;
-    cont.erase(type);
-    return true;
+  string& NAMES::operator[](string k){
+    return cont[k];
   }
   NAMES::operator string(){
-    string r="{";
+    string r="NAMES{";
+    int t=r.length();
     for(ITER i=cont.begin();i!=cont.end();i++){
       r+=i->first+"=\""+i->second+"\",";
     }
-    r.erase(r.length()-1);
+    if(r.length()>t)r.erase(r.length()-1);
     r+="}";
     return r;
+  }
+  void NAMES::set(string k, string v){
+    if(k=="")return;
+    if(v!=""){
+      cont[k]=v;
+    }else{
+      cont.erase(k);
+    }
+  }
+  string NAMES::get(string k){
+    if(k=="")return NULL;
+    if(cont.find(k)!=cont.end()){
+      return cont[k];
+    }
+    return "";
   }
   
   /*
    *  REPOS
    */
-  iostream& REPOS::stream(string name, string type, ios::openmode mode){
-    string full=path[type]+"/"+name+"."+ext[type];
-    iostream* s=openstm(full,mode);
-    stm[s]=full;
+  REPOS::REPOS(){
+    path.set("def",new PATH());
+    ext["def"]="?";
+  }
+  REPOS::~REPOS(){
+    delete path.get("def");
+  }
+  PATH REPOS::makepath(string n, string t){
+    string e=ext.get(t)!=""?ext[t]:ext["def"];
+    string r;
+    int i,b=0;
+    for(i=0;(i=e.find("?",b))<e.length();i++,b=i){
+      r+=e.substr(b,i-b);
+      r+=n;
+    }
+    r+=e.substr(b);
+    PATH p=path.get(t)?path[t]:path["def"];
+    return p|r;
+  }
+  iostream& REPOS::stream(string n, string t, ios::openmode m){
+    PATH p(makepath(n,t));
+    return stream(p,m);
+  }
+  iostream& REPOS::stream(PATH p, ios::openmode m){
+    iostream* s=openstm(p,m);
+    ostm[s]=p;
     return *s;
   }
   bool REPOS::stream(iostream& s){
-    if(stm.find(&s)!=stm.end()){
+    if(ostm.find(&s)!=ostm.end()){
       closestm(&s);
-      stm.erase(&s);
+      ostm.erase(&s);
       return true;
     }else{
       return false;
@@ -114,12 +210,19 @@ namespace unbase{
     string r;
     r+=string("location=\"")+location+"\",";
     r+=string("stream={");
-    for(OPNSTMSITER i=stm.begin();i!=stm.end();i++){
-      r+=string("[")+i->first+"]=\""+i->second+"\",";
+    for(OPNSTMSITER i=ostm.begin();i!=ostm.end();i++){
+      r+=string("[")+i->first+"]=\""+static_cast<string>(i->second)+"\",";
     }
     r.erase(r.length()-1);
     r+="}";
     return r;
+  }
+  REPOS::RESTYPE REPOS::restype(string n, string t){
+    PATH f=makepath(n,t);
+    return restype(f);
+  }
+  REPOS::RESTYPE REPOS::restype(PATH p){
+    return non;
   }
   /*
    *  REPOSS
@@ -162,8 +265,22 @@ namespace unbase{
    *  DATA
    */
   REPOSS DATA::repos; // repositories
-  NAMES DATA::path;
+  PATHS DATA::path;
   NAMES DATA::ext;
+
+  REPOS::RESTYPE DATA::restype(string n, string t, string r){
+    if(r==""){
+      for(REPOSS::ITER i=repos.cont.begin();i!=repos.cont.end();i++){
+	if(i->second){
+	  REPOS::RESTYPE s=i->second->restype(n,t);
+	  if(s!=REPOS::non)return s;
+	}
+      }
+    }else{
+      if(repos.cont.find(r)!=repos.cont.end())return repos[r]->restype(n,t);
+    }
+    return REPOS::non;
+  }
 
   iostream& DATA::open(string name, string type, string rep, ios::openmode mode){
     if(rep==""){
@@ -181,8 +298,6 @@ namespace unbase{
 	    if(s.good() || n==repos.cont.end())return s;
 	    r.stream(s);
 	  }
-	}else{
-	  repos.cont.erase(i);
 	}
       }
     }else{
@@ -197,6 +312,12 @@ namespace unbase{
       if(r.stream(s))return;
     }
   }
+}
+
+#include<sys/types.h> 
+#include<sys/stat.h> 
+#include<unistd.h> 
+namespace unbase{ 
   /*
    *  DERECTORY
    */
@@ -212,10 +333,24 @@ namespace unbase{
   bool DIRECTORY::close(){
     
   }
-  iostream* DIRECTORY::openstm(string name, ios::openmode mode){
-    return new fstream((location+name).data(),mode);
+  iostream* DIRECTORY::openstm(PATH p, ios::openmode m){
+    PATH l(location);
+    PATH f=l|p;
+    return new fstream(f().data(),m);
   }
   bool DIRECTORY::closestm(iostream* s){
     delete s;
+  }
+  REPOS::RESTYPE DIRECTORY::restype(PATH p){
+    PATH l(location);
+    PATH f=l|p;
+    struct stat s;
+    if(stat(f().data(),&s))return non;
+    if(S_ISREG(s.st_mode))return stm;
+    if(S_ISDIR(s.st_mode))return dir;
+    return non;
+  }
+  REPOS::RESTYPE DIRECTORY::restype(string n, string t){
+    return REPOS::restype(n,t);
   }
 }

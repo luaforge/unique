@@ -5,12 +5,10 @@
 unogl.state = enable
 unogl.dep = unbase unmath
 
-ifeq ($(PLATFORM),linux)
-  unogl.C.I += /usr/include/GL /usr/include/X11 /usr/include/X11/extensions/
-  unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
-  unogl.L.l += GL GLU
-  unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
-endif
-ifeq ($(PLATFORM),win32)
-  unogl.L.l += opengl32 glu32 gdi32 user32 winmm
-endif
+linux-gcc.unogl.C.I += /usr/include/GL /usr/include/X11 /usr/include/X11/extensions/
+linux-gcc.unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
+linux-gcc.unogl.L.l += GL GLU
+linux-gcc.unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
+
+win32-mingw.unogl.L.l += opengl32 glu32 gdi32 user32 winmm
+

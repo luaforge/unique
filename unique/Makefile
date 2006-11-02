@@ -20,8 +20,9 @@ include opt/global
 -include config
 -include opt/option
 ## include platform config
--include opt/$(PLATFORM)-$(COMPILER).local
-include opt/$(PLATFORM)-$(COMPILER)
+CONFIG=$(PLATFORM)-$(COMPILER)
+-include opt/$(CONFIG).local
+include opt/$(CONFIG)
 ########## << config section << ###########
 
 ########## >> predefine section >> ###########
@@ -66,11 +67,26 @@ $(1).tps+=$$(wildcard $$(call U.T,$(1)))
 $(1).modep+=$$(call L.SO,$$($(1).dep))
 ###### << module depend variables <<
 ###### >> compile variables >>
+ifneq ($$($(CONFIG).$(1).C.flags),)
+  $(1).C.flags+=$$(call C.I,$$($(CONFIG).$(1).C.flags))
+endif
+ifneq ($$($(CONFIG).$(1).C.I),)
+  $(1).C.flags+=$$(call C.I,$$($(CONFIG).$(1).C.I))
+endif
 ifneq ($$($(1).C.I),)
   $(1).C.flags+=$$(call C.I,$$($(1).C.I))
 endif
 ###### << compile variables <<
 ###### >> linking variables >>
+ifneq ($$($(CONFIG).$(1).L.opts),)
+  $(1).L.opts+=$$($(CONFIG).$(1).L.opts)
+endif
+ifneq ($$($(CONFIG).$(1).L.L),)
+  $(1).L.opts+=$$(call L.L,$$($(CONFIG).$(1).L.L))
+endif
+ifneq ($$($(CONFIG).$(1).L.l),)
+  $(1).L.opts+=$$(call L.l,$$($(CONFIG).$(1).L.l))
+endif
 ifneq ($$($(1).L.L),)
   $(1).L.opts+=$$(call L.L,$$($(1).L.L))
 endif
@@ -80,7 +96,7 @@ endif
 #ifneq ($$($(1).dep),)
 #  $(1).L.opts+=$$(call L.d,$$($(1).dep))           # lib dep name
 #endif
-T.L.opts+=$$($(1).L.opts)
+T.L.opts+=$(1).L.opts
 ###### << linking variables <<
 #### << template variables <<
 #### >> module specific rules >>
@@ -147,7 +163,7 @@ endef
 ########## << template section << ###########
 
 ########## >> implementation section >> ###########
-TARGET.MODULES=$(filter-out %.hxx %.hpp %.opt,$(patsubst src/%,%,$(wildcard src/*)))
+TARGET.MODULES=$(filter-out %.hxx %.hpp %.opt CVS,$(patsubst src/%,%,$(wildcard src/*)))
 ## >> template implementation >>
 $(foreach cortege,$(TARGET.MODULES),$(eval $(call T.MODULE,$(cortege))))
 ## << template implementation <<
@@ -156,10 +172,6 @@ probe: $(T.probe)
 	@$(call U.EH,Global options {)
 	@$(call U.EH,  C.FLAGS = $(C.FLAGS))
 	@$(call U.EH,  L.OPTS  = $(L.OPTS))
-	@$(call U.EH,})
-	@$(call U.EH,Target options {)
-	@$(call U.EH,  T.obj    = $(T.obj))
-	@$(call U.EH,  T.L.opts = $(T.L.opts))
 	@$(call U.EH,})
 ## << global probe <<
 ## >> global build >>
@@ -172,16 +184,14 @@ endif
 ifeq ($(DESIGN),monolith)
 $(call L.SO,$(T.NAME)): $(T.obj)
 	@$(call U.EH,Build $(T.NAME) module)
-#	@$(call U.EX,$(call L.XX,$$(filter $(call C.O,,%),$^),$@,$(L.OPTS) $(T.L.opts)))
-	@$(call U.EX,$(call L.XX,$^,$@,$(T.L.opts) $(L.OPTS)))
+	@$(call U.EX,$(call L.XX,$(filter $(call C.O,,%),$^),$@,$(L.OPTS) $(T.L.opts))
 build: $(call L.SO,$(T.NAME))
 	@$(call U.EH,Build complete....)
 clean: $(T.clean)
-	@$(call U.RM,$(call L.SO,$(T.NAME)))
 	@$(call U.EH,Clean complete....)
 endif
 ifeq ($(DESIGN),runable)
-  
+
 endif
 ## << global build rules
 

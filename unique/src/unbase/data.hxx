@@ -32,16 +32,41 @@
 namespace unbase{//tolua_export
   class PATH{//tolua_export
   protected:
+    vector<string> path;
+    void parse(string);
+    string cnstr() const;
   public:
     //tolua_begin
-    string path;
     PATH();
     PATH(string);
     ~PATH();
-    string operator[](int); // extract component
-    int operator~();        // num of components
-    operator string();      // return full path
-    PATH operator|(const PATH&);
+    string& operator[](int); // extract component
+    int operator~() const;   // num of components
+    operator string() const; // return full path
+    string operator()() const; // return full path
+    void operator()(string); // set new value
+    void operator()(int&/**k=-1 asnil**/,string&); // iterator
+    PATH operator|(PATH&) const; // concat paths
+    PATH operator|(string) const; // concat with string
+  };
+  //tolua_end
+  class PATHS{//tolua_export
+  protected:
+    typedef map<string,PATH*> CONT;
+    typedef map<string,PATH*>::iterator ITER;
+    CONT cont;
+  public:
+    //tolua_begin
+    PATHS();
+    ~PATHS();
+    void operator()(string&k/**="" asnil**/,PATH*&); // iterator
+    operator string();
+    //tolua_end
+    PATH& operator[](string k);
+    void set(string,PATH*);
+    PATH* get(string);
+    //tolua_begin
+    /**PATH* tolua_index(string,get,set);**/
   };
   //tolua_end
 
@@ -54,35 +79,61 @@ namespace unbase{//tolua_export
     NAMES();
     ~NAMES();
     void operator()(string&type/**="" asnil**/, string&name);
-    string& operator[](string type);
     operator string();
-    bool pop(string type);
+    //tolua_end
+    string& operator[](string type);
+    void set(string,string);
+    string get(string);
+    //tolua_begin
+    /**string tolua_index(string,get,set);**/
   };
   //tolua_end
   
   class REPOS{//tolua_export
   public:
-    typedef map<iostream*,string> OPNSTMS;
+    typedef map<iostream*,PATH> OPNSTMS;
     typedef OPNSTMS::iterator OPNSTMSITER;
   protected:
-    OPNSTMS stm;
+    OPNSTMS ostm;
+    PATH makepath(string name, string type);
   public:
     //tolua_begin
+    typedef enum RESTYPE{ // Resource type
+      non=0x1, // None (resource not existing or not accessible)
+      dir=0x2, // Directory (resource is directory)
+      stm=0x3  // Stream (resource is stream)
+    } RESTYPE;
+    
     string location;
     unbase::STATE state;
-    unbase::NAMES path;
+    unbase::PATHS path;
     unbase::NAMES ext;
     //tolua_end
     
-    virtual iostream& stream(string name, string type="", ios::openmode mode=ios::in);
-    virtual bool stream(iostream& stm);
-    virtual iostream* openstm(string name, ios::openmode mode=ios::in){}
-    virtual bool closestm(iostream* stm){}
+    virtual iostream& stream(PATH path, ios::openmode mode=ios::in);
+    virtual iostream& stream(string name, string type="def", ios::openmode mode=ios::in);
+    virtual bool stream(iostream&);
+  protected:
+    virtual iostream* openstm(PATH path, ios::openmode mode=ios::in){}
+    virtual bool closestm(iostream*){}
+  public:
+    /* name automatic convert to path, as example:
+       
+       name=metal.steel.anisotropic, type="material"
+                            |
+			    V
+       path[type]+"metal/steel/anisotropic"+ext[type]
+                            |
+			    V
+       data/material/metal/steel/anisotropic.lua     */
 
     //tolua_begin
-    REPOS(){}
-    virtual ~REPOS(){}
-
+    virtual RESTYPE restype(string name, string type="def");
+    virtual RESTYPE restype(PATH path);
+    
+    REPOS();
+    virtual ~REPOS();
+    
     operator string();
   };
   //tolua_end
@@ -106,37 +157,44 @@ namespace unbase{//tolua_export
   public:
     //tolua_begin
     static unbase::REPOSS repos; // repositories
-    static unbase::NAMES path;
+    static unbase::PATHS path;
     static unbase::NAMES ext;
     
     static iostream& open(string name, string type, string repos, ios::openmode mode);
     static void close(iostream& s);
-    
+    static REPOS::RESTYPE restype(string name, string type="def", string repos="");
+
     static string __info(string);
   };
   //tolua_end
 
   //tolua_begin
-  inline iostream& unstream(string name, ios::openmode mode, string type="", string repos=""){
+  inline iostream& unstream(string name, ios::openmode mode, string type="def", string repos=""){
     return DATA::open(name,type,repos,mode);
   }
-  inline iostream& unstream(string name, string type="", string repos=""){
+  inline iostream& unstream(string name, string type="def", string repos=""){
     return DATA::open(name,type,repos,ios::in);
   }
   inline void unstream(iostream& stm){
     DATA::close(stm);
   }
+  inline REPOS::RESTYPE unrestype(string name, string type="def", string repos=""){
+    return DATA::restype(name,type,repos);
+  }
   //tolua_end
   
-  class DIRECTORY: public unbase::REPOS{//tolua_export
+  class DIRECTORY: public REPOS{//tolua_export
   public:
     //tolua_begin
     DIRECTORY();
     virtual ~DIRECTORY();
+    virtual RESTYPE restype(PATH path);
+    virtual RESTYPE restype(string name, string type="def");
     //tolua_end
+  protected:
     virtual bool open();
     virtual bool close();
-    virtual iostream* openstm(string name, ios::openmode mode=ios::in);
+    virtual iostream* openstm(PATH path, ios::openmode mode=ios::in);
     virtual bool closestm(iostream* stm);
   };//tolua_export
   
