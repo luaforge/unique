@@ -255,11 +255,16 @@ namespace unbase{
     r+="}";
     return r;
   }
-  bool REPOSS::pop(string type){
-    ITER i=cont.find(type);
-    if(i==cont.end())return false;
-    cont.erase(type);
-    return true;
+  REPOS* REPOSS::get(string name){
+    if(cont.find(name)!=cont.end())return cont[name];
+    return NULL;
+  }
+  void REPOSS::set(string name, REPOS* repos){
+    if(repos){
+      cont[name]=repos;
+    }else{
+      if(cont.find(name)!=cont.end())cont.erase(name);
+    }
   }
   /*
    *  DATA

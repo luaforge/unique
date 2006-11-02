@@ -147,9 +147,13 @@ namespace unbase{//tolua_export
     REPOSS();
     ~REPOSS();
     void operator()(string&name/**="" asnil**/, REPOS*&repos/**=NULL asnil**/);
+    //tolua_end
     REPOS *& operator[](string name);
+    REPOS* get(string name);
+    void set(string name, REPOS* repos);
+    //tolua_begin
+    /**REPOS* tolua_index(string,get,set);**/
     operator string();
-    bool pop(string type);
   };
   //tolua_end
   

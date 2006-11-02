@@ -96,15 +96,15 @@ endif
 #ifneq ($$($(1).dep),)
 #  $(1).L.opts+=$$(call L.d,$$($(1).dep))           # lib dep name
 #endif
-T.L.opts+=$(1).L.opts
+T.L.opts+=$$($(1).L.opts)
 ###### << linking variables <<
 #### << template variables <<
 #### >> module specific rules >>
 ###### >> compile pattern rule >>
-#obj/$(1).%$(X.OXX): src/$(1)/%$(X.CXX)
 $(call C.O,$(1),%): $(call C.S,$(1),%)
 	@$(call U.EH,Compile $$< to $$@)
 	@$(call U.EX,$(call C.XX,$$<,$$@,$$($(1).C.flags) $(C.FLAGS)))
+  T.obj+=$$($(1).obj)
 ###### << compile pattern rule <<
 ###### >> binding pattern rule >>
 $(call P.O,$(1),%): $(call P.S,$(1),%)
@@ -113,16 +113,16 @@ $(call P.O,$(1),%): $(call P.S,$(1),%)
 .PRECIOUS: $(call P.O,$(1),%)
 ###### << binding pattern rule <<
 ###### >> module build rule >>
-ifeq ($(DESIGN),module) # build module
-$(call L.SO,$(1)): $$($(1).obj) $$($(1).modep)
+ifneq ($$($(1).design),option)
+ifeq ($(findstring modules,$(DESIGN)),modules) # build module
+  $(1).target=$(call L.SO,$(1))
+$$($(1).target): $$($(1).obj) $$($(1).modep)
 	@$(call U.EH,Build $(1) module)
 #	@$(call U.EX,$(call L.XX,$$(filter $(call C.O,$(1),%),$$^),$$@,$$($(1).L.opts) $(L.OPTS))) 
 	@$(call U.EX,$$(call L.XX,$$^,$$@,$$($(1).L.opts) $(L.OPTS))) 
-  $(1).target=$(call L.SO,$(1))
 build.$(1): $$($(1).target)
   T.build+=build.$(1)
-else
-  T.obj+=$$($(1).obj)
+endif
 endif
 ###### << module build rule <<
 ###### >> module clean rule >>
@@ -172,27 +172,44 @@ probe: $(T.probe)
 	@$(call U.EH,Global options {)
 	@$(call U.EH,  C.FLAGS = $(C.FLAGS))
 	@$(call U.EH,  L.OPTS  = $(L.OPTS))
+	@$(call U.EH,  T.build = $(T.build))
+	@$(call U.EH,  T.clean = $(T.clean))
+	@$(call U.EH,  T.obj = $(T.obj))
+	@$(call U.EH,  T.L.opts = $(T.L.opts))
 	@$(call U.EH,})
 ## << global probe <<
 ## >> global build >>
-ifeq ($(DESIGN),module)
-build: $(T.build)
-	@$(call U.EH,Build complete....)
-clean: $(T.clean)
-	@$(call U.EH,Clean complete....)
-endif
-ifeq ($(DESIGN),monolith)
-$(call L.SO,$(T.NAME)): $(T.obj)
+TARGET.DESIGN=$(addsuffix .$(1),$(2))
+#### >> design modules >>
+modules.build: $(T.build)
+	@$(call U.EH,Build modules complete....)
+modules.clean: $(T.clean)
+	@$(call U.EH,Clean modules complete....)
+#### << design modules <<
+#### >> design monolith >>
+monolith.target=$(call L.SO,$(T.NAME))
+$(monolith.target): $(T.obj)
 	@$(call U.EH,Build $(T.NAME) module)
-	@$(call U.EX,$(call L.XX,$(filter $(call C.O,,%),$^),$@,$(L.OPTS) $(T.L.opts))
-build: $(call L.SO,$(T.NAME))
-	@$(call U.EH,Build complete....)
-clean: $(T.clean)
-	@$(call U.EH,Clean complete....)
-endif
-ifeq ($(DESIGN),runable)
-
-endif
+	@$(call U.EX,$(call L.XX,$^,$@,$(L.OPTS) $(T.L.opts)))
+monolith.build: $(monolith.target)
+	@$(call U.EH,Build monolith complete....)
+monolith.clean: $(T.clean)
+	@$(call U.RM,$(monolith.target))
+	@$(call U.EH,Clean monolith complete....)
+#### << design monolith <<
+#### >> design runable >>
+runable.target=$(call L.RO,$(T.NAME))
+$(runable.target): $(T.obj)
+	@$(call U.EH,Build $(T.NAME) module)
+	@$(call U.EX,$(call L.XX,$^,$@,$(L.OPTS) $(T.L.opts)))
+runable.build: $(runable.target)
+	@$(call U.EH,Build runable complete....)
+runable.clean: $(T.clean)
+	@$(call U.RM,$(runable.target))
+	@$(call U.EH,Clean runable complete....)
+#### << design runable <<
+build: $(call TARGET.DESIGN,build,$(DESIGN))
+clean: $(call TARGET.DESIGN,clean,$(DESIGN))
 ## << global build rules
 
 ########## << implementation section << ###########

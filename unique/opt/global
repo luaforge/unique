@@ -11,6 +11,7 @@
 
 ####### >> filename and extensions >> #######
 ## X        - extensions properties
+## X.HXX    - c++ header extension
 ## X.CXX    - c++ source extension
 ## X.OXX    - c++ object extension
 ## X.PXX    - toluaxx source extension
@@ -48,7 +49,8 @@
 ## C        - compiler properties
 ## C.XX     - compiler call              {$(1)-input source, $(2)-output object, $(3)-options}
 ## C.S      - source call                {$(1)-module,$(2)-source}
-## C.O      - object call                {$(1)-module,$(2)-object}
+## C.O      - full object call           {$(1)-module,$(2)-object}
+## C.OO     - only object call           {$(1)-object}
 ## C.I      - include path call          {$(1)-include paths}
 ## C.I.path - global include paths
 ## C.FLAGS  - global compiler options
@@ -85,11 +87,12 @@ U.T=$(addprefix $(D.SRC)/$(1)/,$(U.B))
 ###### >> directories >> #######
 D.SRC=src
 D.OBJ=obj
-D.BIN=bin
+D.RUN=bin
 D.LIB=lib
 ###### << directories << #######
 
 ###### >> extensions >> #######
+X.HXX=.hxx
 X.CXX=.cxx
 X.OXX=.oxx
 X.PXX=.pxx

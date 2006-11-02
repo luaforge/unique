@@ -7,9 +7,10 @@ PLATFORM=linux
 COMPILER=gcc
 
 ## Design
-## module|monolith|runable
-DESIGN=module
-#DESIGN=monolith
+## modules|monolith|runable
+DESIGN=modules
+DESIGN+=monolith
+DESIGN+=runable
 
 ## Mode
 ## test|real

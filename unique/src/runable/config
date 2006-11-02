@@ -1,0 +1,18 @@
+
+
+runable.state = enable
+runable.design = option
+
+runable.dep = unbase unmath unogl
+
+m.suf=);
+m.pre=\nUNMODULE(
+
+$(call C.S,runable,main): $(call C.H,runable,modules)
+
+$(call C.H,runable,modules): 
+	@$(call U.RM,$@)
+	@$(call U.EF,/*\n * Automatic generated modules define header\n */,$@)
+	@$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(runable.dep))),$@)
+
+.PHONY: $(call C.H,runable,modules)
