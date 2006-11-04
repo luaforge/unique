@@ -1,6 +1,6 @@
 ##############################
 #
-#  Unique Engine, jan,2006
+#  Unique Engine
 # *module: unbase
 # *author: PhoenixIV
 # *description:
@@ -11,5 +11,5 @@
 unbase.state=enable
 
 linux-gcc.unbase.L.opts += $(shell pkg-config --libs lua5.1 toluaxx5.1)
-linux-gcc.unbase.L.l += c dl pthread z bz2
+linux-gcc.unbase.L.l += c dl
 

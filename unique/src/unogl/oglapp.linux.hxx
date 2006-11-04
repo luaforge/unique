@@ -29,8 +29,6 @@ Author:
 #  include<xf86vmode.h>
 
 namespace unogl{
-  using namespace unbase;
-
   class GLAPP: public GRAPHCONTEXT{
   public:
     enum{// Стили окна

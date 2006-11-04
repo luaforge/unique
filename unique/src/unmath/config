@@ -1,7 +1,7 @@
 #
 #  Math3d library build config
 #
-unmath.state=enable
+unmath.state = enable
 
 linux-gcc.unmath.C.I = /usr/include/GL
 linux-gcc.unmath.L.l = GL GLU

@@ -1,6 +1,8 @@
 #pragma once
 #include"unbase.hxx"
 
+#include<map>
+
 namespace unbase{//tolua_export
   // Interface context class
   class CONTEXT{//tolua_export

@@ -23,13 +23,12 @@
  */
 
 #pragma once
-#include"platform.hxx"
-#include"option.hxx"
+#include"unbase.hxx"
 #include<map>
 #include<iostream>
 #include<vector>
 
-namespace unbase{//tolua_export
+namespace undata{//tolua_export
   class PATH{//tolua_export
   protected:
     vector<string> path;
@@ -106,8 +105,8 @@ namespace unbase{//tolua_export
     
     string location;
     unbase::STATE state;
-    unbase::PATHS path;
-    unbase::NAMES ext;
+    undata::PATHS path;
+    undata::NAMES ext;
     //tolua_end
     
     virtual iostream& stream(PATH path, ios::openmode mode=ios::in);
@@ -160,9 +159,9 @@ namespace unbase{//tolua_export
   class DATA{//tolua_export
   public:
     //tolua_begin
-    static unbase::REPOSS repos; // repositories
-    static unbase::PATHS path;
-    static unbase::NAMES ext;
+    static undata::REPOSS repos; // repositories
+    static undata::PATHS path;
+    static undata::NAMES ext;
     
     static iostream& open(string name, string type, string repos, ios::openmode mode);
     static void close(iostream& s);
@@ -185,22 +184,6 @@ namespace unbase{//tolua_export
   inline REPOS::RESTYPE unrestype(string name, string type="def", string repos=""){
     return DATA::restype(name,type,repos);
   }
-  //tolua_end
-  
-  class DIRECTORY: public REPOS{//tolua_export
-  public:
-    //tolua_begin
-    DIRECTORY();
-    virtual ~DIRECTORY();
-    virtual RESTYPE restype(PATH path);
-    virtual RESTYPE restype(string name, string type="def");
-    //tolua_end
-  protected:
-    virtual bool open();
-    virtual bool close();
-    virtual iostream* openstm(PATH path, ios::openmode mode=ios::in);
-    virtual bool closestm(iostream* stm);
-  };//tolua_export
-  
-}//tolua_export
+}
+//tolua_end
 

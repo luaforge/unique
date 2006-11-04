@@ -19,7 +19,7 @@ MODE=real
 ## Debug
 ## enable|disable
 DEBUG=enable
-#DEBUG=disable
+DEBUG=disable
 
 ## Main name
 ## lunique

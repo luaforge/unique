@@ -29,8 +29,11 @@ Author:
 #ifdef _LINUX
 #  include"oglapp.linux.hxx"
 using namespace unogl;
+using namespace unbase;
 
-#define PROUT(o) {cout<<#o<<" = "<<o<<endl;}
+#  include<vector>
+
+#  define PROUT(o) {cout<<#o<<" = "<<o<<endl;}
 
 //typedef BOOL (APIENTRY * wglSwapIntervalEXT_Func)(int);
 //wglSwapIntervalEXT_Func wglSwapIntervalEXT=wglSwapIntervalEXT_Func(wglGetProcAddress("wglSwapIntervalEXT"));

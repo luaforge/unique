@@ -1,24 +1,8 @@
+
 $lfile "base.lua"
 
 $hfile"option.hxx"
 $hfile"cpu.hxx"
 $hfile"time.hxx"
 $hfile"system.hxx"
-$pfile"iostream.ixx"
-$hfile"data.hxx"
-
-$[ -- Presets
-DATA.path.root="./data/"
-DATA.path.shd="shader/"
-DATA.path.tex="texture/"
-DATA.path.met="metric/"
-DATA.path.mat="material/"
-DATA.path.lua="script/"
-DATA.path.scn="scene/"
-DATA.path.map="map/"
-DATA.path.fnt="font/"
-DATA.path.snd="sound/"
-DATA.path.mod="lib/"
-$]
-
 $hfile"context.hxx"
