@@ -1,5 +1,5 @@
 #include"cpu.hxx"
-#ifdef _WIN32
+#if _WIN32 && !_MINGW
 
 void unbase::cpuid(int func,int&a,int&b,int&c,int&d){
   asm {

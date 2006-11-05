@@ -13,9 +13,9 @@
 ## X.OXX    - c++ object extension
 ## X.PXX    - toluaxx source extension
 ## X.DLL    - dynamic link library extension
-X.DLL=.so
+X.DLL=.dll
 ## X.RUN    - runable file extension
-X.RUN=.x86
+X.RUN=.exe
 ####### << filename and extensions << #######
 
 
@@ -23,17 +23,18 @@ X.RUN=.x86
 ## U        - utily properties
 ## U.EX     - exec call   {$(1)-command}
 ## U.EH     - echo call   {$(1)-string}
-U.EH=echo -ne "$(1) \n"
+U.PATH=$(subst /,\\,$(1))
+U.EH=echo $(1)
 ## U.EF     - echo to file call {$(1)-string,$(2)-filename}
-U.EF=echo -ne "$(1) \n" >> $(2)
+U.EF=echo $(1) >> $(2)
 ## U.RM     - remove call {$(1)-files}
-U.RM=rm -f $(1)
+U.RM=del /q /f $(call U.PATH,$(1))
 ## U.CP     - copy call   {$(1)-from|files,to|file}
-U.CP=cp $(1) $(2)
+U.CP=copy $(call U.PATH,$(1)) $(call U.PATH,$(2))
 ## U.MD     - mkdir call  {$(1)-name}
-U.MD=mkdir $(1)
+U.MD=mkdir $(call U.PATH,$(1))
 ## U.RD     - rmdir call  {$(1)-name}
-U.RD=rmdir $(1)
+U.RD=rmdir $(call U.PATH,$(1))
 ####### << utilites << #######
 
 ####### >> toluaxx >> #######
@@ -50,6 +51,18 @@ P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
 ####### << toluaxx << #######
 
 ####### >> compiler >> #######
+ifndef MINGW_NAME
+  MINGW_NAME=
+endif
+ifndef MINGW_PREFIX
+  MINGW_PREFIX=$(PREFIX)$(MINGW_NAME)
+endif
+ifndef MINGW_BINUTIL
+  MINGW_BINUTIL=$(MINGW_PREFIX)/bin
+endif
+ifndef PREFIX
+  PREFIX=$(MINGW_PREFIX)
+endif
 ## C        - compiler properties
 ## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
 C.XX=g++ -c $(1) -o $(2) $(3)
@@ -60,9 +73,11 @@ C.XX=g++ -c $(1) -o $(2) $(3)
 ## C.I      - include path call {$(1)-include paths}
 C.I=$(addprefix -I,$(1))
 ## C.I.path - global include paths
+ifneq ($(local.I),)
+  C.I.path+=$(local.I)
+endif
 ## C.FLAGS  - global compiler options
-C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
-C.FLAGS+=-D_LINUX=1
+C.FLAGS+=-D_MINGW=1
 ## C.FLAGS.OPTIM.* - optimization flags
 ## C.FLAGS.OPTIM.DISABLE - Don't optimize.
 C.FLAGS.OPTIM.DISABLE=-O0
@@ -92,10 +107,12 @@ L.l=$(addprefix -l,$(1))
 ##L.d=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
 L.d=$(addsuffix $(X.DLL),$(1))
 ## L.L.path - global link paths
+ifneq ($(local.L),)
+  L.L.path+=$(local.L)
+endif
 ## L.l.name - global libs names
-#L.l.name+=c dl
 ## L.OPTS   - global linker options
-#L.OPTS+=$(shell pkg-config --libs lua5.1)
-#L.OPTS+=$(shell pkg-config --libs toluaxx5.1)
 ####### << linker << #######
+
+L.l.name += lua51 toluaxx51
 

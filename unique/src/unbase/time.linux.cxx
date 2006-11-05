@@ -1,5 +1,5 @@
 #include"time.hxx"
-#ifdef _LINUX
+#if _LINUX
 #  include<unistd.h>
 #  include<time.h>
 #  include<sys/time.h>

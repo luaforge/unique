@@ -26,25 +26,33 @@
 #ifdef _WIN32
 #  include<windows.h>
 #  include<sys/timeb.h>
-using namespace unbase;
 
-double curtime(){
-  timeb now;
-  ftime(&now);
-  return double(now.time)+double(now.millitm)/double(1000);
-}
+#  define ESTIMATE_TIME 0.1 // seconds
 
-double estimate_cpu_frequency(){
-  unsigned int before,after;
-  LARGE_INTEGER start,stop;
-
-  before=curtime();
-  QueryPerformanceCounter(&start);
-  Sleep(1000);
-  after=curtime();
-  QueryPerformanceCounter(&stop);
-
-  return double((stop.QuadPart-start.QuadPart)/(after-before));
+namespace unbase{
+  
+  double curtime(){
+    timeb now;
+    ftime(&now);
+    return double(now.time)+double(now.millitm)/double(1000);
+  }
+  
+  double estimate_cpu_frequency(){
+    double start,stop;
+    unsigned int before,after;
+    //LARGE_INTEGER start,stop;
+    
+    before=curtime();
+    //QueryPerformanceCounter(&start);
+    start=rdtsc();
+    Sleep((unsigned long)(double(1000)*double(ESTIMATE_TIME)));
+    after=curtime();
+    //QueryPerformanceCounter(&stop);
+    stop=rdtsc();
+    
+    //return double((stop.QuadPart-start.QuadPart)/(after-before));
+    return double(stop-start)/double(after-before);
+  }
 }
 
 #endif

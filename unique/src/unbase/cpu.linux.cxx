@@ -1,5 +1,5 @@
 #include"cpu.hxx"
-#ifdef _LINUX
+#if _LINUX || _MINGW
 
 void unbase::cpuid(int func,int&eax,int&ebx,int&ecx,int&edx){
   __asm__ __volatile__("cpuid":"=a"(eax),"=b"(ebx),"=c"(ecx),"=d"(edx):"a"(func));

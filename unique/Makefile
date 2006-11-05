@@ -15,10 +15,13 @@ all: build
 ########## >> config section >> ###########
 ## include main config
 
-include opt/global
--include opt/local
+
+
 -include config
 -include opt/option
+include opt/global
+-include opt/local
+
 ## include platform config
 CONFIG=$(PLATFORM)-$(COMPILER)
 -include opt/$(CONFIG).local
@@ -179,6 +182,7 @@ TARGET.MODULES=$(filter-out %.hxx %.hpp %.opt CVS,$(patsubst src/%,%,$(wildcard 
 ## >> template implementation >>
 $(foreach cortege,$(TARGET.MODULES),$(eval $(call T.MODULE,$(cortege))))
 ## << template implementation <<
+
 ## >> global probe >>
 probe: $(T.probe)
 	@$(call U.EH,Global options {)
@@ -220,7 +224,11 @@ runable.clean: $(T.clean)
 	@$(call U.RM,$(runable.target))
 	@$(call U.EH,Clean runable complete....)
 #### << design runable <<
-build: $(call TARGET.DESIGN,build,$(DESIGN))
+.PHONY: prepare prepare.local prepare.global modules.prepare runable.prepare monolith.prepare
+prepare.global:
+	@$(call U.EH,Preparing build lunique for PLATFORM=$(PLATFORM) with COMPILER=$(COMPILER) MODE=$(MODE)....)
+prepare: prepare.global prepare.local $(call TARGET.DESIGN,prepare,$(DESIGN))
+build: prepare $(call TARGET.DESIGN,build,$(DESIGN))
 clean: $(call TARGET.DESIGN,clean,$(DESIGN))
 ## << global build rules
 

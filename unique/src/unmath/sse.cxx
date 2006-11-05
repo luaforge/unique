@@ -29,7 +29,7 @@
 namespace _SSE{
   scalar sqrtf_scal(const scalar f){
     scalar r=0.0;
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         movss   xmm0, f
 	
@@ -37,7 +37,8 @@ namespace _SSE{
 	
 	movss      r, xmm0
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movq  (%%eax), %%mm0\n"
 	    
@@ -56,7 +57,7 @@ namespace _SSE{
 
   scalar len_vec3(const vec3& v){
     scalar r=0.0;
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         mov eax, v
 	
@@ -79,7 +80,8 @@ namespace _SSE{
 	
 	mov r, edx
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movss 8(%%eax), %%xmm0\n"
 	    "movlhps %%xmm0, %%xmm0\n"
@@ -106,7 +108,7 @@ namespace _SSE{
   
   scalar len_vec4(const vec4& v){
     scalar r=0.0;
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         mov eax, v
 	
@@ -125,7 +127,8 @@ namespace _SSE{
 	
 	movss  r, xmm0
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    
@@ -149,7 +152,7 @@ namespace _SSE{
   }
 
   void norm_vec3(vec3& v){
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         mov eax, v
 	
@@ -176,7 +179,8 @@ namespace _SSE{
 	movhlps xmm0, xmm0
 	movss [eax+8], xmm0
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movss 8(%%eax), %%xmm0\n"
 	    "movlhps %%xmm0, %%xmm0\n"
@@ -208,7 +212,7 @@ namespace _SSE{
   }
 
   void norm_vec4(vec4& v){
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         mov eax, v
 	
@@ -231,7 +235,8 @@ namespace _SSE{
 	
 	movups  [eax], xmm0
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    "movaps %%xmm0, %%xmm1\n"
@@ -258,7 +263,7 @@ namespace _SSE{
   }
   
   vec3& sub_vec3_vec3(vec3& r, const vec3& v1, const vec3& v2){
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         mov eax, v1
 	mov ebx, v2
@@ -271,7 +276,8 @@ namespace _SSE{
 	
 	movups [edx], xmm0
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    "movups (%%ebx), %%xmm1\n"
@@ -288,7 +294,7 @@ namespace _SSE{
   
   void dot_vec4_vec4(const vec4& v0, const void *v1, int v1_stride, void *result, int result_stride, int count){
     if(count==0) return;
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         pusha
 	
@@ -321,7 +327,8 @@ namespace _SSE{
 	  
 	  popa
 	  }
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    
@@ -350,7 +357,7 @@ namespace _SSE{
   }
 
   void mul_mat4_mat4(const mat4& m0, const mat4& m1, mat4& res){
-#   ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         push eax
 	push ebx
@@ -436,7 +443,8 @@ namespace _SSE{
 	pop ebx
 	pop eax
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    "movups 16(%%eax), %%xmm1\n"
@@ -518,7 +526,7 @@ namespace _SSE{
   
   void mul_mat4_vec3(const mat4& m, const void *v, int v_stride, void *result, int result_stride, int count){
     if(count==0) return;
-#ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
         pusha
 	
@@ -565,7 +573,8 @@ namespace _SSE{
 	  
 	popa
 	  }
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__ (
 	     "movups (%%eax), %%xmm0\n"
 	     "movups 16(%%eax), %%xmm1\n"
@@ -610,7 +619,7 @@ namespace _SSE{
 
   void mul_mat4_vec4(const mat4& m, const void *v, int v_stride, void *result, int result_stride, int count){
     if(count==0) return;
-#ifdef _WIN32
+#   if _WIN32 && !_MINGW
     __asm{
       pusha
 	
@@ -656,7 +665,8 @@ namespace _SSE{
 	
 	popa
 	}
-#   else
+#   endif
+#   if _LINUX || _MINGW
     __asm__(
 	    "movups (%%eax), %%xmm0\n"
 	    "movups 16(%%eax), %%xmm1\n"

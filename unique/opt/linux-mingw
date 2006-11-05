@@ -13,9 +13,9 @@
 ## X.OXX    - c++ object extension
 ## X.PXX    - toluaxx source extension
 ## X.DLL    - dynamic link library extension
-X.DLL=.so
+X.DLL=.dll
 ## X.RUN    - runable file extension
-X.RUN=.x86
+X.RUN=.exe
 ####### << filename and extensions << #######
 
 
@@ -50,9 +50,21 @@ P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
 ####### << toluaxx << #######
 
 ####### >> compiler >> #######
+ifndef MINGW_NAME
+  MINGW_NAME=i586-mingw32msvc
+endif
+ifndef MINGW_PREFIX
+  MINGW_PREFIX=/usr/$(MINGW_NAME)
+endif
+ifndef MINGW_BINUTIL
+  MINGW_BINUTIL=$(MINGW_PREFIX)/bin
+endif
+ifndef PREFIX
+  PREFIX=$(MINGW_PREFIX)
+endif
 ## C        - compiler properties
 ## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
-C.XX=g++ -c $(1) -o $(2) $(3)
+C.XX=$(MINGW_NAME)-g++ -c $(1) -o $(2) $(3)
 ## C.H      - header call {$(1)-module,$(2)-source}
 ## C.S      - source call {$(1)-module,$(2)-source}
 ## C.O      - full object call {$(1)-module,$(2)-object}
@@ -62,7 +74,7 @@ C.I=$(addprefix -I,$(1))
 ## C.I.path - global include paths
 ## C.FLAGS  - global compiler options
 C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
-C.FLAGS+=-D_LINUX=1
+C.FLAGS+=-D_MINGW=1
 ## C.FLAGS.OPTIM.* - optimization flags
 ## C.FLAGS.OPTIM.DISABLE - Don't optimize.
 C.FLAGS.OPTIM.DISABLE=-O0
@@ -79,9 +91,9 @@ C.FLAGS.RELEASE+=
 ####### >> linker >> #######
 ## L        - linker options
 ## L.XX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
-L.XX=g++ -shared -o $(2) $(3) $(filter $(call L.SO,%),$(1)) $(filter $(call C.OO,%),$(1))
+L.XX=$(MINGW_NAME)-g++ -shared -o $(2) $(3) $(filter $(call L.SO,%),$(1)) $(filter $(call C.OO,%),$(1))
 ## L.RX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
-L.RX=g++ -o $(2) $(3) $(filter $(call L.RO,%),$(1)) $(filter $(call C.OO,%),$(1))
+L.RX=$(MINGW_NAME)-g++ -o $(2) $(3) $(filter $(call L.RO,%),$(1)) $(filter $(call C.OO,%),$(1))
 ## L.SO     - link library name out call {$(1)-library}
 ## L.RO     - link runable name out call {$(1)-runable}
 ## L.L      - link path call {$(1)-link paths}
@@ -92,10 +104,12 @@ L.l=$(addprefix -l,$(1))
 ##L.d=$(addprefix $(D.LIB)/,$(addsuffix $(X.DLL),$(1)))
 L.d=$(addsuffix $(X.DLL),$(1))
 ## L.L.path - global link paths
+ifneq ($(local.L),)
+  L.L.path+=$(local.L)
+endif
 ## L.l.name - global libs names
-#L.l.name+=c dl
 ## L.OPTS   - global linker options
-#L.OPTS+=$(shell pkg-config --libs lua5.1)
-#L.OPTS+=$(shell pkg-config --libs toluaxx5.1)
 ####### << linker << #######
+
+L.l.name += lua51 toluaxx51
 

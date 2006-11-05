@@ -1,0 +1,6 @@
+
+#PREFIX = C\:/GNUtools/mingw
+
+local.I += path/to/optional/includes
+
+local.L += path/to/optional/libs
