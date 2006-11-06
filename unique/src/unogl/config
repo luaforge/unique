@@ -2,7 +2,7 @@
 #  GL\GLX\X11 library build config
 #
 
-#unogl.state = enable
+unogl.state = enable
 unogl.dep = unbase unmath
 
 linux-gcc.unogl.C.I += /usr/include/GL /usr/include/X11 /usr/include/X11/extensions/

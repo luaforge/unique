@@ -199,8 +199,9 @@ bool GLAPP::open(){
 
   XGetKeyboardControl(xdisplay,&xkbstate);
   XAutoRepeatOff(xdisplay);
-
+  
   RendererInfo();
+  InitExtensions();
   
   state=STATE("context opened",true);
 

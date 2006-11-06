@@ -1315,7 +1315,7 @@ module gl{
 
   //void glVertex3d @ glVertex(double x, double y, double z=0.0);
 
-  void glInitNamesArray();
-  void glGenNames(GLsizei n,GLuint* names);
-  void glDeleteNames(GLsizei n,GLuint* names);
+  void unogl::glInitNamesArray();
+  void unogl::glGenNames(GLsizei n,GLuint* names);
+  void unogl::glDeleteNames(GLsizei n,GLuint* names);
 }

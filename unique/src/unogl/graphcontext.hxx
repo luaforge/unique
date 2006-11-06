@@ -56,6 +56,7 @@ namespace unogl{//tolua_export
     //virtual bool open();
     //virtual void close();
     virtual void RendererInfo();
+    virtual void InitExtensions();
     // Binding context
     virtual void bind();  // Binding context (similar make current)
     virtual void ubind(); // Unbinding context (similar swap buffer or flush buffer)

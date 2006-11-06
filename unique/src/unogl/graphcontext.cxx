@@ -14,11 +14,13 @@ GRAPHCONTEXT::~GRAPHCONTEXT(){}
 void GRAPHCONTEXT::bind(){}  // Binding context (similar make current)
 void GRAPHCONTEXT::ubind(){} // Unbinding context (similar swap buffer or flush buffer)
 void GRAPHCONTEXT::RendererInfo(){
-  glInitNamesArray();
   vendor    =(const char*)glGetString(GL_VENDOR);
   renderer  =(const char*)glGetString(GL_RENDERER);
   version   =(const char*)glGetString(GL_VERSION);
   extensions=(const char*)glGetString(GL_EXTENSIONS);
+}
+void GRAPHCONTEXT::InitExtensions(){
+  glInitExtensions();
 }
 void GRAPHCONTEXT::clear(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
