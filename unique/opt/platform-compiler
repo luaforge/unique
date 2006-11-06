@@ -38,6 +38,12 @@
 ####### << utilites << #######
 
 
+####### >> lua >> #######
+## M        - interpreter properties
+## M.XX     - interpreter call {$(1) - arguments}
+####### << lua << #######
+
+
 ####### >> toluaxx >> #######
 ## P        - integrate preprocessor properties
 ## P.XX     - preprocessor call          {$(1)-input source, $(2)-output object, $(3)-options}

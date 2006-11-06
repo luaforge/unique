@@ -135,7 +135,8 @@ $$($(1).target): $$($(1).obj) $$($(1).modep)
 	@$(call U.EH,Build $(1) module)
 #	@$(call U.EX,$(call L.XX,$$(filter $(call C.O,$(1),%),$$^),$$@,$$($(1).L.opts) $(L.OPTS))) 
 	@$(call U.EX,$$(call L.XX,$$^,$$@,$$($(1).L.opts) $(L.OPTS))) 
-build.$(1): $$($(1).target)
+.PHONY: prepare.$(1)
+build.$(1): prepare.$(1) $$($(1).target)
   T.build+=build.$(1)
 endif
 endif
