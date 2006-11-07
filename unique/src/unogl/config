@@ -13,12 +13,13 @@ linux-gcc.unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
 win32-mingw.unogl.L.l += opengl32 glu32 gdi32 user32 winmm
 
 unogl.glext = /usr/include/GL/glext.h
-unogl.glext.name = GL_VERSION_1_2 GL_VERSION_1_3 GL_VERSION_1_4 GL_VERSION_1_5 GL_VERSION_2_0
-unogl.glext.name += GL_EXT_coordinate_frame GL_EXT_multisample GL_EXT_vertex_shader GL_EXT_framebuffer_object
+unogl.glext.name += GL_VERSION_1_2 GL_VERSION_1_3 GL_VERSION_1_4 GL_VERSION_1_5 GL_VERSION_2_0  # OpenGL version related extensions
+unogl.glext.name += GL_EXT_framebuffer_object  # Optional extensions
+#unogl.glext.name += GL_EXT_coordinate_frame GL_EXT_multisample GL_EXT_vertex_shader
 
 prepare.unogl: $(call C.H,unogl,oglext.func)
 
-$(call C.H,unogl,oglext.func):
+$(call C.H,unogl,oglext.func): $(D.SRC)/unogl/config
 	@$(call U.EH,Generate OpenGL extensions to $@)
 	@$(call U.EX,$(call M.XX,$(D.SRC)/unogl/genglext.lua -o $@ $(addprefix -i ,$(unogl.glext.name)) $(unogl.glext)))
 

@@ -68,7 +68,6 @@ namespace undata{//tolua_export
     /**PATH* tolua_index(string,get,set);**/
   };
   //tolua_end
-
   class NAMES{//tolua_export
   public:
     typedef map<string,string> CONT;
@@ -87,10 +86,12 @@ namespace undata{//tolua_export
     /**string tolua_index(string,get,set);**/
   };
   //tolua_end
-  
+  class RESOURCE;
+  class CATALOG;
+  class STREAM;
   class REPOS{//tolua_export
   public:
-    typedef map<iostream*,PATH> OPNSTMS;
+    typedef map<STREAM*,PATH> OPNSTMS;
     typedef OPNSTMS::iterator OPNSTMSITER;
   protected:
     OPNSTMS ostm;
@@ -103,10 +104,10 @@ namespace undata{//tolua_export
       stm=0x3  // Stream (resource is stream)
     } RESTYPE;
     
+    string name;
     string location;
     unbase::STATE state;
     undata::PATHS path;
-    undata::NAMES ext;
     //tolua_end
     
     virtual iostream& stream(PATH path, ios::openmode mode=ios::in);
@@ -136,7 +137,6 @@ namespace undata{//tolua_export
     operator string();
   };
   //tolua_end
-
   class REPOSS{//tolua_export
   public:
     typedef map<string,REPOS*> CONT;
@@ -155,35 +155,74 @@ namespace undata{//tolua_export
     operator string();
   };
   //tolua_end
-  
-  class DATA{//tolua_export
+  class RESOURCE{//tolua_export
+  protected:
+    
   public:
     //tolua_begin
-    static undata::REPOSS repos; // repositories
-    static undata::PATHS path;
-    static undata::NAMES ext;
+    enum RCLASS{
+      dir=0x1,
+      stm=0x2
+    };
+    enum ACCESS{
+      in=0x1,
+      out=0x2,
+      io=0x3,
+    };
     
-    static iostream& open(string name, string type, string repos, ios::openmode mode);
-    static void close(iostream& s);
-    static REPOS::RESTYPE restype(string name, string type="def", string repos="");
-
-    static string __info(string);
+    string name;
+    string type;
+    bool   exist;
+    ACCESS access;
+    RCLASS rclass;
+    REPOS* repos;
+    
+    RESOURCE(const RESOURCE&);
+    RESOURCE(string name, string type="def", string repos=""); // get resource info
+    ~RESOURCE();
+  };
+  //tolua_end
+  class CATALOG{//tolua_export
+  protected:
+    
+  public:
+    //tolua_begin
+    enum MODE{
+      in =0x1,
+      out=0x2,
+    };
+    
+  };
+  //tolua_end
+  class STREAM{//tolua_export
+  protected:
+    
+  public:
+    //tolua_begin
+    enum MODE{
+      in =0x1,
+      out=0x2,
+      io =0x3
+    };
+    enum STATE{
+      good=0x0,
+      bad=0x1,
+      fail=0x2
+    };
+    unbase::STATE state;
+    
   };
   //tolua_end
 
   //tolua_begin
-  inline iostream& unstream(string name, ios::openmode mode, string type="def", string repos=""){
-    return DATA::open(name,type,repos,mode);
-  }
-  inline iostream& unstream(string name, string type="def", string repos=""){
-    return DATA::open(name,type,repos,ios::in);
-  }
-  inline void unstream(iostream& stm){
-    DATA::close(stm);
-  }
-  inline REPOS::RESTYPE unrestype(string name, string type="def", string repos=""){
-    return DATA::restype(name,type,repos);
-  }
+  extern REPOSS repos; // repositories
+  extern PATHS  path;  // standard paths
+  //tolua_end
+
+  //tolua_begin
+  STREAM& stream(string name, STREAM::MODE mode, string type="def", string repos="");
+  STREAM& stream(string name, string type="def", string repos="");
+  
 }
 //tolua_end
 

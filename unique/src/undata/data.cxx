@@ -244,6 +244,7 @@ namespace undata{
     }
   }
   REPOS *& REPOSS::operator[](string name){
+    cont[name]->name=name;
     return cont[name];
   }
   REPOSS::operator string(){
@@ -261,6 +262,7 @@ namespace undata{
   }
   void REPOSS::set(string name, REPOS* repos){
     if(repos){
+      repos->name=name;
       cont[name]=repos;
     }else{
       if(cont.find(name)!=cont.end())cont.erase(name);
@@ -269,9 +271,8 @@ namespace undata{
   /*
    *  DATA
    */
-  REPOSS DATA::repos; // repositories
-  PATHS DATA::path;
-  NAMES DATA::ext;
+  REPOSS repos; // repositories
+  PATHS  path;
 
   REPOS::RESTYPE DATA::restype(string n, string t, string r){
     if(r==""){

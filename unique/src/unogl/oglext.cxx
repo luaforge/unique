@@ -17,32 +17,33 @@ namespace unogl{
   mat4& gl_TranslateProjectionMatrix(){return trnprojmat;}
   mat4& gl_TranslateProjectionMatrixInv(){return trnprojmatinv;}
   GLint& gl_Lights(){return maxlights;}
+
+  glExtFuncPtr glGetProcAddress(const char* name){
+    glExtFuncPtr address;
+#   if _WIN32 || _MINGW
+    address=wglGetProcAddress(name);
+#   endif
+#   if _LINUX
+    address=glXGetProcAddress((const GLubyte*)name);
+#   endif
+    if(address) return address;
+    else cout<<"Warning: Extension `"<<name<<"` not found...."<<endl;
+    return NULL;
+  }
   
   // Define OpenGL extensions
-#define GLEXT_FUNC(name,type,real) PFN##type##PROC name;
-#include"oglext.func.hxx"
-#undef GLEXT_FUNC
+# define GLEXT_FUNC(name,type,real) PFN##type##PROC name;
+# include"oglext.func.hxx"
+# undef GLEXT_FUNC
 
-#if _MINGW
-#  define GLEXT_FUNC(name,type,real) {					\
-    name=(PFN##type##PROC)wglGetProcAddress(#real);			\
-    if(name);								\
-    else cout<<"Warning: Extension <"<<#type<<"> not found...."<<endl;	\
-  }
-#endif
-#if _LINUX
-#  define GLEXT_FUNC(name,type,real) {					\
-    name=(PFN##type##PROC)glXGetProcAddress((const GLubyte*)#real);	\
-    if(name);								\
-    else cout<<"Warning: Extension "<<#type<<" not found...."<<endl;	\
-  }
-#endif
+  // Initialize OpenGL extensions
+# define GLEXT_FUNC(name,type,real) name=(PFN##type##PROC)glGetProcAddress(#real);
   void glInitExtensions(){
-    glInitNamesArray();
     cout<<"Init OpenGL extensions...."<<endl;
+    glInitNamesArray();
 #   include"oglext.func.hxx"
   }
-#undef GLEXT_FUNC
+# undef GLEXT_FUNC
 
   bool glCheckError(const char* srcfile, const int srcline){
     int errcode=glGetError();

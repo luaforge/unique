@@ -39,6 +39,8 @@ namespace unogl{
   extern void glInitNamesArray();
   extern void glGenNames(GLsizei n,GLuint* names);
   extern void glDeleteNames(GLsizei n,const GLuint* names);
+  typedef void (*glExtFuncPtr)(void);
+  extern glExtFuncPtr glGetProcAddress(const char* name);
   extern void glInitExtensions();
   extern bool glCheckError(const char* srcfile, const int srcline);
   
