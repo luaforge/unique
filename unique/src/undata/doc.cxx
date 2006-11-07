@@ -1,6 +1,6 @@
 #include"data.hxx"
 using namespace undata;
-
+/*
 CLASSINFO(DATA,
 	  CLASSINFOENT(ru_RU,(
 			      $overview{Интегрированный менеджер ресурсов}
@@ -16,3 +16,4 @@ CLASSINFO(DATA,
 			      )
 		       )
 	  )
+*/

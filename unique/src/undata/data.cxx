@@ -170,13 +170,13 @@ namespace undata{
    *  REPOS
    */
   REPOS::REPOS(){
-    path.set("def",new PATH());
-    ext["def"]="?";
+    path.set("def",new PATH("?"));
   }
   REPOS::~REPOS(){
     delete path.get("def");
   }
   PATH REPOS::makepath(string n, string t){
+    /*
     string e=ext.get(t)!=""?ext[t]:ext["def"];
     string r;
     int i,b=0;
@@ -186,25 +186,11 @@ namespace undata{
     }
     r+=e.substr(b);
     PATH p=path.get(t)?path[t]:path["def"];
-    return p|r;
+    */
+    //return p|r;
   }
-  iostream& REPOS::stream(string n, string t, ios::openmode m){
-    PATH p(makepath(n,t));
-    return stream(p,m);
-  }
-  iostream& REPOS::stream(PATH p, ios::openmode m){
-    iostream* s=openstm(p,m);
-    ostm[s]=p;
-    return *s;
-  }
-  bool REPOS::stream(iostream& s){
-    if(ostm.find(&s)!=ostm.end()){
-      closestm(&s);
-      ostm.erase(&s);
-      return true;
-    }else{
-      return false;
-    }
+  RESOURCE REPOS::resource(string name, string spec){
+    
   }
   REPOS::operator string(){
     string r;
@@ -216,13 +202,6 @@ namespace undata{
     r.erase(r.length()-1);
     r+="}";
     return r;
-  }
-  REPOS::RESTYPE REPOS::restype(string n, string t){
-    PATH f=makepath(n,t);
-    return restype(f);
-  }
-  REPOS::RESTYPE REPOS::restype(PATH p){
-    return non;
   }
   /*
    *  REPOSS
@@ -272,50 +251,22 @@ namespace undata{
    *  DATA
    */
   REPOSS repos; // repositories
-  PATHS  path;
-
-  REPOS::RESTYPE DATA::restype(string n, string t, string r){
-    if(r==""){
-      for(REPOSS::ITER i=repos.cont.begin();i!=repos.cont.end();i++){
-	if(i->second){
-	  REPOS::RESTYPE s=i->second->restype(n,t);
-	  if(s!=REPOS::non)return s;
+  PATHS  path;  // pathes
+  
+  RESOURCE resource(string name, string spec, string repos){
+    if(repos==""){ // Examine all repositoryes
+      string n;
+      REPOS* r;
+      for(undata::repos(n,r);n!="";undata::repos(n,r)){
+	if(r){
+	  RESOURCE s=r->resource(name,spec);
+	  if(s.type!=RESOURCE::non)return s;
 	}
       }
-    }else{
-      if(repos.cont.find(r)!=repos.cont.end())return repos[r]->restype(n,t);
+    }else{ // Geting from `repos` repository
+      REPOS* r=undata::repos.get(repos);
+      if(r)return r->resource(name,spec);
     }
-    return REPOS::non;
-  }
-
-  iostream& DATA::open(string name, string type, string rep, ios::openmode mode){
-    if(rep==""){
-      for(REPOSS::ITER i=repos.cont.begin();i!=repos.cont.end();i++){
-	if(i->second){
-	  REPOS& r=*(i->second);
-	  {
-	    iostream&s=r.stream(name,type,mode);
-	    if(s.good())return s;
-	    r.stream(s);
-	  }
-	  {
-	    iostream&s=r.stream(name,"",mode);
-	    REPOSS::ITER n=i; n++;
-	    if(s.good() || n==repos.cont.end())return s;
-	    r.stream(s);
-	  }
-	}
-      }
-    }else{
-      REPOS& r=*repos[rep];
-      iostream&s=r.stream(name,type,mode);
-      return s;
-    }
-  }
-  void DATA::close(iostream& s){
-    for(REPOSS::ITER i=repos.cont.begin();i!=repos.cont.end();i++){
-      REPOS& r=*(i->second);
-      if(r.stream(s))return;
-    }
+    return RESOURCE(name,spec,NULL);
   }
 }

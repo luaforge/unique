@@ -29,6 +29,7 @@ namespace undata{
   bool DIRECTORY::closestm(iostream* s){
     delete s;
   }
+  /*
   REPOS::RESTYPE DIRECTORY::restype(PATH p){
     PATH l(location);
     PATH f=l|p;
@@ -41,4 +42,5 @@ namespace undata{
   REPOS::RESTYPE DIRECTORY::restype(string n, string t){
     return REPOS::restype(n,t);
   }
+  */
 }

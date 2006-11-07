@@ -8,8 +8,6 @@ namespace undata{//tolua_export
     //tolua_begin
     DIRECTORY();
     virtual ~DIRECTORY();
-    virtual RESTYPE restype(PATH path);
-    virtual RESTYPE restype(string name, string type="def");
     //tolua_end
   protected:
     virtual bool open();

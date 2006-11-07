@@ -98,21 +98,13 @@ namespace undata{//tolua_export
     PATH makepath(string name, string type);
   public:
     //tolua_begin
-    typedef enum RESTYPE{ // Resource type
-      non=0x1, // None (resource not existing or not accessible)
-      dir=0x2, // Directory (resource is directory)
-      stm=0x3  // Stream (resource is stream)
-    } RESTYPE;
-    
     string name;
     string location;
     unbase::STATE state;
     undata::PATHS path;
+    unsigned int prior;
     //tolua_end
     
-    virtual iostream& stream(PATH path, ios::openmode mode=ios::in);
-    virtual iostream& stream(string name, string type="def", ios::openmode mode=ios::in);
-    virtual bool stream(iostream&);
   protected:
     virtual iostream* openstm(PATH path, ios::openmode mode=ios::in){}
     virtual bool closestm(iostream*){}
@@ -128,8 +120,7 @@ namespace undata{//tolua_export
        data/material/metal/steel/anisotropic.lua     */
 
     //tolua_begin
-    virtual RESTYPE restype(string name, string type="def");
-    virtual RESTYPE restype(PATH path);
+    virtual RESOURCE resource(string name, string spec=""); // get resource info
     
     REPOS();
     virtual ~REPOS();
@@ -138,10 +129,11 @@ namespace undata{//tolua_export
   };
   //tolua_end
   class REPOSS{//tolua_export
-  public:
+  protected:
     typedef map<string,REPOS*> CONT;
     typedef CONT::iterator ITER;
     CONT cont;
+  public:
     //tolua_begin
     REPOSS();
     ~REPOSS();
@@ -160,27 +152,33 @@ namespace undata{//tolua_export
     
   public:
     //tolua_begin
-    enum RCLASS{
-      dir=0x1,
-      stm=0x2
+    enum TYPE{                // bits implement
+      non=0x0, // Not found   //  00
+      dir=0x1, // Directory   //  01
+      stm=0x2, // Data stream //  10
+      lnk=0x3, // Link        //  11
     };
-    enum ACCESS{
-      in=0x1,
-      out=0x2,
-      io=0x3,
+    enum ACCESS{              // bits implement
+      no =0x0, // No access   //  00
+      in =0x1, // Read only   //  01
+      out=0x2, // Write only  //  10
+      io =0x3, // Read/Write  //  11
+      ro =0x1,
+      wo =0x2,
+      rw =0x3
     };
     
     string name;
-    string type;
-    bool   exist;
+    string spec;
     ACCESS access;
-    RCLASS rclass;
+    TYPE   type;
     REPOS* repos;
     
-    RESOURCE(const RESOURCE&);
-    RESOURCE(string name, string type="def", string repos=""); // get resource info
-    ~RESOURCE();
+    RESOURCE():type(non),access(no),repos(NULL){}
+    RESOURCE(string n,string s="",REPOS* r=NULL):name(n),spec(s),repos(r),type(non),access(no){}
+    virtual ~RESOURCE(){}
   };
+  RESOURCE resource(string name, string spec="def", string repos=""); // get resource info
   //tolua_end
   class CATALOG{//tolua_export
   protected:
@@ -195,21 +193,69 @@ namespace undata{//tolua_export
   };
   //tolua_end
   class STREAM{//tolua_export
-  protected:
-    
   public:
     //tolua_begin
-    enum MODE{
+    typedef unsigned long pos_type;
+    enum MODE{ // open mode
       in =0x1,
       out=0x2,
       io =0x3
     };
-    enum STATE{
+    enum STATUS{ // stream status
       good=0x0,
       bad=0x1,
       fail=0x2
     };
+    enum DIR{ // seek dir
+      cur=0x0, // relate to current
+      beg=0x1,
+      end=0x2
+    };
+    //tolua_end
+  protected:
+    unsigned int __rcount;
+    unsigned int __wcount;
+
+    virtual void __read(void* chunk, pos_type count){}
+    virtual string __content(){return "";}
+    virtual void __write(void* chunk, pos_type count){}
+    virtual void __content(string chunk){}
+    virtual pos_type __tellr()const{return 0;}
+    virtual pos_type __tellw()const{return 0;}
+    virtual void __seekr(pos_type count, DIR dir){}
+    virtual void __seekw(pos_type count, DIR dir){}
+  public:
+    //tolua_begin
+    MODE mode;
+    STATUS status;
     unbase::STATE state;
+
+    STREAM(){}
+    virtual ~STREAM(){}
+
+    // Reading
+    inline void read(void* chunk, pos_type count){__read(chunk,count);}
+    inline string read(){return __content();}
+
+    // Writing
+    inline void write(void* chunk, pos_type count){__write(chunk,count);}
+    inline void write(string chunk){__content(chunk);}
+    
+    // Count
+    inline pos_type gcount()const{return __rcount;}
+    inline pos_type scount()const{return __wcount;}
+
+    // Tell
+    inline pos_type tellr()const{return __tellr();}
+    inline pos_type tellw()const{return __tellw();}
+    inline pos_type tellg()const{return __tellr();}
+    inline pos_type tells()const{return __tellw();}
+
+    // Seek
+    inline void seekr(pos_type count,DIR dir=cur){__seekr(count,dir);}
+    inline void seekw(pos_type count,DIR dir=cur){__seekw(count,dir);}
+    inline void seekg(pos_type count,DIR dir=cur){__seekr(count,dir);}
+    inline void seekp(pos_type count,DIR dir=cur){__seekw(count,dir);}
     
   };
   //tolua_end
@@ -220,8 +266,8 @@ namespace undata{//tolua_export
   //tolua_end
 
   //tolua_begin
-  STREAM& stream(string name, STREAM::MODE mode, string type="def", string repos="");
-  STREAM& stream(string name, string type="def", string repos="");
+  //STREAM& stream(string name, STREAM::MODE mode, string type="def", string repos="");
+  //STREAM& stream(string name, string type="def", string repos="");
   
 }
 //tolua_end

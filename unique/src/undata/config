@@ -8,7 +8,7 @@
 #  
 ##############################
 
-#undata.state = enable
+undata.state = enable
 undata.dep = unbase
 
 linux-gcc.undata.L.l += z bz2
