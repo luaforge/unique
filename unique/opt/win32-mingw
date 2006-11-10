@@ -61,18 +61,6 @@ P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
 ####### << toluaxx << #######
 
 ####### >> compiler >> #######
-ifndef MINGW_NAME
-  MINGW_NAME=
-endif
-ifndef MINGW_PREFIX
-  MINGW_PREFIX=$(PREFIX)$(MINGW_NAME)
-endif
-ifndef MINGW_BINUTIL
-  MINGW_BINUTIL=$(MINGW_PREFIX)/bin
-endif
-ifndef PREFIX
-  PREFIX=$(MINGW_PREFIX)
-endif
 ## C        - compiler properties
 ## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
 C.XX=g++ -c $(1) -o $(2) $(3)
