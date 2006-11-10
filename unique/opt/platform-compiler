@@ -27,6 +27,7 @@
 ####### >> utilites >> #######
 ## U        - utily properties
 ## U.EX     - exec call   {$(1)-command}
+## U.TX     - test exec   {$(1)-command}
 ## U.EH     - echo call   {$(1)-string}
 ## U.EF     - echo to file call {$(1)-string,$(2)-filename}
 ## U.RM     - remove call {$(1)-files}

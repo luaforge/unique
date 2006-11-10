@@ -1,5 +1,5 @@
-/*
- * Automatic generated modules define header
+/* 
+ * Automatic generated modules define header 
  */ 
 
 UNMODULE(unbase); 

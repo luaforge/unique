@@ -23,6 +23,7 @@
 ####### >> utilites >> #######
 ## U        - utily properties
 ## U.EX     - exec call   {$(1)-command}
+## U.TX     - test exec   {$(1)-command}
 ## U.EH     - echo call   {$(1)-string}
 ## U.EF     - echo to file call {$(1)-string,$(2)-filename}
 ## U.RM     - remove call {$(1)-files}
@@ -124,7 +125,8 @@ L.L.path+=$(D.LIB)
 
 ###### >> optional patterns >> #######
 ifeq ($(MODE),test)
-  U.EX=$(call U.EH,[shell] $(1))
+#$(call U.EH,[shell] $(1))
+  U.EX=$(U.TX)
 else
   U.EX=$(1)
 endif

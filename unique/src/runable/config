@@ -11,8 +11,10 @@ m.pre=\nUNMODULE(
 $(call C.S,runable,main): $(call C.H,runable,modules)
 
 $(call C.H,runable,modules): 
-	@$(call U.RM,$@)
-	@$(call U.EF,/*\n * Automatic generated modules define header\n */,$@)
-	@$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(runable.dep))),$@)
+	@$(call U.EX,$(call U.RM,$@))
+	@$(call U.EX,$(call U.EF,/*,$@))
+	@$(call U.EX,$(call U.EF, * Automatic generated modules define header,$@))
+	@$(call U.EX,$(call U.EF, */,$@))
+	@$(call U.EX,$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(runable.dep))),$@))
 
 .PHONY: $(call C.H,runable,modules)

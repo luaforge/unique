@@ -22,6 +22,8 @@ X.RUN=.exe
 ####### >> utilites >> #######
 ## U        - utily properties
 ## U.EX     - exec call   {$(1)-command}
+## U.TX     - test exec   {$(1)-command}
+U.TX=echo '$(1)'
 ## U.EH     - echo call   {$(1)-string}
 U.EH=echo -ne "$(1) \n"
 ## U.EF     - echo to file call {$(1)-string,$(2)-filename}

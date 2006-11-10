@@ -21,12 +21,14 @@ X.RUN=.exe
 
 ####### >> utilites >> #######
 ## U        - utily properties
-## U.EX     - exec call   {$(1)-command}
-## U.EH     - echo call   {$(1)-string}
 U.PATH=$(subst /,\\,$(1))
-U.EH=echo $(1)
+## U.EX     - exec call   {$(1)-command}
+## U.TX     - test exec   {$(1)-command}
+U.TX=echo '$(1)'
+## U.EH     - echo call   {$(1)-string}
+U.EH=echo "$(1)"
 ## U.EF     - echo to file call {$(1)-string,$(2)-filename}
-U.EF=echo $(1) >> $(2)
+U.EF=echo "$(1)" >> $(2)
 ## U.RM     - remove call {$(1)-files}
 U.RM=del /q /f $(call U.PATH,$(1))
 ## U.CP     - copy call   {$(1)-from|files,to|file}

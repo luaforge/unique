@@ -29,43 +29,56 @@
 #include<vector>
 
 namespace undata{//tolua_export
+  /*
+   *  separate path
+   */
   class PATH{//tolua_export
   protected:
-    vector<string> path;
+    vector<string> path; // path is an array of entires, each of it is a separate entire (stream or catalog)
     void parse(string);
-    string cnstr() const;
+    string cnstr()const;
   public:
     //tolua_begin
     PATH();
     PATH(string);
     ~PATH();
     string& operator[](int); // extract component
-    int operator~() const;   // num of components
-    operator string() const; // return full path
-    string operator()() const; // return full path
+    int operator~()const;   // num of components
+    operator string()const; // return full path
+    string operator()()const; // return full path
     void operator()(string); // set new value
     void operator()(int&/**k=-1 asnil**/,string&); // iterator
-    PATH operator|(PATH&) const; // concat paths
-    PATH operator|(string) const; // concat with string
+    PATH operator|(PATH&)const; // concat paths
+    PATH operator|(string)const; // concat with string
   };
   //tolua_end
+  /*
+   *  PATHS
+   */
   class PATHS{//tolua_export
   protected:
-    typedef map<string,PATH*> CONT;
-    typedef map<string,PATH*>::iterator ITER;
+    typedef map<string,vector<PATH> > CONT;
+    typedef CONT::iterator ITER;
+    vector<PATH> empty;
     CONT cont;
+    void parse(vector<PATH>&,string);
+    string cnstr(vector<PATH>&);
   public:
     //tolua_begin
     PATHS();
     ~PATHS();
-    void operator()(string&k/**="" asnil**/,PATH*&); // iterator
+    void operator()(string&k/**="" asnil**/,string&p); // iterator
     operator string();
     //tolua_end
-    PATH& operator[](string k);
-    void set(string,PATH*);
-    PATH* get(string);
+    void operator()(string&k/**="" asnil**/,vector<PATH>&v); // iterator
+    vector<PATH>& operator[](string);
     //tolua_begin
-    /**PATH* tolua_index(string,get,set);**/
+    /**tolua_getindex {**/
+    string get(string)/**="" asnil**/;
+    /**}**/
+    /**tolua_setindex {**/
+    void set(string,string/** p="" asnil**/);
+    /**}**/
   };
   //tolua_end
   class NAMES{//tolua_export
@@ -80,10 +93,13 @@ namespace undata{//tolua_export
     operator string();
     //tolua_end
     string& operator[](string type);
-    void set(string,string);
-    string get(string);
     //tolua_begin
-    /**string tolua_index(string,get,set);**/
+    /**tolua_getindex {**/
+    string get(string)/**="" asnil**/;
+    /**}**/
+    /**tolua_setindex {**/
+    void set(string,string/** s="" asnil**/);
+    /**}**/
   };
   //tolua_end
   class RESOURCE;
@@ -121,7 +137,9 @@ namespace undata{//tolua_export
 
     //tolua_begin
     virtual RESOURCE resource(string name, string spec=""); // get resource info
-    
+    virtual void stream(STREAM& s);      // close stream
+    virtual STREAM& stream(RESOURCE& r); // open stream
+
     REPOS();
     virtual ~REPOS();
     
@@ -140,11 +158,105 @@ namespace undata{//tolua_export
     void operator()(string&name/**="" asnil**/, REPOS*&repos/**=NULL asnil**/);
     //tolua_end
     REPOS *& operator[](string name);
-    REPOS* get(string name);
-    void set(string name, REPOS* repos);
     //tolua_begin
-    /**REPOS* tolua_index(string,get,set);**/
+    /**tolua_getindex {**/
+    REPOS* get(string name);
+    /**}**/
+    /**tolua_setindex {**/
+    void set(string name,REPOS*repos);
+    /**}**/
     operator string();
+  };
+  //tolua_end
+  class CATALOG{//tolua_export
+  protected:
+    
+  public:
+    //tolua_begin
+    enum MODE{
+      no =0x0,
+      in =0x1,
+      out=0x2,
+      io =0x3
+    };
+    
+  };
+  //tolua_end
+  class STREAM{//tolua_export
+  public:
+    //tolua_begin
+    typedef unsigned long pos_type;
+    enum MODE{ // open mode
+      in =0x1,
+      out=0x2,
+      io =0x3
+    };
+    enum STATE{ // stream status
+      good=0x0,
+      eof=0x1,
+      bad=0x2,
+      fail=0x2
+    };
+    enum DIR{ // seek dir
+      cur=0x0,
+      beg=0x1,
+      end=0x2
+    };
+    //tolua_end
+  protected:
+    pos_type __rcount;
+    pos_type __wcount;
+
+    virtual void __read(void* chunk, pos_type count){}
+    virtual string __content(){return "";}
+    virtual void __write(void* chunk, pos_type count){}
+    virtual void __content(string chunk){}
+    virtual pos_type __tellr()const{return 0;}
+    virtual pos_type __tellw()const{return 0;}
+    virtual void __seekr(pos_type count,DIR dir){}
+    virtual void __seekw(pos_type count,DIR dir){}
+  public:
+    //tolua_begin
+    string name;
+    REPOS* repos;
+    MODE   mode;
+    STATE  state;
+    
+    STREAM():repos(NULL){}
+    STREAM(REPOS* r, MODE m=in):repos(r),mode(m){}
+    virtual ~STREAM(){}
+    void free(){if(repos)repos->stream(*this);}
+    
+    // Operate
+    void open(){}
+    void close(){}
+    
+    // Reading
+    inline void read(void* chunk,pos_type count){__read(chunk,count);}
+    inline string read(){return __content();}
+    inline void datar(void* chunk, pos_type count){__read(chunk,count);}
+
+    // Writing
+    inline void write(void* chunk,pos_type count){__write(chunk,count);}
+    inline void write(string chunk){__content(chunk);}
+    inline void dataw(void* chunk,pos_type count){__write(chunk,count);}
+    
+    // Count
+    inline pos_type gcount()const{return __rcount;}
+    inline pos_type scount()const{return __wcount;}
+
+    // Tell
+    inline pos_type tellr()const{return __tellr();}
+    inline pos_type tellw()const{return __tellw();}
+    inline pos_type tellg()const{return __tellr();}
+    inline pos_type tells()const{return __tellw();}
+
+    // Seek
+    inline void seekr(pos_type count,DIR dir=cur){__seekr(count,dir);}
+    inline void seekw(pos_type count,DIR dir=cur){__seekw(count,dir);}
+    inline void seekg(pos_type count,DIR dir=cur){__seekr(count,dir);}
+    inline void seekp(pos_type count,DIR dir=cur){__seekw(count,dir);}
+    
   };
   //tolua_end
   class RESOURCE{//tolua_export
@@ -177,89 +289,13 @@ namespace undata{//tolua_export
     RESOURCE():type(non),access(no),repos(NULL){}
     RESOURCE(string n,string s="",REPOS* r=NULL):name(n),spec(s),repos(r),type(non),access(no){}
     virtual ~RESOURCE(){}
+
+    virtual STREAM& stream(STREAM::MODE mode=STREAM::in);
+    //virtual CATALOG& catalog(CATALOG::MODE mode=CATALOG::in);
   };
   RESOURCE resource(string name, string spec="def", string repos=""); // get resource info
   //tolua_end
-  class CATALOG{//tolua_export
-  protected:
-    
-  public:
-    //tolua_begin
-    enum MODE{
-      in =0x1,
-      out=0x2,
-    };
-    
-  };
-  //tolua_end
-  class STREAM{//tolua_export
-  public:
-    //tolua_begin
-    typedef unsigned long pos_type;
-    enum MODE{ // open mode
-      in =0x1,
-      out=0x2,
-      io =0x3
-    };
-    enum STATUS{ // stream status
-      good=0x0,
-      bad=0x1,
-      fail=0x2
-    };
-    enum DIR{ // seek dir
-      cur=0x0, // relate to current
-      beg=0x1,
-      end=0x2
-    };
-    //tolua_end
-  protected:
-    unsigned int __rcount;
-    unsigned int __wcount;
-
-    virtual void __read(void* chunk, pos_type count){}
-    virtual string __content(){return "";}
-    virtual void __write(void* chunk, pos_type count){}
-    virtual void __content(string chunk){}
-    virtual pos_type __tellr()const{return 0;}
-    virtual pos_type __tellw()const{return 0;}
-    virtual void __seekr(pos_type count, DIR dir){}
-    virtual void __seekw(pos_type count, DIR dir){}
-  public:
-    //tolua_begin
-    MODE mode;
-    STATUS status;
-    unbase::STATE state;
-
-    STREAM(){}
-    virtual ~STREAM(){}
-
-    // Reading
-    inline void read(void* chunk, pos_type count){__read(chunk,count);}
-    inline string read(){return __content();}
-
-    // Writing
-    inline void write(void* chunk, pos_type count){__write(chunk,count);}
-    inline void write(string chunk){__content(chunk);}
-    
-    // Count
-    inline pos_type gcount()const{return __rcount;}
-    inline pos_type scount()const{return __wcount;}
-
-    // Tell
-    inline pos_type tellr()const{return __tellr();}
-    inline pos_type tellw()const{return __tellw();}
-    inline pos_type tellg()const{return __tellr();}
-    inline pos_type tells()const{return __tellw();}
-
-    // Seek
-    inline void seekr(pos_type count,DIR dir=cur){__seekr(count,dir);}
-    inline void seekw(pos_type count,DIR dir=cur){__seekw(count,dir);}
-    inline void seekg(pos_type count,DIR dir=cur){__seekr(count,dir);}
-    inline void seekp(pos_type count,DIR dir=cur){__seekw(count,dir);}
-    
-  };
-  //tolua_end
-
+  
   //tolua_begin
   extern REPOSS repos; // repositories
   extern PATHS  path;  // standard paths

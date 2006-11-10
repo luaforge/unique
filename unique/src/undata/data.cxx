@@ -32,7 +32,7 @@ namespace undata{
   string PATH::cnstr() const{
     string r;
     for(int i=0;i<path.size();i++){
-      r+=path[i]; if(i!=path.size()-1)r+="/";
+      r+=path[i]; if(i+1<path.size())r+="/";
     }
     return r;
   }
@@ -48,7 +48,7 @@ namespace undata{
   PATH::PATH(){}
   PATH::PATH(string _p){parse(_p);}
   PATH::~PATH(){}
-  PATH::operator string()const{return string("PATH(\"")+cnstr()+"\")";}
+  PATH::operator string()const{return cnstr();}
   int PATH::operator~()const{return path.size();}
   string& PATH::operator[](int _n){return path[_n];}
   void PATH::operator()(int&k/**-1 asnil**/,string&v){
@@ -69,13 +69,28 @@ namespace undata{
   PATH PATH::operator|(string _n)const{PATH _p(_n); return (*this)|_p;}
   string PATH::operator()()const{return cnstr();}
   void PATH::operator()(string _n){parse(_n);}
-  
   /*
    *  PATHS
    */
+  void PATHS::parse(vector<PATH>& e, string s){
+    e.clear();
+    int i=0,t=0;
+    for(;i<s.length();t=i+1){
+      i=min(s.find(":",t),s.find(";",t));
+      if(i!=t)e.push_back(PATH(s.substr(t,i-t)));
+    }
+  }
+  string PATHS::cnstr(vector<PATH>& e){
+    string r;
+    for(int i=0;i<e.size();i++){
+      r+=e[i]();
+      if(i+1<e.size())r+=";";
+    }
+    return r;
+  }
   PATHS::PATHS(){}
   PATHS::~PATHS(){}
-  void PATHS::operator()(string&k/**="" asnil**/, PATH*&v){
+  void PATHS::operator()(string&k/**="" asnil**/, string&v){
     ITER i=cont.begin();
     if(k!=""){
       i=cont.find(k);
@@ -83,39 +98,57 @@ namespace undata{
     }
     if(i==cont.end()){
       k="";
-      v=NULL;
+      v="";
+    }else{
+      k=i->first;
+      v=cnstr(i->second);
+    }
+  }
+  void PATHS::operator()(string&k/**="" asnil**/, vector<PATH>&v){
+    ITER i=cont.begin();
+    if(k!=""){
+      i=cont.find(k);
+      if(i!=cont.end())i++;
+    }
+    if(i==cont.end()){
+      k="";
+      v=empty;
     }else{
       k=i->first;
       v=i->second;
     }
   }
-  PATH& PATHS::operator[](string k){
-    return *cont[k];
+  vector<PATH>& PATHS::operator[](string k){
+    if(cont.find(k)!=cont.end())return cont[k];
+    return empty;
   }
   PATHS::operator string(){
     string r="PATHS{";
     int t=r.length();
     for(ITER i=cont.begin();i!=cont.end();i++){
-      r+=i->first+"="+static_cast<string>(*(i->second))+",";
+      r+=i->first+"=";
+      //for(int j=0;j<i->second.size();j++)r+=static_cast<string>(i->second[j])+";";
+      r+=cnstr(i->second);
+      r+=",";
     }
     if(r.length()>t)r.erase(r.length()-1);
     r+="}";
     return r;
   }
-  void PATHS::set(string k, PATH* _p){
+  void PATHS::set(string k, string p){
     if(k=="")return;
-    if(_p){
-      cont[k]=_p;
+    if(p.length()){
+      parse(cont[k],p);
     }else{
       cont.erase(k);
     }
   }
-  PATH* PATHS::get(string k){
-    if(k=="")return NULL;
+  string PATHS::get(string k){
+    if(k=="")return "";
     if(cont.find(k)!=cont.end()){
-      return cont[k];
+      return cnstr(cont[k]);
     }
-    return NULL;
+    return "";
   }
 
   /*
@@ -170,10 +203,9 @@ namespace undata{
    *  REPOS
    */
   REPOS::REPOS(){
-    path.set("def",new PATH("?"));
+    path.set("def","?");
   }
   REPOS::~REPOS(){
-    delete path.get("def");
   }
   PATH REPOS::makepath(string n, string t){
     /*
@@ -190,6 +222,12 @@ namespace undata{
     //return p|r;
   }
   RESOURCE REPOS::resource(string name, string spec){
+    
+  }
+  void REPOS::stream(STREAM& s){
+    
+  }
+  STREAM& REPOS::stream(RESOURCE& r){
     
   }
   REPOS::operator string(){
@@ -253,6 +291,14 @@ namespace undata{
   REPOSS repos; // repositories
   PATHS  path;  // pathes
   
+  STREAM& RESOURCE::stream(STREAM::MODE mode){
+    if(repos)return repos->stream(*this);
+  }
+  /*
+  CATALOG& RESOURCE::catalog(){
+    return CATALOG();
+    }*/
+
   RESOURCE resource(string name, string spec, string repos){
     if(repos==""){ // Examine all repositoryes
       string n;

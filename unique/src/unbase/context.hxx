@@ -39,12 +39,13 @@ namespace unbase{//tolua_export
     CONTEXTS();
     ~CONTEXTS();
     void operator()(string&/**n="" asnil**/,CONTEXT*&/**c=NULL**/);
-    //tolua_end
     //CONTEXT *& operator[](string);
+    /**tolua_getindex {**/
     CONTEXT* get(string);
+    /**}**/
+    /**tolua_setindex {**/
     void set(string, CONTEXT*);
-    //tolua_begin
-    /**CONTEXT* tolua_index(string,get,set);**/
+    /**}**/
     operator string();
   };
   //tolua_end

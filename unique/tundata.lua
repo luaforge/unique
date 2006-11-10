@@ -47,7 +47,12 @@ print("Test REPOS")
 print("Test DIRECTORY")
 local d=undata.DIRECTORY()
 d.location="."
-d.path.opt=undata.PATH("opt")
+d.path.opt="opt/?:opt/?.config"
+print(d.path)
+print(d.path.opt)
+d.path.opt=nil
+print(d.path)
+os.exit()
 print("src is directory? yes",d:restype(undata.PATH("src"))==d.dir)
 print("config is stream? yes",d:restype(undata.PATH("config"))==d.stm)
 print("option not exist? yes",d:restype(undata.PATH("option"))==d.non)
