@@ -138,10 +138,11 @@ namespace undata{//tolua_export
       rw =0x3
     };
     enum STATE{ // stream status
-      good=0x0,
-      eof=0x1,
-      bad=0x2,
-      fail=0x2
+      nonebit=0x0,
+      goodbit=0x1,
+      badbit=0x2,
+      failbit=0x2,
+      openbit=0x4
     };
     enum DIR{ // seek dir
       cur=0x0,
@@ -209,6 +210,14 @@ namespace undata{//tolua_export
     
     // Length
     inline pos_type length(){return __length;}
+    
+    // State
+    inline bool eof(){return __tellr()>=__length;}
+    inline bool good(){return state&goodbit;}
+    inline bool bad(){return state&badbit;}
+    inline bool fail(){return state&failbit;}
+    inline bool opened(){return state&openbit;}
+    inline bool closed(){return !opened();}
 
     virtual operator string();
   };

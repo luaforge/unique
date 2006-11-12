@@ -82,31 +82,26 @@ $(1).modep+=$$(call L.SO,$$($(1).dep))
 ###### << module depend variables <<
 ###### >> compile variables >>
 ifneq ($$($(CONFIG).$(1).C.flags),)
-  $(1).C.flags+=$$(call C.I,$$($(CONFIG).$(1).C.flags))
+  $(1).C.flags.native+=$$($(CONFIG).$(1).C.flags)
 endif
 ifneq ($$($(CONFIG).$(1).C.I),)
-  $(1).C.flags+=$$(call C.I,$$($(CONFIG).$(1).C.I))
+  $(1).C.flags.native+=$$(call C.I,$$($(CONFIG).$(1).C.I))
 endif
-ifneq ($$($(1).C.I),)
-  $(1).C.flags+=$$(call C.I,$$($(1).C.I))
-endif
+$(1).C.flags+=$$($(1).C.flags.native)
+$(1).dep.C.flags+=$$(foreach ent,$$(addsuffix .C.flags.native,$$($(1).dep)),$$($$(ent)))
+$(1).C.flags+=$$($(1).dep.C.flags)
 ###### << compile variables <<
 ###### >> linking variables >>
-ifneq ($$($(CONFIG).$(1).L.opts),)
-  $(1).L.opts+=$$($(CONFIG).$(1).L.opts)
-endif
+$(1).L.opts.native+=$$($(CONFIG).$(1).L.opts)
 ifneq ($$($(CONFIG).$(1).L.L),)
-  $(1).L.opts+=$$(call L.L,$$($(CONFIG).$(1).L.L))
+  $(1).L.opts.native+=$$(call L.L,$$($(CONFIG).$(1).L.L))
 endif
 ifneq ($$($(CONFIG).$(1).L.l),)
-  $(1).L.opts+=$$(call L.l,$$($(CONFIG).$(1).L.l))
+  $(1).L.opts.native+=$$(call L.l,$$($(CONFIG).$(1).L.l))
 endif
-ifneq ($$($(1).L.L),)
-  $(1).L.opts+=$$(call L.L,$$($(1).L.L))
-endif
-ifneq ($$($(1).L.l),)
-  $(1).L.opts+=$$(call L.l,$$($(1).L.l))
-endif
+$(1).L.opts+=$$($(1).dep.L.opts.native)
+$(1).dep.L.opts+=$$(foreach ent,$$(addsuffix .L.opts.native,$$($(1).dep)),$$($$(ent)))
+$(1).L.opts+=$$($(1).dep.L.opts)
 #ifneq ($$($(1).dep),)
 #  $(1).L.opts+=$$(call L.d,$$($(1).dep))           # lib dep name
 #endif

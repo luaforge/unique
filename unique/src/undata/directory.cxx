@@ -21,7 +21,7 @@ namespace undata{
     mode_t modes=S_IREAD|S_IWRITE|S_IRGRP|S_IROTH;
     __fd=::open(n.data(),flags,modes);
     if(__fd<0){
-      state=bad;
+      state=badbit;
       __fd=0;
     }
     {
@@ -29,6 +29,7 @@ namespace undata{
       if(::stat(path().data(),&s))__length=0;
       else __length=s.st_size;
     }
+    state=STATE(goodbit|openbit);
   }
   void FSTREAM::__close(){
     if(!__fd)return;

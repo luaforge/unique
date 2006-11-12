@@ -1,3 +1,3 @@
 #include"oglext.hxx"
-#include"grapthcontext.hxx"
+#include"graphcontext.hxx"
 #include"oglapp.hxx"

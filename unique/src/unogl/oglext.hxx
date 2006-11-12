@@ -16,7 +16,7 @@
 namespace unogl{
   
 #ifdef OGL_DEBUG_MODE
-#  define OGL_CHECKERROR() glCheckError(__FILE__,__LINE__);
+#  define OGL_CHECKERROR() unogl::glCheckError(__FILE__,__LINE__);
 #else
 #  define OGL_CHECKERROR()
 #endif

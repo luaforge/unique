@@ -1,0 +1,332 @@
+/***************************************************************************
+ *            shader.cpp
+ *
+ *  Wed Jun 29 17:12:37 2005
+ *  Copyright  2005  Fenix
+ *  tonder@trktvs.ru
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+#include"shader.hxx"
+#include"undata.hxx"
+
+#include"texture.hxx"
+
+#include<toluaxx.h>
+
+namespace unvis{
+  using namespace unbase;
+  using namespace undata;
+  using namespace unogl;
+  
+  SHADERGROUP::SHADERGROUP(){}
+  SHADERGROUP::~SHADERGROUP(){}
+  void SHADERGROUP::operator()(string&n,SHADERPROG*&p){
+    ITER i;
+    if(n=="")i=array.begin();
+    else{
+      i=array.find(n);
+      if(i==array.end()){n="";p=NULL;return;}
+      i++; for(;i->second==NULL&&i!=array.end();i++);
+      if(i==array.end()){n="";p=NULL;return;}
+    }
+    n=i->first;
+    p=i->second;
+  }
+  
+  SHADERPROG* SHADERGROUP::get(string name){
+    
+  }
+  void SHADERGROUP::set(string name,SHADERPROG* node){
+    if(node)array.insert(std::make_pair(name,node));else array.erase(name);
+  }
+  SHADERGROUP::operator string(){string ret="";for(ITER i=array.begin();i!=array.end();i++){ret+=(*i).first+",";} ret.erase(ret.length()-1);return ret;}
+  
+  const SLSAMP sampler[8]={
+    SLSAMP(0),SLSAMP(1),SLSAMP(2),SLSAMP(3),
+    SLSAMP(4),SLSAMP(5),SLSAMP(6),SLSAMP(7)
+  };
+  GLSLUNIFORM::GLSLUNIFORM(GLSLPROG* o):prog(o){}
+  GLSLUNIFORM::~GLSLUNIFORM(){}
+#  define ASSERT_MACROS(glfunc) {glUseProgram(prog->obj);GLint param;if((param=prog->uniformlocation(name))>=0)glfunc;glUseProgram(0);OGL_DEBUG();}
+  bool GLSLUNIFORM::get(string name){ return bool(prog->uniformlocation(name)>=0); }
+  void GLSLUNIFORM::setbool(string name, bool value){ ASSERT_MACROS(glUniform1i(param,value)); }
+  void GLSLUNIFORM::setscal(string name, scalar value){ ASSERT_MACROS(glUniform1f(param,value)); }
+  void GLSLUNIFORM::setsamp(string name, SLSAMP& value){
+    ASSERT_MACROS(glUniform1i(param,value()));
+  }
+  void GLSLUNIFORM::setvec2(string name, vec2& value){ ASSERT_MACROS(glUniform2fv(param,1,value)); }
+  void GLSLUNIFORM::setvec3(string name, vec3& value){ ASSERT_MACROS(glUniform3fv(param,1,value)); }
+  void GLSLUNIFORM::setvec4(string name, vec4& value){ ASSERT_MACROS(glUniform4fv(param,1,value)); }
+  void GLSLUNIFORM::setmat3(string name, mat3& value){ ASSERT_MACROS(glUniformMatrix3fv(param,1,GL_FALSE,value)); }
+  void GLSLUNIFORM::setmat4(string name, mat4& value){ ASSERT_MACROS(glUniformMatrix4fv(param,1,GL_FALSE,value)); }
+  GLSLUNIFORM::operator string(){return "UNIFORM()";}
+  
+  GLSLSHADER::GLSLSHADER():SHADERCHUNK(){}
+  GLSLSHADER::GLSLSHADER(string s):SHADERCHUNK(),src(s){}
+  GLSLSHADER::GLSLSHADER(string s,string t):SHADERCHUNK(),src(s),text(t){}
+  GLSLSHADER::~GLSLSHADER(){if(obj)glDeleteShader(obj);}
+  bool GLSLSHADER::update(){
+    bool t=otext!=text,s=osrc!=src;
+    if(t || s){
+      if(s && !t){ // if changed source only then reload source
+	load();
+	compile();
+	param();
+	otext=text;
+	osrc=src;
+      }else{ // if changed text (source may be changed too)
+	compile();
+	param();
+	otext=text;
+	osrc=src;
+      }
+      return true;
+    }else return false;
+  }
+  bool GLSLSHADER::load(){
+    //DRES* s=DRES::get(src,"shd");
+    //if(s){
+      //text=s->str();
+      //DRES::put(s);
+      return true;
+      //}return false;
+  }
+  bool GLSLSHADER::compile(){
+    GLint nreturn; // Return state
+    const GLchar* source=text.data();
+    glShaderSource(obj,1,&source,NULL);
+    glCompileShader(obj);
+    glGetShaderiv(obj,GL_COMPILE_STATUS,&nreturn);
+    if(nreturn){
+      state=STATE(src+" compiled ok",true);
+    }else{
+      GLchar str[4096];
+      GLsizei len=0;
+      glGetShaderInfoLog(obj,strlen(str),&len,str);
+      str[len]='\0';
+      state=STATE(src+"\n"+string(str),false);
+    }
+    OGL_DEBUG();
+    return bool(nreturn);
+  }
+  bool GLSLSHADER::param(){
+    GLuint i=0,j=0,k=0;
+    for(;i<text.length();){
+      i=text.find("uniform",i);
+      if(i==string::npos)break;
+      i=text.find(" ",i);
+      i=text.find(" ",++i);
+      j=text.find(";",++i);
+      string name=text.substr(i,j-i);
+      uniform[name]=0;
+      //cout<<"["<<text.substr(i,j-i)<<"]"<<endl;
+    }
+  }
+  GLSLSHADER::operator string(){return string("GLSLSHADER(\"")+src+"\",\""+text+"\")";}
+  
+  GLSLVERT::GLSLVERT():GLSLSHADER(){obj=glCreateShader(GL_VERTEX_SHADER);}
+  GLSLVERT::GLSLVERT(string s):GLSLSHADER(s){obj=glCreateShader(GL_VERTEX_SHADER);}
+  GLSLVERT::GLSLVERT(string s,string t):GLSLSHADER(s,t){obj=glCreateShader(GL_VERTEX_SHADER);}
+  GLSLVERT::~GLSLVERT(){glDeleteShader(obj);}
+  GLSLVERT::operator string(){return string("GLSLVERT(\"")+src+"\",\""+text+"\")";}
+
+  GLSLFRAG::GLSLFRAG():GLSLSHADER(){obj=glCreateShader(GL_FRAGMENT_SHADER);}
+  GLSLFRAG::GLSLFRAG(string s):GLSLSHADER(s){obj=glCreateShader(GL_FRAGMENT_SHADER);}
+  GLSLFRAG::GLSLFRAG(string s,string t):GLSLSHADER(s,t){obj=glCreateShader(GL_FRAGMENT_SHADER);}
+  GLSLFRAG::~GLSLFRAG(){glDeleteShader(obj);}
+  GLSLFRAG::operator string(){return string("GLSLFRAG(\"")+src+"\",\""+text+"\")";}
+  /*
+  SHDCONT::SHDCONT(GLSLPROG* thiz){prog=thiz;}
+  SHDCONT::~SHDCONT(){}
+  GLSLSHADER* SHDCONT::get(int i){i--; return prog->attached(i);}
+  void SHDCONT::set(int i,GLSLSHADER* s){i--; prog->detach(i); prog->attach(i,s);}
+  string SHDCONT::__tostring(){return string("SHDCONT()");}
+  */
+  GLSLPROG::GLSLPROG():SHADERPROG(),state(),array(0),uniform(this){obj=glCreateProgram();}
+  GLSLPROG::~GLSLPROG(){glDeleteProgram(obj);}
+  void GLSLPROG::bind(){update();glUseProgram(obj);binddefaultparameters();}
+  void GLSLPROG::ubind(){glUseProgram(0);}
+  bool GLSLPROG::detach(GLuint i){
+    if(i<0 || i>=array.size())return false;
+    if(array[i]!=NULL)glDetachShader(obj,array[i]->obj);
+    return true;
+  }
+  bool GLSLPROG::attach(GLuint i,GLSLSHADER* s){
+    if(i<0)return false;
+    upd=true;
+    if(i>=array.size())array.resize(i+1);
+    array[i]=s;
+    glAttachShader(obj,s->obj);
+    state=STATE(true,string("attach"));
+    OGL_DEBUG();
+    return true;
+  }
+  GLSLSHADER* GLSLPROG::attached(GLuint i){
+    if(i<0 || i>=array.size())return NULL;
+    return array[i];
+  }
+  bool GLSLPROG::link(){
+    GLchar str[4096];
+    GLint nreturn;
+    defaultattribs();
+    glLinkProgram(obj);
+    glGetProgramiv(obj,GL_LINK_STATUS,&nreturn);
+    if(!nreturn){
+      glGetProgramInfoLog(obj,sizeof(str),NULL,str);
+      state=STATE(string("GLSLPROG: Link error: \n")+str,false);
+      return false;
+    }
+    OGL_DEBUG();
+    glValidateProgram(obj);
+    glGetProgramiv(obj,GL_VALIDATE_STATUS,&nreturn);
+    if(!nreturn){
+      glGetProgramInfoLog(obj,sizeof(str),NULL,str);
+      state=STATE(string("GLSLPROG: SetParameter error: \n")+str,false);
+      return false;
+    }
+    OGL_DEBUG();
+    glGetProgramInfoLog(obj,sizeof(str),NULL,str);
+    state=STATE(string("GLSLPROG: LinkedInfo: \n")+str,true);
+    OGL_DEBUG();
+    defaultparameters();
+    OGL_DEBUG();
+    return true;
+  }
+
+  bool GLSLPROG::update(){
+    for(int i=0;i<array.size();i++)if(array[i])if(array[i]->update())upd=true;
+    if(upd)link();
+    upd=false;
+    return true;
+  }
+  void GLSLPROG::defaultparameters(){
+    glUseProgram(obj);
+    GLint par_unit=0;
+    for(unsigned char i=0;i<8;i++){
+      char tex_name[16];
+      sprintf(tex_name,"gl_TexUnit_%d",i);
+      if((par_unit=glGetUniformLocation(obj,tex_name))>=0){
+	glUniform1i(par_unit, i);
+      }
+    }
+    OGL_DEBUG();
+    if((par_unit=glGetUniformLocation(obj,"gl_TexUnit"))>=0){
+      const GLint tex_units[4]={0,1,2,3};
+      glUniform1iv(par_unit,4,tex_units);
+    }
+    OGL_DEBUG();
+    if((par_unit=glGetUniformLocation(obj,"glViewport"))>=0){
+      int vp[4];
+      glGetIntegerv(GL_VIEWPORT,vp);
+      glUniform1iv(par_unit,4,vp);    
+    }
+    OGL_DEBUG();
+    if((par_unit=glGetUniformLocation(obj,"glViewportTexCompatSize"))>=0){
+      int vp[4];
+      glGetIntegerv(GL_VIEWPORT,vp);
+      vp[0]=glTextureCompatSize(vp[2]);
+      vp[1]=glTextureCompatSize(vp[3]);
+      glUniform1iv(par_unit,2,vp);
+    }
+    if((par_unit=glGetUniformLocation(obj,"glViewport2TextureCoeff"))>=0){
+      int vp[4];
+      glGetIntegerv(GL_VIEWPORT,vp);
+      vp[0]=glTextureCompatSize(vp[2]);
+      vp[1]=glTextureCompatSize(vp[3]);
+      vec2 c=vec2(scalar(vp[2])/scalar(vp[0]),scalar(vp[3])/scalar(vp[1]));
+      glUniform2fv(par_unit,1,c);
+    }
+    OGL_DEBUG();
+    /*
+    // Выставляем текстурные карты по именам
+    GLint p=0;
+    if((p=glGetUniformLocation(obj,"diffusemap"))>=0)  glUniform1i(p,0);
+    if((p=glGetUniformLocation(obj,"ambientmap"))>=0)  glUniform1i(p,1);
+    if((p=glGetUniformLocation(obj,"normalmap"))>=0)   glUniform1i(p,1);
+    if((p=glGetUniformLocation(obj,"heightmap"))>=0)   glUniform1i(p,2);
+    if((p=glGetUniformLocation(obj,"spacularmap"))>=0) glUniform1i(p,2);
+    if((p=glGetUniformLocation(obj,"emissionmap"))>=0) glUniform1i(p,3);
+    if((p=glGetUniformLocation(obj,"detailmap"))>=0)   glUniform1i(p,3);
+    OGLEXT::CheckGLError(__FILE__,__LINE__,"GLSLPROG::link");
+    */
+#ifdef SESHADER_FAST_UNIFORM
+    for(GLuint s=0;s<array.size();s++){
+      for(GLSLSHADER::UNIFORM::iterator i=array[s]->uniform.begin();i!=array[s]->uniform.end();i++){
+	(*i).second=glGetUniformLocation(obj,(*i).first.data());
+	//assert((*i).second >= 0);
+      }
+    }
+#endif
+    OGL_DEBUG();
+    glUseProgram(0);
+  }
+  void GLSLPROG::defaultattribs(){
+    // Numbered vertex attribs
+    glBindAttribLocation(obj, 0,"glVertexAttrib0");
+    glBindAttribLocation(obj, 1,"glVertexAttrib1");
+    glBindAttribLocation(obj, 2,"glVertexAttrib2");
+    glBindAttribLocation(obj, 3,"glVertexAttrib3");
+    glBindAttribLocation(obj, 4,"glVertexAttrib4");
+    glBindAttribLocation(obj, 5,"glVertexAttrib5");
+    glBindAttribLocation(obj, 6,"glVertexAttrib6");
+    glBindAttribLocation(obj, 7,"glVertexAttrib7");
+    glBindAttribLocation(obj, 8,"glVertexAttrib8");
+    glBindAttribLocation(obj, 9,"glVertexAttrib9");
+    glBindAttribLocation(obj,10,"glVertexAttrib10");
+    glBindAttribLocation(obj,11,"glVertexAttrib11");
+    glBindAttribLocation(obj,12,"glVertexAttrib12");
+    glBindAttribLocation(obj,13,"glVertexAttrib13");
+    glBindAttribLocation(obj,14,"glVertexAttrib14");
+    glBindAttribLocation(obj,15,"glVertexAttrib15");
+    OGL_DEBUG();
+    // Named vertex attribs
+    glBindAttribLocation(obj,12,"glTangent");  // Tangent  vector
+    glBindAttribLocation(obj,13,"glBinormal"); // Binormal vector
+    glBindAttribLocation(obj,14,"glNormal"); // Normal   vector
+    OGL_DEBUG();
+    glBindAttribLocation(obj,12,"glTangentMatrix"); // Tangent matrix
+    glBindAttribLocation(obj,13,"glTangentMatrix");
+    glBindAttribLocation(obj,14,"glTangentMatrix");
+    OGL_DEBUG();
+    //cout<<"gl_Vertex = "<<glGetAttribLocation(obj,"gl_Vertex")<<endl;
+  }
+#define SET_PARAM_VALUE(name,func,count,value) {GLuint p=0;if((p=glGetUniformLocation(obj,#name))>=0)func(p,count,value);}
+  void GLSLPROG::binddefaultparameters(){
+    SET_PARAM_VALUE(glLights,glUniform1iv,1,&gl_Lights());
+    SET_PARAM_VALUE(glCameraPos,glUniform3fv,1,gl_CameraPosition());
+    int vp[4];
+    glGetIntegerv(GL_VIEWPORT,vp);
+    SET_PARAM_VALUE(glViewport,glUniform4iv,1,vp);
+  }
+  GLint GLSLPROG::uniformlocation(string name){
+#ifdef SESHADER_FAST_UNIFORM
+    for(GLuint s=0;s<array.size();s++){
+      GLSLSHADER::UNIFORM::iterator i=array[s]->uniform.find(name);
+      if(i!=array[s]->uniform.end())return (*i).second;
+      //GLint i=array[s]->uniform[name];
+      //if(i)return array[s]->uniform[name];
+    }
+#else
+    return glGetUniformLocation(obj,name.data());
+#endif
+  }
+
+  GLSLPROG::operator string(){return string("GLSLPROG(")+")";}
+  
+}

@@ -3,9 +3,9 @@
 #
 unmath.state = enable
 
-linux-gcc.unmath.C.I = /usr/include/GL
-linux-gcc.unmath.L.l = GL GLU
+--linux-gcc.unmath.C.I = /usr/include/GL
+--linux-gcc.unmath.L.l = GL GLU
 
-win32-mingw.unmath.L.l = opengl32 glu32
+--win32-mingw.unmath.L.l = opengl32 glu32
 
 unmath.dep = unbase

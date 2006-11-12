@@ -331,8 +331,8 @@ namespace undata{
   /*
    *  STREAM
    */
-  STREAM::STREAM():repos(NULL),__rcount(0),__wcount(0){}
-  STREAM::STREAM(REPOS* r):repos(r){}
+  STREAM::STREAM():state(STREAM::nonebit),repos(NULL),__rcount(0),__wcount(0){}
+  STREAM::STREAM(REPOS* r):state(STREAM::nonebit),repos(r){}
   STREAM::~STREAM(){}
   string STREAM::__content(){
     string r;
