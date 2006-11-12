@@ -3,6 +3,7 @@ $hfile"data.hxx"
 $hfile"directory.hxx"
 
 $[ -- Presets
+--[=[
 DATA.path.root="./data/"
 DATA.path.shd="shader/"
 DATA.path.tex="texture/"
@@ -14,4 +15,5 @@ DATA.path.map="map/"
 DATA.path.fnt="font/"
 DATA.path.snd="sound/"
 DATA.path.mod="lib/"
+]=]
 $]

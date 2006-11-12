@@ -25,11 +25,21 @@
 #include"data.hxx"
 #include<fstream>
 
+# define ENUMVALSTR(re,name,cs) {		\
+    string&__ret=re;				\
+    __ret+=#name; __ret+="=";			\
+    switch(name){				\
+      cs;					\
+    default: __ret+="<incorrect value>";	\
+    }						\
+  }
+# define ENUMCASESTR(cs) case cs: __ret+=#cs; break;
+
 namespace undata{
   /*
    *  PATH
    */
-  string PATH::cnstr() const{
+  string PATH::cnstr()const{
     string r;
     for(int i=0;i<path.size();i++){
       r+=path[i]; if(i+1<path.size())r+="/";
@@ -60,7 +70,7 @@ namespace undata{
       k++; v=path[k];
     }
   }
-  PATH PATH::operator|(PATH&_n) const{
+  PATH PATH::operator|(PATH&_n)const{
     PATH r;
     r.path=path;
     for(int i=0;i<~_n;i++)if(_n[i].length()>0)r.path.push_back(_n[i]);
@@ -69,6 +79,12 @@ namespace undata{
   PATH PATH::operator|(string _n)const{PATH _p(_n); return (*this)|_p;}
   string PATH::operator()()const{return cnstr();}
   void PATH::operator()(string _n){parse(_n);}
+  PATH PATH::apply(string _n)const{
+    string r=cnstr();
+    int i=0;
+    for(;(i=r.find("?"))<r.length();i++)r=r.substr(0,i)+_n+r.substr(i+1);
+    return PATH(r);
+  }
   /*
    *  PATHS
    */
@@ -127,7 +143,6 @@ namespace undata{
     int t=r.length();
     for(ITER i=cont.begin();i!=cont.end();i++){
       r+=i->first+"=";
-      //for(int j=0;j<i->second.size();j++)r+=static_cast<string>(i->second[j])+";";
       r+=cnstr(i->second);
       r+=",";
     }
@@ -150,7 +165,7 @@ namespace undata{
     }
     return "";
   }
-
+  vector<PATH> PATHS::empty;
   /*
    *  NAMES
    */
@@ -206,41 +221,60 @@ namespace undata{
     path.set("def","?");
   }
   REPOS::~REPOS(){
-  }
-  PATH REPOS::makepath(string n, string t){
-    /*
-    string e=ext.get(t)!=""?ext[t]:ext["def"];
-    string r;
-    int i,b=0;
-    for(i=0;(i=e.find("?",b))<e.length();i++,b=i){
-      r+=e.substr(b,i-b);
-      r+=n;
-    }
-    r+=e.substr(b);
-    PATH p=path.get(t)?path[t]:path["def"];
-    */
-    //return p|r;
-  }
-  RESOURCE REPOS::resource(string name, string spec){
     
+  }
+  RESOURCE::TYPE REPOS::restype(PATH p){
+    return RESOURCE::non;
+  }
+  STREAM::MODE REPOS::resmode(PATH path){
+    return STREAM::no;
+  }
+  string REPOS::makename(string n){
+    for(int i=0;n[i]=='.';n[i]='/',i++);
+    return n;
+  }
+  // n=="path.to.stream"   - path to stream
+  // n=="path.to.catalog." - path to catalog
+  RESOURCE REPOS::resource(string n, string s){
+    if(n.length()<=0)return RESOURCE();
+    RESOURCE::TYPE g=n[n.length()-1]=='.'?RESOURCE::dir:RESOURCE::stm;
+    n=makename(n);
+    if(path.get(s)=="")s="def";
+    vector<PATH>& ps=path[s];
+    for(int i=0;i<ps.size();i++){
+      PATH p=ps[i].apply(n);
+      RESOURCE::TYPE t=restype(p);
+      if(t==RESOURCE::non)continue;
+      STREAM::MODE a=resmode(p);
+      return RESOURCE(n,s,this,p,t,a);
+    }
+    return RESOURCE();
+  }
+  STREAM& REPOS::stream(RESOURCE& r, STREAM::MODE m){
+    if(r.type==RESOURCE::non)return empty;
+    STREAM* s=stream(r.path,m);
+    if(!s)return empty;
+    ostm[s]=r.name;
+    return *s;
   }
   void REPOS::stream(STREAM& s){
-    
-  }
-  STREAM& REPOS::stream(RESOURCE& r){
-    
+    if(ostm.find(&s)==ostm.end())return;
+    ostm.erase(&s);
+    if(&s)delete &s;
   }
   REPOS::operator string(){
-    string r;
+    string r="REPOS{";
     r+=string("location=\"")+location+"\",";
     r+=string("stream={");
+    int b=r.length();
     for(OPNSTMSITER i=ostm.begin();i!=ostm.end();i++){
       r+=string("[")+i->first+"]=\""+static_cast<string>(i->second)+"\",";
     }
-    r.erase(r.length()-1);
-    r+="}";
+    if(r.length()>b)r.erase(r.length()-1);
+    r+="}}";
     return r;
   }
+  STREAM REPOS::empty;
   /*
    *  REPOSS
    */
@@ -267,9 +301,9 @@ namespace undata{
   REPOSS::operator string(){
     string r="{";
     for(ITER i=cont.begin();i!=cont.end();i++){
-      r+=i->first+"=\""+i->second+"\",";
+      r+=i->first+"="+static_cast<string>(*(i->second))+",";
     }
-    r.erase(r.length()-1);
+    if(r.length()>1)r.erase(r.length()-1);
     r+="}";
     return r;
   }
@@ -290,21 +324,79 @@ namespace undata{
    */
   REPOSS repos; // repositories
   PATHS  path;  // pathes
-  
-  STREAM& RESOURCE::stream(STREAM::MODE mode){
-    if(repos)return repos->stream(*this);
-  }
   /*
   CATALOG& RESOURCE::catalog(){
     return CATALOG();
     }*/
-
+  /*
+   *  STREAM
+   */
+  STREAM::STREAM():repos(NULL),__rcount(0),__wcount(0){}
+  STREAM::STREAM(REPOS* r):repos(r){}
+  STREAM::~STREAM(){}
+  string STREAM::__content(){
+    string r;
+    {
+      char*b=new char[__length+1];
+      __read(b,__length);
+      b[__length]='\0';
+      r=b;
+    }
+    return r;
+  }
+  void STREAM::__content(string chunk){
+    __write((void*)chunk.data(),chunk.length());
+  }
+  STREAM::operator string(){
+    string r="STREAM{name=\""; r+=name; r+="\",path="; r+=static_cast<string>(path); r+=",";
+    ENUMVALSTR(r,mode,
+	       ENUMCASESTR(STREAM::no)
+	       ENUMCASESTR(STREAM::inp)
+	       ENUMCASESTR(STREAM::out)
+	       ENUMCASESTR(STREAM::io)
+	       ); r+=",";
+    r+="length="; r+=length();
+    r+="}";
+    return r;
+  }
+  /*
+   *  RESOURCE
+   */
+  STREAM& RESOURCE::stream(STREAM::MODE m){
+    if(m&access&&repos)return repos->stream(*this,m);
+    return REPOS::empty;
+  }
+  void RESOURCE::stream(STREAM& stm){
+    if(repos&&repos==stm.repos)repos->stream(stm);
+  }
+  RESOURCE::operator string(){
+      string r="RESOURCE{";
+      r+="name=\""; r+=name; r+="\",";
+      r+="spec=\""; r+=spec; r+="\",";
+      r+="path=\""; r+=static_cast<string>(path); r+="\",";
+      ENUMVALSTR(r,access,
+		 ENUMCASESTR(STREAM::no)
+		 ENUMCASESTR(STREAM::inp)
+		 ENUMCASESTR(STREAM::out)
+		 ENUMCASESTR(STREAM::io)
+		 ); r+=",";
+      ENUMVALSTR(r,type,
+		 ENUMCASESTR(RESOURCE::non)
+		 ENUMCASESTR(RESOURCE::stm)
+		 ENUMCASESTR(RESOURCE::dir)
+		 ENUMCASESTR(RESOURCE::lnk)
+		 ); r+=",";
+      r+="repos=";  if(repos)r+=static_cast<string>(*repos);else r+="nil";
+      r+="}";
+      return r;
+    }
   RESOURCE resource(string name, string spec, string repos){
     if(repos==""){ // Examine all repositoryes
       string n;
       REPOS* r;
       for(undata::repos(n,r);n!="";undata::repos(n,r)){
 	if(r){
+	  //cout<<"::::::: name="<<name<<"  spec="<<spec<<"  repos="<<n<<endl;
 	  RESOURCE s=r->resource(name,spec);
 	  if(s.type!=RESOURCE::non)return s;
 	}

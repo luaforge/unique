@@ -68,7 +68,17 @@ inline std::string operator+(const std::string& s, const int i){
 }
 inline std::string operator+(const std::string& s, const unsigned int i){
   char t[32];
+  sprintf(t,"%u",i);
+  return s+t;
+}
+inline std::string operator+(const std::string& s, const long i){
+  char t[64];
   sprintf(t,"%d",i);
+  return s+t;
+}
+inline std::string operator+(const std::string& s, const unsigned long i){
+  char t[64];
+  sprintf(t,"%u",i);
   return s+t;
 }
 inline std::string operator+(const std::string& s, const void*p){
@@ -79,5 +89,8 @@ inline std::string operator+(const std::string& s, const void*p){
 inline std::string& operator+=(std::string& s, const float f){s=s+f;return s;}
 inline std::string& operator+=(std::string& s, const int i){s=s+i;return s;}
 inline std::string& operator+=(std::string& s, const unsigned int i){s=s+i;return s;}
+inline std::string& operator+=(std::string& s, const long i){s=s+i;return s;}
+inline std::string& operator+=(std::string& s, const unsigned long i){s=s+i;return s;}
+inline std::string& operator+=(std::string& s, const void*p){s=s+p;return s;}
 using namespace std;
 

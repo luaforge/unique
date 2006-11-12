@@ -18,16 +18,17 @@ print("Source path: #"..tostring(#p).." ["..tostring(p).."]")
 for k,n in p do print("[",k,"]=",n) end
 p=p.."backup/0.1"
 print(p)
+p("?path/?/to/?.?.test?")
+print("Apply ",p,p:apply("local"))
 
 print("Test PATHS")
 local ps=undata.PATHS()
 print(ps)
 ps.texture=p
-ps.material=undata.PATH("/local/data")
+ps.material="/local/data"
 ps.mesh=ps.texture
 print(ps)
 for k,n in ps do print("[",k,"]=",n) end
-ps.material[1]="global"
 print(ps)
 ps.mesh=nil
 print(ps)
@@ -43,15 +44,27 @@ ns.texture=nil
 print(ns)
 
 print("Test REPOS")
+print(undata.repos)
 
 print("Test DIRECTORY")
 local d=undata.DIRECTORY()
+undata.repos.base=d
+print(undata.repos)
 d.location="."
 d.path.opt="opt/?:opt/?.config"
 print(d.path)
 print(d.path.opt)
 d.path.opt=nil
 print(d.path)
+d.path.opt="opt/?:opt/?.local"
+
+local r=undata.resource("linux-mingw")
+print(r)
+local r=undata.resource("linux-mingw","opt")
+print(r)
+local s=r:stream(undata.STREAM.inp)
+print(s)
+
 os.exit()
 print("src is directory? yes",d:restype(undata.PATH("src"))==d.dir)
 print("config is stream? yes",d:restype(undata.PATH("config"))==d.stm)
