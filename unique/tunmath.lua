@@ -23,8 +23,13 @@ assert(a+unmath.vec2.null==a and a+unmath.vec2.one==unmath.vec2(3,4),"operator+c
 assert(a%unmath.vec2.null==unmath.vec2.null,"operator%const operator==const failed")
 
 print("Test vec3")
+local v3=unmath.vec3()
+print("Test vec4")
+local v4=unmath.vec4()
 print("Test mat3")
+local m3=unmath.mat3()
 print("Test mat4")
+local m4=unmath.mat4()
 local v,m=unmath.vec3(1.3,2.2,3.1),unmath.mat4.null
 print(m*v)
 

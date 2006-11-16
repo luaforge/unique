@@ -33,7 +33,7 @@
     default: __ret+="<incorrect value>";	\
     }						\
   }
-# define ENUMCASESTR(cs) case cs: __ret+=#cs; break;
+# define ENUMCASESTR(en,cs) case en::cs: __ret+=#en; __ret+="."; __ret+=#cs; break;
 
 namespace undata{
   /*
@@ -230,7 +230,7 @@ namespace undata{
     return STREAM::no;
   }
   string REPOS::makename(string n){
-    for(int i=0;n[i]=='.';n[i]='/',i++);
+    for(int i=0;i<n.length();i++)if(n[i]=='.')n[i]='/';
     return n;
   }
   // n=="path.to.stream"   - path to stream
@@ -265,13 +265,26 @@ namespace undata{
   REPOS::operator string(){
     string r="REPOS{";
     r+=string("location=\"")+location+"\",";
-    r+=string("stream={");
-    int b=r.length();
-    for(OPNSTMSITER i=ostm.begin();i!=ostm.end();i++){
-      r+=string("[")+i->first+"]=\""+static_cast<string>(i->second)+"\",";
+    {
+      r+=string("stream={");
+      int b=r.length();
+      for(OPNSTMSITER i=ostm.begin();i!=ostm.end();i++){
+	r+=string("[")+i->first+"]=\""+static_cast<string>(i->second)+"\",";
+      }
+      if(r.length()>b)r.erase(r.length()-1);
+      r+="},";
     }
-    if(r.length()>b)r.erase(r.length()-1);
-    r+="}}";
+    {
+      r+=string("path={");
+      int b=r.length();
+      string k,v;
+      for(path(k,v);k!="";path(k,v)){
+	r+=k+"=\""+v+"\",";
+      }
+      if(r.length()>b)r.erase(r.length()-1);
+      r+="}";
+    }
+    r+="}";
     return r;
   }
   STREAM REPOS::empty;
@@ -299,7 +312,7 @@ namespace undata{
     return cont[name];
   }
   REPOSS::operator string(){
-    string r="{";
+    string r="REPOSGROUP{";
     for(ITER i=cont.begin();i!=cont.end();i++){
       r+=i->first+"="+static_cast<string>(*(i->second))+",";
     }
@@ -350,10 +363,10 @@ namespace undata{
   STREAM::operator string(){
     string r="STREAM{name=\""; r+=name; r+="\",path="; r+=static_cast<string>(path); r+=",";
     ENUMVALSTR(r,mode,
-	       ENUMCASESTR(STREAM::no)
-	       ENUMCASESTR(STREAM::inp)
-	       ENUMCASESTR(STREAM::out)
-	       ENUMCASESTR(STREAM::io)
+	       ENUMCASESTR(STREAM,no)
+	       ENUMCASESTR(STREAM,inp)
+	       ENUMCASESTR(STREAM,out)
+	       ENUMCASESTR(STREAM,io)
 	       ); r+=",";
     r+="length="; r+=length();
     r+="}";
@@ -375,16 +388,16 @@ namespace undata{
       r+="spec=\""; r+=spec; r+="\",";
       r+="path=\""; r+=static_cast<string>(path); r+="\",";
       ENUMVALSTR(r,access,
-		 ENUMCASESTR(STREAM::no)
-		 ENUMCASESTR(STREAM::inp)
-		 ENUMCASESTR(STREAM::out)
-		 ENUMCASESTR(STREAM::io)
+		 ENUMCASESTR(STREAM,no)
+		 ENUMCASESTR(STREAM,inp)
+		 ENUMCASESTR(STREAM,out)
+		 ENUMCASESTR(STREAM,io)
 		 ); r+=",";
       ENUMVALSTR(r,type,
-		 ENUMCASESTR(RESOURCE::non)
-		 ENUMCASESTR(RESOURCE::stm)
-		 ENUMCASESTR(RESOURCE::dir)
-		 ENUMCASESTR(RESOURCE::lnk)
+		 ENUMCASESTR(RESOURCE,non)
+		 ENUMCASESTR(RESOURCE,stm)
+		 ENUMCASESTR(RESOURCE,dir)
+		 ENUMCASESTR(RESOURCE,lnk)
 		 ); r+=",";
       r+="repos=";  if(repos)r+=static_cast<string>(*repos);else r+="nil";
       r+="}";

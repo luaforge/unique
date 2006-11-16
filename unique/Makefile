@@ -99,7 +99,7 @@ endif
 ifneq ($$($(CONFIG).$(1).L.l),)
   $(1).L.opts.native+=$$(call L.l,$$($(CONFIG).$(1).L.l))
 endif
-$(1).L.opts+=$$($(1).dep.L.opts.native)
+$(1).L.opts+=$$($(1).L.opts.native)
 $(1).dep.L.opts+=$$(foreach ent,$$(addsuffix .L.opts.native,$$($(1).dep)),$$($$(ent)))
 $(1).L.opts+=$$($(1).dep.L.opts)
 #ifneq ($$($(1).dep),)
@@ -151,6 +151,10 @@ probe.$(1):
 	@$(call U.EH,  $(1).src    = $$($(1).src))
 	@$(call U.EH,  $(1).obj    = $$($(1).obj))
 	@$(call U.EH,  $(1).dep    = $$($(1).dep))
+	@$(call U.EH,  $(1).C.flags.native = $$($(1).C.flags.native))
+	@$(call U.EH,  $(1).C.flags = $$($(1).C.flags))
+	@$(call U.EH,  $(1).L.opts.native = $$($(1).L.opts.native))
+	@$(call U.EH,  $(1).L.opts = $$($(1).L.opts))
 	@$(call U.EH,})
 T.probe+=probe.$(1)
 ###### << probe and test rules <<

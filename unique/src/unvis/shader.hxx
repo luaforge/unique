@@ -42,44 +42,54 @@ namespace unvis{//tolua_export
   /*
    *  COMMON
    */
-  class SHADERPROG{//tolua_export
+  class SHDGROUP;
+  class SHADER{//tolua_export
   public:
     //tolua_begin
-    SHADERPROG(){}
-    virtual ~SHADERPROG(){}
-  
+    SHDGROUP* parent;
+    string name;
+
+    SHADER():parent(NULL){}
+    virtual ~SHADER(){}
+    
     virtual bool update(){}
     virtual void bind(){}
     virtual void ubind(){}
-    //tolua_end
-  };//tolua_export
-  class SHADERCHUNK{//tolua_export
-  public:
-    //tolua_begin
-    SHADERCHUNK(){}
-    virtual ~SHADERCHUNK(){}
+    
+    virtual operator string();
     //tolua_end
   };//tolua_export
   
-  class SHADERGROUP{//tolua_export
-  protected:
-    typedef map<string,SHADERPROG*> CONT;
-    typedef map<string,SHADERPROG*>::iterator ITER;
-    CONT array;
+  class SHDCHUNK{//tolua_export
   public:
     //tolua_begin
-    SHADERGROUP();
-    ~SHADERGROUP();
-    void operator()(string&/**k="" asnil**/,SHADERPROG*&);
+    SHDCHUNK(){}
+    virtual ~SHDCHUNK(){}
+    //tolua_end
+  };//tolua_export
+  
+  class SHDGROUP: public SHADER{//tolua_export
+  protected:
+    typedef map<string,SHADER*> POOL;
+    typedef map<string,SHADER*>::iterator ITER;
+    POOL pool;
+    bool autoload;
+    string fullhiername(string n="");
+  public:
+    //tolua_begin
+    SHDGROUP();
+    SHDGROUP(bool autoload);
+    ~SHDGROUP();
+    void operator()(string&/**k="" asnil**/,SHADER*&);
     /**tolua_getindex {**/
-    SHADERPROG* get(string);
+    SHADER* get(string);
     /**}**/
     /**tolua_setindex {**/
-    void set(string,SHADERPROG*);
+    void set(string,SHADER*);
     /**}**/
-    operator string();
+    virtual operator string();
     //tolua_end
-    SHADERPROG* operator[](string);
+    SHADER* operator[](string);
   };//tolua_export
   
   /*
@@ -122,7 +132,7 @@ namespace unvis{//tolua_export
     /**tolua_setindex {**/
     void setbool(string,bool);
     void setscal(string,scalar);
-    void setvec2(string,SLINT&);
+    void setsint(string,SLINT&);
     void setvec2(string,vec2&);
     void setvec3(string,vec3&);
     void setvec4(string,vec4&);
@@ -134,7 +144,7 @@ namespace unvis{//tolua_export
     //tolua_end
   };//tolua_export
   
-  class GLSLSHADER: public SHADERCHUNK{//tolua_export
+  class GLSLSHADER: public SHDCHUNK{//tolua_export
   protected:
     string osrc,otext;
   public:
@@ -152,11 +162,11 @@ namespace unvis{//tolua_export
     GLSLSHADER(string,string);
     virtual ~GLSLSHADER();
     //tolua_end
-
+    
     virtual bool load();
     virtual bool compile();
     virtual bool param();
-
+    
     //tolua_begin
     virtual bool update(); // If return true then update GLSLPROG too
     virtual operator string();
@@ -189,7 +199,7 @@ namespace unvis{//tolua_export
   };
   //tolua_end
   
-  class GLSLPROG: public SHADERPROG{//tolua_export
+  class GLSLPROG: public SHADER{//tolua_export
   public:
     typedef vector<GLSLSHADER*> CONT;
     typedef vector<GLSLSHADER*>::iterator ITER;
@@ -211,10 +221,21 @@ namespace unvis{//tolua_export
     bool update();
     void bind();
     void ubind();
+
+    /**tolua_getindex {**/
+    GLSLSHADER* get(int);
+    /**}**/
+    /**tolua_setindex {**/
+    void set(int, GLSLSHADER*);
+    /**}**/
+    
+    virtual operator string();
     //tolua_end
-
+    
+    GLint uniformlocation(string name);
+  protected:
     bool link();
-
+    
     bool detach(GLuint);
     bool attach(GLuint,GLSLSHADER*);
     GLSLSHADER* attached(GLuint);
@@ -222,12 +243,8 @@ namespace unvis{//tolua_export
     void defaultattribs();
     void defaultparameters();
     void binddefaultparameters();
-    GLint uniformlocation(string name);
     
-    //tolua_begin
-    operator string();
-  };
-  //tolua_end
+  };//tolua_export
   
 }//tolua_export
 

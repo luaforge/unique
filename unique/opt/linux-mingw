@@ -83,7 +83,6 @@ C.XX=$(MINGW_NAME)-g++ -c $(1) -o $(2) $(3)
 C.I=$(addprefix -I,$(1))
 ## C.I.path - global include paths
 ## C.FLAGS  - global compiler options
-C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
 C.FLAGS+=-D_MINGW=1
 ## C.FLAGS.OPTIM.* - optimization flags
 ## C.FLAGS.OPTIM.DISABLE - Don't optimize.
@@ -120,6 +119,3 @@ endif
 ## L.l.name - global libs names
 ## L.OPTS   - global linker options
 ####### << linker << #######
-
-L.l.name += lua51 toluaxx51
-

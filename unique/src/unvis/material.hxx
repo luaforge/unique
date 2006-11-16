@@ -35,6 +35,7 @@ namespace unvis{//tolua_export
 
   class MATGROUP;
   class MATERIAL{//tolua_export
+  protected:
   public:
     class COLOR{//tolua_export
     public:
@@ -46,34 +47,60 @@ namespace unvis{//tolua_export
       scalar shininess;
       //tolua_end
       COLOR();
-      void set(unsigned int);
+      void bind(unsigned int);
+      void ubind();
+    };//tolua_export
+    class TEXMAP{//tolua_export
+    public:
+      union {
+	struct {
+	//tolua_begin
+	  unvis::TEXTURE* diffuse;
+	  unvis::TEXTURE* emission;
+	  unvis::TEXTURE* ambient;
+	  unvis::TEXTURE* specular;
+	//tolua_end
+	};
+	//tolua_begin
+	TEXTURE* map[4];
+	//tolua_end
+      };
+      TEXMAP();
+      void bind();
+      void ubind();
+      //tolua_begin
+      TEXTURE *& operator[](int i);
+      //tolua_end
     };//tolua_export
     
     //tolua_begin
     /**tolua_readonly**/ MATGROUP* parent;
     /**tolua_readonly**/ string name;
+    /**tolua_readonly**/ MATERIAL::COLOR  color;
+    /**tolua_readonly**/ MATERIAL::TEXMAP texture;
+    SHADER* shader;
+    
     bool light;
-    /**tolua_readonly**/ COLOR  color;
-    unsigned int side;
-    TEXTURE* texture[8];
-    SHADERPROG* shader;
-  
+    
     MATERIAL();
     virtual ~MATERIAL();
     void bind();
     void ubind();
+    virtual operator string();
     //tolua_end
   };//tolua_export
   
   class MATGROUP: public MATERIAL{//tolua_export
   protected:
-    typedef map<string,MATERIAL*> CONT;
+    typedef map<string,MATERIAL*> POOL;
     typedef map<string,MATERIAL*>::iterator ITER;
-    CONT array;
-    string hiername(string n="");
+    POOL pool;
+    string fullhiername(string n="");
   public:
+    bool autoload;
     //tolua_begin
     MATGROUP();
+    MATGROUP(bool autoload);
     ~MATGROUP();
     void operator()(string&/** k="" asnil**/,MATERIAL*&);
     /**tolua_getindex {**/
@@ -82,7 +109,7 @@ namespace unvis{//tolua_export
     /**tolua_setindex {**/
     void set(string,MATERIAL*);
     /**}**/
-    operator string();
+    virtual operator string();
     //tolua_end
   };//tolua_export
   

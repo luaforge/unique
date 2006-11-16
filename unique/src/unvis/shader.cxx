@@ -31,31 +31,35 @@
 
 namespace unvis{
   using namespace unbase;
-  using namespace undata;
   using namespace unogl;
   
-  SHADERGROUP::SHADERGROUP(){}
-  SHADERGROUP::~SHADERGROUP(){}
-  void SHADERGROUP::operator()(string&n,SHADERPROG*&p){
-    ITER i;
-    if(n=="")i=array.begin();
-    else{
-      i=array.find(n);
-      if(i==array.end()){n="";p=NULL;return;}
-      i++; for(;i->second==NULL&&i!=array.end();i++);
-      if(i==array.end()){n="";p=NULL;return;}
-    }
-    n=i->first;
-    p=i->second;
+  SHADER::operator string(){
+    return "SHADERPROG{}";
   }
   
-  SHADERPROG* SHADERGROUP::get(string name){
-    
+  SHDGROUP::SHDGROUP():autoload(true){}
+  SHDGROUP::SHDGROUP(bool al):autoload(al){}
+  SHDGROUP::~SHDGROUP(){}
+  
+  __GROUP_IMPLEMENTATION_(unvis::SHDGROUP,
+			  unvis::SHADER,
+			  shader,
+			  "return unvis.SHDGROUP()",
+			  "local SHADER=unvis.SHADER\n"
+			  "local GLSLPROG=unvis.GLSLPROG\n"
+			  "local GLSLVERT=unvis.GLSLVERT\n"
+			  "local GLSLFRAG=unvis.GLSLFRAG");
+
+  SHDGROUP::operator string(){
+    string r="SHDGROUP{";
+    int t=r.length();
+    for(ITER i=pool.begin();i!=pool.end();i++){
+      r+=(*i).first+",";
+    }
+    if(t>r.length())r.erase(r.length()-1);
+    r+="}";
+    return r;
   }
-  void SHADERGROUP::set(string name,SHADERPROG* node){
-    if(node)array.insert(std::make_pair(name,node));else array.erase(name);
-  }
-  SHADERGROUP::operator string(){string ret="";for(ITER i=array.begin();i!=array.end();i++){ret+=(*i).first+",";} ret.erase(ret.length()-1);return ret;}
   
   const SLSAMP sampler[8]={
     SLSAMP(0),SLSAMP(1),SLSAMP(2),SLSAMP(3),
@@ -66,6 +70,7 @@ namespace unvis{
 #  define ASSERT_MACROS(glfunc) {glUseProgram(prog->obj);GLint param;if((param=prog->uniformlocation(name))>=0)glfunc;glUseProgram(0);OGL_DEBUG();}
   bool GLSLUNIFORM::get(string name){ return bool(prog->uniformlocation(name)>=0); }
   void GLSLUNIFORM::setbool(string name, bool value){ ASSERT_MACROS(glUniform1i(param,value)); }
+  void GLSLUNIFORM::setsint(string name, SLINT& value){ ASSERT_MACROS(glUniform1i(param,value())); }
   void GLSLUNIFORM::setscal(string name, scalar value){ ASSERT_MACROS(glUniform1f(param,value)); }
   void GLSLUNIFORM::setsamp(string name, SLSAMP& value){
     ASSERT_MACROS(glUniform1i(param,value()));
@@ -77,9 +82,9 @@ namespace unvis{
   void GLSLUNIFORM::setmat4(string name, mat4& value){ ASSERT_MACROS(glUniformMatrix4fv(param,1,GL_FALSE,value)); }
   GLSLUNIFORM::operator string(){return "UNIFORM()";}
   
-  GLSLSHADER::GLSLSHADER():SHADERCHUNK(){}
-  GLSLSHADER::GLSLSHADER(string s):SHADERCHUNK(),src(s){}
-  GLSLSHADER::GLSLSHADER(string s,string t):SHADERCHUNK(),src(s),text(t){}
+  GLSLSHADER::GLSLSHADER():SHDCHUNK(){}
+  GLSLSHADER::GLSLSHADER(string s):SHDCHUNK(),src(s){}
+  GLSLSHADER::GLSLSHADER(string s,string t):SHDCHUNK(),src(s),text(t){}
   GLSLSHADER::~GLSLSHADER(){if(obj)glDeleteShader(obj);}
   bool GLSLSHADER::update(){
     bool t=otext!=text,s=osrc!=src;
@@ -151,14 +156,15 @@ namespace unvis{
   GLSLFRAG::GLSLFRAG(string s,string t):GLSLSHADER(s,t){obj=glCreateShader(GL_FRAGMENT_SHADER);}
   GLSLFRAG::~GLSLFRAG(){glDeleteShader(obj);}
   GLSLFRAG::operator string(){return string("GLSLFRAG(\"")+src+"\",\""+text+"\")";}
-  /*
-  SHDCONT::SHDCONT(GLSLPROG* thiz){prog=thiz;}
-  SHDCONT::~SHDCONT(){}
-  GLSLSHADER* SHDCONT::get(int i){i--; return prog->attached(i);}
-  void SHDCONT::set(int i,GLSLSHADER* s){i--; prog->detach(i); prog->attach(i,s);}
-  string SHDCONT::__tostring(){return string("SHDCONT()");}
-  */
-  GLSLPROG::GLSLPROG():SHADERPROG(),state(),array(0),uniform(this){obj=glCreateProgram();}
+  
+  GLSLSHADER* GLSLPROG::get(int k){
+    return attached(k);
+  }
+  void GLSLPROG::set(int k, GLSLSHADER* n){
+    detach(k); attach(k,n);
+  }
+
+  GLSLPROG::GLSLPROG():SHADER(),state(),array(0),uniform(this){obj=glCreateProgram();}
   GLSLPROG::~GLSLPROG(){glDeleteProgram(obj);}
   void GLSLPROG::bind(){update();glUseProgram(obj);binddefaultparameters();}
   void GLSLPROG::ubind(){glUseProgram(0);}

@@ -1,10 +1,9 @@
 #pragma once
 
-//tolua_begin
-
-namespace unmath{
-  class vec4{
+namespace unmath{//tolua_export
+  class vec4{//tolua_export
   public:
+    //tolua_begin
     inline vec4(): x(0.0f), y(0.0f), z(0.0f), w(1.0f) { }
     inline vec4(scalar x, scalar y, scalar z, scalar w):x(x), y(y), z(z), w(w) { }
     inline vec4(const scalar* xyzw): x(xyzw[0]), y(xyzw[1]), z(xyzw[2]), w(xyzw[3]) { }//tolua_noexport
@@ -15,8 +14,10 @@ namespace unmath{
     inline bool operator==(const vec4& v)const{ return (fabs(x-v.x)<cnst::one_eps&&fabs(y-v.y)<cnst::one_eps&&fabs(z-v.z)<cnst::one_eps&&fabs(w-v.w)<cnst::one_eps); }
     inline bool operator!=(const vec4& v)const{ return !(*this==v); }//tolua_noexport
     // Typecasting
-    inline operator scalar*(){ return array; } // to scalar*//tolua_noexport
-    inline operator const scalar*() const{ return array; }//tolua_noexport
+    //tolua_end
+    inline operator scalar*(){ return array; }
+    inline operator const scalar*() const{ return array; }
+    //tolua_begin
     // Computation
     const vec4 operator*(const mat4&)const;
     inline const vec4 operator*(scalar f) const{ return vec4(x*f, y*f, z*f, w*f); }
@@ -53,12 +54,22 @@ namespace unmath{
     //tolua_end
     // data cells
     union{
-      struct{ scalar x,y,z,w; }; // space coordinates
-      struct{ scalar s,t,r,q; }; // texture coordinates
-      struct{ scalar R,G,B,A; }; // color components
-      struct{ scalar left, right, top, bottom; }; // for clipping and widgets
-      struct{ scalar a,b,c,d; }; // Plane params
-      scalar array[4];
+      struct { // space coordinates
+        scalar x,y,z,w;//tolua_export
+      };
+      struct { // texture coordinates
+	scalar s,t,r,q;//tolua_export
+      };
+      struct { // color components
+	scalar R,G,B,A;//tolua_export
+      };
+      struct { // for clipping and widgets
+	scalar left,right,top,bottom;//tolua_export
+      };
+      struct { // Plane params
+	scalar a,b,c,d;//tolua_export
+      };
+      scalar array[4];//tolua_export
     };
     //tolua_begin
     // documented
@@ -75,8 +86,8 @@ namespace unmath{
     static tolua_readonly vec4 nz;
     static tolua_readonly vec4 pw;
     static tolua_readonly vec4 nw;
-    //
-    operator string()const;
+    
+    operator string() const;
   };
   //tolua_end
 

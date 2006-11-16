@@ -92,8 +92,8 @@ void TEXCUBE::gennorm(unsigned int size){ // Create normalization CubeMap
   bind();
   glPixelStorei(GL_UNPACK_ALIGNMENT,1);
   OGL_DEBUG();
-  wrap.s=TEXWRAP::clampedge;
-  wrap.t=TEXWRAP::clampedge;
+  wrap.s=WRAP::clampedge;
+  wrap.t=WRAP::clampedge;
   filter=fullinear;
   unsigned char*pixels=new unsigned char[size*size*3]();
   for(int s=0;s<6;s++){

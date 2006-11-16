@@ -69,7 +69,6 @@ C.XX=g++ -c $(1) -o $(2) $(3)
 C.I=$(addprefix -I,$(1))
 ## C.I.path - global include paths
 ## C.FLAGS  - global compiler options
-C.FLAGS+=$(shell pkg-config --cflags lua5.1 toluaxx5.1)
 C.FLAGS+=-D_LINUX=1
 ## C.FLAGS.OPTIM.* - optimization flags
 ## C.FLAGS.OPTIM.DISABLE - Don't optimize.
@@ -101,9 +100,6 @@ L.l=$(addprefix -l,$(1))
 L.d=$(addsuffix $(X.DLL),$(1))
 ## L.L.path - global link paths
 ## L.l.name - global libs names
-#L.l.name+=c dl
 ## L.OPTS   - global linker options
-#L.OPTS+=$(shell pkg-config --libs lua5.1)
-#L.OPTS+=$(shell pkg-config --libs toluaxx5.1)
 ####### << linker << #######
 

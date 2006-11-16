@@ -28,10 +28,11 @@
 #  define NULL 0x00000000
 #endif
 
+#undef tolua_readonly
+#define tolua_readonly const
+
 #include"config.hxx"
 //#include "memory.hxx"
-
-#define tolua_readonly const
 
 #ifdef _WIN32
 #  define UNAPI __declspec(dllexport)

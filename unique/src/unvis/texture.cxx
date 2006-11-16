@@ -23,45 +23,38 @@
  */
 
 #include"texture.hxx"
+#include"undata.hxx"
 
-#include"toluaxx.h"
+#include<toluaxx.h>
 
 namespace unvis{
-
-  TEXTURES::TEXTURES(){}
-  TEXTURES::~TEXTURES(){}
-  void TEXTURES::operator()(string&n,TEXTURE*&t){
-    
-  }
-  TEXTURE* TEXTURES::get(string n){
-    /*
-      if(array.find(name)!=array.end())return array[name];else{ // Try load
-      DRES* s=DRES::get(name+".lua","tex");
-      if(s){
-      lua_State* L=tolua_state();
-      string source=s->str(); source+="\n_texret_."+name+"="+"ret\n";
-      lua_pushstring(L,"_texret_");
-      tolua_pushusertype(L,(void*)this,"TEXTURES");
-      lua_settable(L,LUA_GLOBALSINDEX);
-      lua_dobuffer(L,source.data(),source.length(),s->name.data());
-      DRES::put(s);
-      if(array.find(name)!=array.end())return array[name];
-      }
-      return NULL;
-      }
-    */
-    if(array.find(n)!=array.end())return array[n];else return NULL;
-  }
-  void TEXTURES::set(string name,TEXTURE* node){
-    if(node)array.insert(std::make_pair(name,node));else array.erase(name);
-  }
-  TEXTURES::operator string(){string ret="";for(ITER i=array.begin();i!=array.end();i++){ret+=(*i).first+",";} ret.erase(ret.length()-1);return ret;}
   
-  TEXCRD::TEXCRD(GLenum c):coord(c),mode(TEXCRD::object),scale(vec4(1.0,1.0,1.0,0.0)),state(false){}
-  TEXCRD::TEXCRD(GLenum c,GLenum m):coord(c),mode(m),scale(vec4(1.0,1.0,1.0,0.0)),state(true){}
-  TEXCRD::TEXCRD(GLenum c,GLenum m,vec4 s):coord(c),mode(m),scale(s),state(true){}
-  void TEXCRD::set(){
-    if(mode!=TEXCRD::object && mode!=TEXCRD::eye && mode!=TEXCRD::sphere)return;
+  TEXGROUP::TEXGROUP():autoload(true){}
+  TEXGROUP::TEXGROUP(bool al):autoload(al){}
+  TEXGROUP::~TEXGROUP(){}
+  
+  __GROUP_IMPLEMENTATION_(unvis::TEXGROUP,
+			  unvis::TEXTURE,
+			  texture,
+			  "return unvis.TEXGROUP()",
+			  "local TEXTURE=unvis.TEXTURE");
+  
+  TEXGROUP::operator string(){
+    string r="TEXGROUP{";
+    int t=r.length();
+    for(ITER i=pool.begin();i!=pool.end();i++)r+=(*i).first+",";
+    if(t<r.length())r.erase(r.length()-1);
+    r+="}";
+    return r;
+  }
+  
+  TEXTURE::COORD::COORD(unsigned int c):coord(c),mode(TEXTURE::COORD::object),
+					scale(1.0,1.0,1.0,0.0),state(false){}
+  TEXTURE::COORD::COORD(unsigned int c, unsigned int m):coord(c),mode(m),state(true),
+							scale(1.0,1.0,1.0,0.0){}
+  TEXTURE::COORD::COORD(unsigned int c, unsigned int m, vec4 s):coord(c),mode(m),scale(s),state(true){}
+  void TEXTURE::COORD::set(){
+    if(mode!=COORD::object && mode!=COORD::eye && mode!=COORD::sphere)return;
     switch(coord){
     case GL_S:if(state)glEnable(GL_TEXTURE_GEN_S);else glDisable(GL_TEXTURE_GEN_S);break;
     case GL_T:if(state)glEnable(GL_TEXTURE_GEN_T);else glDisable(GL_TEXTURE_GEN_T);break;
@@ -80,40 +73,40 @@ namespace unvis{
     OGL_DEBUG();
   }
   
-  TEXCGEN::TEXCGEN():s(TEXCRD::s),t(TEXCRD::t),r(TEXCRD::r),q(TEXCRD::q){}
-  void TEXCGEN::set(){s.set();t.set();r.set();q.set();}
+  TEXTURE::GENCRD::GENCRD():s(GENCRD::s),t(GENCRD::t),r(GENCRD::r),q(GENCRD::q){}
+  void TEXTURE::GENCRD::set(){s.set();t.set();r.set();q.set();}
   
-  TEXWRAP::TEXWRAP(GLint _s,GLint _t,GLint _r):s(_s),t(_t),r(_r){}
-  void TEXWRAP::set(GLuint typetarget){
+  TEXTURE::WRAP::WRAP(int _s, int _t, int _r):s(_s),t(_t),r(_r){}
+  void TEXTURE::WRAP::set(GLuint typetarget){
     glTexParameteri(typetarget,GL_TEXTURE_WRAP_S,s);
     glTexParameteri(typetarget,GL_TEXTURE_WRAP_T,t);
     glTexParameteri(typetarget,GL_TEXTURE_WRAP_R,r);
     OGL_DEBUG();
   }
   /// Texture combiner ///
-  TEXFUNCPAR::TEXFUNCPAR():target_rgb(0),target_alpha(0),rgb(0),alpha(0){}
-  TEXFUNCPAR::TEXFUNCPAR(GLuint trgb, GLuint ta):target_rgb(trgb),
-						 target_alpha(ta),rgb(0),
-						 alpha(0){}
-  void TEXFUNCPAR::set(){
+  TEXTURE::FUNCPAR::FUNCPAR():target_rgb(0),target_alpha(0),rgb(0),alpha(0){}
+  TEXTURE::FUNCPAR::FUNCPAR(unsigned int trgb, unsigned int ta):target_rgb(trgb),
+								target_alpha(ta),rgb(0),
+								alpha(0){}
+  void TEXTURE::FUNCPAR::set(){
     if(rgb)  glTexEnvi(GL_TEXTURE_ENV,target_rgb,rgb);
     OGL_DEBUG();
     if(alpha)glTexEnvi(GL_TEXTURE_ENV,target_alpha,alpha);
     OGL_DEBUG();
   }
   
-  TEXFUNC::TEXFUNC():type(TEXFUNC::modulate),combine_rgb(0),combine_alpha(0),
-		     scale_rgb(1.0f),scale_alpha(1.0f){
-    src[0]=TEXFUNCPAR(GL_SOURCE0_RGB,GL_SOURCE0_ALPHA);
-    src[1]=TEXFUNCPAR(GL_SOURCE1_RGB,GL_SOURCE1_ALPHA);
-    src[2]=TEXFUNCPAR(GL_SOURCE2_RGB,GL_SOURCE2_ALPHA);
-    opr[0]=TEXFUNCPAR(GL_OPERAND0_RGB,GL_OPERAND0_ALPHA);
-    opr[1]=TEXFUNCPAR(GL_OPERAND1_RGB,GL_OPERAND1_ALPHA);
-    opr[2]=TEXFUNCPAR(GL_OPERAND2_RGB,GL_OPERAND2_ALPHA);
+  TEXTURE::FUNC::FUNC():type(FUNC::modulate),combine_rgb(0),combine_alpha(0),
+			scale_rgb(1.0f),scale_alpha(1.0f){
+    src[0]=TEXTURE::FUNCPAR(GL_SOURCE0_RGB,GL_SOURCE0_ALPHA);
+    src[1]=TEXTURE::FUNCPAR(GL_SOURCE1_RGB,GL_SOURCE1_ALPHA);
+    src[2]=TEXTURE::FUNCPAR(GL_SOURCE2_RGB,GL_SOURCE2_ALPHA);
+    opr[0]=TEXTURE::FUNCPAR(GL_OPERAND0_RGB,GL_OPERAND0_ALPHA);
+    opr[1]=TEXTURE::FUNCPAR(GL_OPERAND1_RGB,GL_OPERAND1_ALPHA);
+    opr[2]=TEXTURE::FUNCPAR(GL_OPERAND2_RGB,GL_OPERAND2_ALPHA);
   }
-  void TEXFUNC::set(){
+  void TEXTURE::FUNC::set(){
     glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,type);
-    if(type==TEXFUNC::combine){
+    if(type==FUNC::combine){
       if(combine_rgb)glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB,combine_rgb);
       OGL_DEBUG();
       if(combine_alpha)glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_ALPHA,combine_alpha);
@@ -139,13 +132,12 @@ namespace unvis{
 		     inited(false),binded(false),format(0),storage(0){
     glGenTextures(1,&glid);
     OGL_DEBUG();
-    typetarget=textarget;
+    typetarget=GL_TEXTURE_1D;
   }
   TEXTURE::~TEXTURE(){// Удаление текстуры
     glDeleteTextures(1,&glid);
     OGL_DEBUG();
   }
-  const GLuint TEXTURE::textarget=GL_TEXTURE_1D;
   
   void TEXTURE::bind(){// Биндим текстуру
     if(binded)return;
@@ -202,9 +194,17 @@ namespace unvis{
   bool TEXTURE::update(){}
   void TEXTURE::copy(){}
   void TEXTURE::init(){}
+
+  TEXTURE::operator string(){
+    return "TEXTURE{}";
+  }
   
   int glTextureCompatSize(int s){
-    for(int i=1;true;i++)if(pow((double)2,(double)i)>=s)return pow((double)2,(double)i);
+    for(int i=1;true;i++){
+      if(pow((double)2,(double)i)>=s){
+	return pow((double)2,(double)i);
+      }
+    }
   }
   
 }

@@ -29,134 +29,131 @@
 #include "image.hxx"
 
 namespace unvis{//tolua_export
-
-  class TEXTURES;
-
-  class TEXCRD{
-  public:
-    enum { // Coord
-      s=GL_S,
-      t=GL_T,
-      r=GL_R,
-      q=GL_Q,
-    };
-    enum { // Plane
-      eye    =GL_EYE_LINEAR,
-      object =GL_OBJECT_LINEAR,
-      sphere =GL_SPHERE_MAP,
-      reflect=GL_REFLECTION_MAP,
-      normal =GL_NORMAL_MAP,
-    };
+  class TEXGROUP;
   
-    GLenum coord; // Coordinate which generated
-    bool   state; // Enable/Disable
-    GLenum  mode; // Generation mode : GL_OBJECT_PLANE, GL_EYE_PLANE, GL_SPHERE_MAP
-    vec4   scale; // Scale     default vec4(1.0,1.0,1.0,0.0)
-  
-    TEXCRD(GLenum);
-    TEXCRD(GLenum,GLenum);
-    TEXCRD(GLenum,GLenum,vec4);
-    void set();
-    CLASSINFODECL
-  };
-  
-  class TEXCGEN{
-  public:
-    TEXCRD s,t,r,q;
-    TEXCGEN();
-    void set();
-  };
-
-  class TEXWRAP{
-  public:
-    enum{// Функции управления наложением
-      repeat   =GL_REPEAT,       // Повторение текстуры (граница игнорируется)
-      clamp    =GL_CLAMP,        // Клампинг используя границу
-      clampedge=GL_CLAMP_TO_EDGE,// Клампинг игнорируя края
-    };
-    GLint s,t,r;
-    TEXWRAP(GLint _s=TEXWRAP::repeat,GLint _t=TEXWRAP::repeat,GLint _r=TEXWRAP::repeat);
-    void set(GLuint);
-  };
-
-  class TEXFUNCPAR{
-  public:
-    GLuint target_rgb;
-    GLuint target_alpha;
-    GLuint rgb;
-    GLuint alpha;
-    TEXFUNCPAR();
-    TEXFUNCPAR(GLuint trgb, GLuint ta);
-    void set();
-    CLASSINFODECL
-  };
-
-  class TEXFUNC{
-  public:
-    enum {
-      // Функция текстурирования
-      replace =GL_REPLACE, // Замещение фрагмента текселем текстуры
-      modulate=GL_MODULATE,// Цвет фрагмента модулируется содержимым текстурной карты
-      decal   =GL_DECAL,   // Замещение, работает только для RGB и RGBA и обрабатывает альфа канал иначе
-      blend   =GL_BLEND,   // Блендинг
-      combine =GL_COMBINE, // Комбинирование
-    };// type
-    enum {
-      dot3rgb    =GL_DOT3_RGB,
-      dot3rgba   =GL_DOT3_RGBA,
-      //replace =GL_REPLACE,
-      //modulate=GL_MODULATE,
-      add        =GL_ADD,     // Добавление
-      addsign    =GL_ADD_SIGNED, //
-      sub        =GL_SUBTRACT_ARB,
-      interpol   =GL_INTERPOLATE_ARB,
-    };// make
-    enum {
-      primary =GL_PRIMARY_COLOR_ARB, // Основной цвет фрагмента (Cf, Af)
-      texture =GL_TEXTURE,      // Цвет текстуры (Ct, At)
-      constant=GL_CONSTANT_ARB, // Цвет, заданный при помощи glTexEnfv
-      previos =GL_PREVIOUS_ARB, //
-    };// src
-    enum {
-      src_color          =GL_SRC_COLOR,          // color
-      one_minus_src_color=GL_ONE_MINUS_SRC_COLOR,// 1 - color
-      src_alpha          =GL_SRC_ALPHA,          // alpha
-      one_munis_src_alpha=GL_ONE_MINUS_SRC_ALPHA,// 1 - alpha
-    };// opr
-    GLuint type;   // Texturing function
-    TEXFUNCPAR src[3]; // Sources
-    TEXFUNCPAR opr[3]; // Operands
-    GLuint combine_rgb;   // Cmd
-    GLuint combine_alpha; //
-    scalar scale_rgb;
-    scalar scale_alpha;
-    TEXFUNC();
-    void set();
-    CLASSINFODECL
-  };
   // Abstract OpenGL texture class
   class TEXTURE{//tolua_export
-  protected:
-    GLenum Enabled[4];
-    string  osrc;
-    bool inited;
-    unsigned int owidth;
-    unsigned int oheight;
   public:
-    static const GLuint textarget;
-    GLuint typetarget;
-    enum { // Texture float bits
+    class COORD{//tolua_export
+    public:
+      //tolua_begin
+      enum { // Coord
+	s=GL_S,
+	t=GL_T,
+	r=GL_R,
+	q=GL_Q,
+      };
+      enum { // Plane
+	eye    =GL_EYE_LINEAR,
+	object =GL_OBJECT_LINEAR,
+	sphere =GL_SPHERE_MAP,
+	reflect=GL_REFLECTION_MAP,
+	normal =GL_NORMAL_MAP,
+      };
+      unsigned int coord; // Coordinate which generated
+      bool   state;       // Enable/Disable
+      unsigned int mode;  // Generation mode : GL_OBJECT_PLANE, GL_EYE_PLANE, GL_SPHERE_MAP
+      vec4   scale;       // Scale     default vec4(1.0,1.0,1.0,0.0)
+      //tolua_end
+      
+      COORD(unsigned int);
+      COORD(unsigned int,unsigned int);
+      COORD(unsigned int,unsigned int,vec4);
+      void set();
+    };//tolua_export
+    
+    class GENCRD{//tolua_export
+    public:
+      COORD s,t,r,q;//tolua_export
+      GENCRD();
+      void set();
+    };//tolua_export
+    
+    class WRAP{//tolua_export
+    public:
+      //tolua_begin
+      enum {
+	repeat   =GL_REPEAT,       // Повторение текстуры (граница игнорируется)
+	clamp    =GL_CLAMP,        // Клампинг используя границу
+	clampedge=GL_CLAMP_TO_EDGE,// Клампинг игнорируя края
+      };
+      int s,t,r;
+      //tolua_end
+      WRAP(int _s=WRAP::repeat,int _t=WRAP::repeat,int _r=WRAP::repeat);
+      void set(unsigned int);
+    };//tolua_export
+    
+    class FUNCPAR{//tolua_export
+    public:
+      //tolua_begin
+      unsigned int target_rgb;
+      unsigned int target_alpha;
+      unsigned int rgb;
+      unsigned int alpha;
+      //tolua_end
+      FUNCPAR();
+      FUNCPAR(unsigned int trgb, unsigned int ta);
+      void set();
+    };//tolua_export
+    
+    class FUNC{//tolua_export
+    public:
+      //tolua_begin
+      enum {
+	// Функция текстурирования
+	replace =GL_REPLACE, // Замещение фрагмента текселем текстуры
+	modulate=GL_MODULATE,// Цвет фрагмента модулируется содержимым текстурной карты
+	decal   =GL_DECAL,   // Замещение, работает только для RGB и RGBA и обрабатывает альфа канал иначе
+	blend   =GL_BLEND,   // Блендинг
+	combine =GL_COMBINE, // Комбинирование
+      };// type
+      enum {
+	dot3rgb    =GL_DOT3_RGB,
+	dot3rgba   =GL_DOT3_RGBA,
+	//replace =GL_REPLACE,
+	//modulate=GL_MODULATE,
+	add        =GL_ADD,     // Добавление
+	addsign    =GL_ADD_SIGNED, //
+	sub        =GL_SUBTRACT_ARB,
+	interpol   =GL_INTERPOLATE_ARB,
+      };// make
+      enum {
+	primary =GL_PRIMARY_COLOR_ARB, // Основной цвет фрагмента (Cf, Af)
+	texture =GL_TEXTURE,      // Цвет текстуры (Ct, At)
+	constant=GL_CONSTANT_ARB, // Цвет, заданный при помощи glTexEnfv
+	previos =GL_PREVIOUS_ARB, //
+      };// src
+      enum {
+	src_color          =GL_SRC_COLOR,          // color
+	one_minus_src_color=GL_ONE_MINUS_SRC_COLOR,// 1 - color
+	src_alpha          =GL_SRC_ALPHA,          // alpha
+	one_munis_src_alpha=GL_ONE_MINUS_SRC_ALPHA,// 1 - alpha
+      };// opr
+      unsigned int type;   // Texturing function
+      FUNCPAR src[3]; // Sources
+      FUNCPAR opr[3]; // Operands
+      unsigned int combine_rgb;   // Cmd
+      unsigned int combine_alpha; //
+      unmath::scalar scale_rgb;
+      unmath::scalar scale_alpha;
+      //tolua_end
+      FUNC();
+      void set();
+    };//tolua_export
+    
+    //tolua_begin
+    enum FLTBITS{ // Texture float bits
       float16,
       float32,
     };
-    enum { // Texture format
+    enum FORMAT{ // Texture format
       lum     =GL_LUMINANCE,
       luma    =GL_LUMINANCE_ALPHA,
       rgb     =GL_RGB,
       rgba    =GL_RGBA,
       depth   =GL_DEPTH_COMPONENT,
     };
-    enum { // Texture internal format
+    enum INTERNFORMAT{ // Texture internal format
       // Alpha
       alpha4  =GL_ALPHA4,
       alpha8  =GL_ALPHA8,
@@ -201,8 +198,7 @@ namespace unvis{//tolua_export
       dxt3rgba=GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,
       dxt5rgba=GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,
     };
-    enum {
-      //textarget=0,
+    enum FILTER{
       // Константы режимов
       // Фильтрация
       linear    =0x1,
@@ -212,17 +208,32 @@ namespace unvis{//tolua_export
       fullinear =0x5,
       // Направления генерации текстурных координат
     };
+    //tolua_end
+  protected:
+    unsigned int Enabled[4];
+    
+    string osrc;
+    unsigned int owidth;
+    unsigned int oheight;
+    
+    unsigned int glid;   // OpenGL texture identifier
+    
+    unsigned int typetarget;
+    
+    bool inited;
     bool binded;
+  public:
+    //tolua_begin
     unbase::STATE state;
     // Texturing parameters
-    GLuint glid;    // OpenGL texture identifier
-    GLuint filter;  // Filtration type
-    TEXFUNC func;   // Texturing function
+    FILTER filter;  // Filtration type
+    FUNC func;      // Texturing function
     bool    mipmap; // Mipmapping
-    TEXWRAP wrap;   // Texture wraping
-    TEXCGEN cgen;   // Texture coord automatic generation
+    WRAP wrap;      // Texture wraping
+    GENCRD cgen;    // Texture coord automatic generation
     string  src;    // Texture source
     string  name;   // Texture name
+    TEXGROUP* parent;
     unsigned int format;
     unsigned int storage;
     unsigned int chan;
@@ -230,11 +241,14 @@ namespace unvis{//tolua_export
     unsigned int height;
     unsigned int length;
     bool screen;
+    
     // Methods
     static unsigned int maxunits();
-
+    
     TEXTURE();
     virtual ~TEXTURE();
+    
+    virtual operator string();
 
     // Binding
     virtual void bind();
@@ -242,22 +256,31 @@ namespace unvis{//tolua_export
     virtual bool update();
     virtual void copy();
     virtual void init();
+    //tolua_end
+    
   };//tolua_export
 
-  class TEXTURES{//tolua_export
-  public:
-    typedef map<string,TEXTURE*> CONT;
+  class TEXGROUP: public TEXTURE{//tolua_export
+  protected:
+    typedef map<string,TEXTURE*> POOL;
     typedef map<string,TEXTURE*>::iterator ITER;
+    POOL pool;
+    bool autoload;
+    string fullhiername(string n="");
   public:
-    CONT array;
+    const TEXTURE* operator[](string);
     //tolua_begin
-    TEXTURES();
-    ~TEXTURES();
-    void operator()(string&name/**="" asnil**/,TEXTURE*&tex);
-    TEXTURE* get(string name)/**=NULL asnil**/;
+    TEXGROUP();
+    TEXGROUP(bool al);
+    ~TEXGROUP();
+    void operator()(string&/**k="" asnil**/,TEXTURE*&);
+    /**tolua_getindex {**/
+    TEXTURE* get(string name);
+    /**}**/
+    /**tolua_setindex {**/
     void set(string name, TEXTURE* tex);
-    //const TEXTURE* operator[](string);
-    operator string();
+    /**}**/
+    virtual operator string();
   };
   //tolua_end
 

@@ -28,7 +28,7 @@ namespace unogl{
   extern mat4& gl_RotateProjectionMatrixInv();
   extern mat4& gl_TranslateProjectionMatrix();
   extern mat4& gl_TranslateProjectionMatrixInv();
-  extern GLint& gl_Lights();
+  extern int&  gl_Lights();
   
 #include"oglext.decl.hxx"
   
