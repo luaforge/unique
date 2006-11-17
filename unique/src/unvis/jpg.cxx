@@ -33,6 +33,7 @@
 #include"image.hxx"
 
 namespace unvis{
+  using namespace undata;
 
 #define ROWS_PREAD 3  // Число строк, читаемых за раз
 #define RBUF_SIZE 128 // размер буфера в памяти, куда будем читать информацию
@@ -152,12 +153,12 @@ namespace unvis{
     default:format=und; break;	
     }
     unsigned int row_stride=cinfo.output_width*cinfo.output_components;// Длина строки
-    PixelsInit();// выделяем память для образа
+    dest();
+    init();// выделяем память для образа
     unsigned int nowRead=0;
     while(nowRead<height){
       JSAMPROW row_pointers[ROWS_PREAD];
-      for(int row=0;row<ROWS_PREAD;row++)
-	row_pointers[row]=&pixels[(nowRead+row)*row_stride];
+      for(int row=0;row<ROWS_PREAD;row++)row_pointers[row]=&pixels[(nowRead+row)*row_stride];
       nowRead+=jpeg_read_scanlines(&cinfo,row_pointers,ROWS_PREAD);
     }
     jpeg_finish_decompress(&cinfo);// Завершаем декомпрессию файла
@@ -237,7 +238,8 @@ namespace unvis{
     jpeg_finish_decompress(&cinfo);// Завершаем декомпрессию файла
     jpeg_destroy_decompress(&cinfo);// Очищаем объект декомпрессии
     // Делаем RGBA образ
-    PixelsInit();// выделяем память для картинки
+    dest();
+    init();// выделяем память для картинки
     //*loger<<"Channels"<<alpChan<<rgbChan;
     //if(rgbChan==3 && alpChan==1);// Правильная ситуация
     if((rgbChan==1)&&(alpChan==3)){	 // Мы случайно перепутали данные RGB и Alpha местами

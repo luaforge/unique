@@ -28,6 +28,7 @@
 #include<toluaxx.h>
 
 namespace unvis{
+  using namespace undata;
   using namespace unogl;
   
   MATGROUP::MATGROUP():MATERIAL(),autoload(true){}

@@ -14,6 +14,13 @@ local t=unbase.TIME()
 
 t()
 
+local mn=unbase.MULTNAME()
+mn("chrome.{1,2,white,black,00}.tex")
+
+for i=1,#mn do
+  print(mn[i],mn(i))
+end
+
 t()
 
 print("Full time: "..t.delta)

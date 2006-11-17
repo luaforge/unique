@@ -1,7 +1,7 @@
 /***************************************************************************
- *            texturecube.hpp
+ *            alapp.hpp
  *
- *  Wed Jun 29 17:12:37 2006
+ *  Wed Jun 29 17:12:37 2005
  *  Copyright  2005  Fenix
  *  tonder@trktvs.ru
  ****************************************************************************/
@@ -23,18 +23,41 @@
  */
 
 #pragma once
-#include"texture2d.hxx"
 
-namespace unvis{//tolua_export
-  class TEXCUBE: public TEXTURE{//tolua_export
+#include"unbase.hxx"
+#include"unmath.hxx"
+
+#include<al.h>
+#include<alc.h>
+
+namespace unoal{//tolua_export
+  ALCdevice *alGetCurrentDevice();
+  
+# define GET_AL_STR(name) string((char*)alGetString(name))
+# define GET_ALC_STR(dev,name) string((char*)alcGetString(dev,name))
+
+  class ALAPP: public unbase::CONTEXT{//tolua_export
+  protected:
+    ALCdevice  *alDevice;  // AL устройство
+    ALCcontext *alContext; // AL контекст рендеринга звука
   public:
     //tolua_begin
-    TEXCUBE();
-    virtual ~TEXCUBE();
-    
-    void load();
-    void init();
-    void gennorm(unsigned int size);
+    ALAPP();
+    virtual ~ALAPP();
+    // Methods
+    virtual bool open();
+    virtual void close();
+    virtual void bind();
+    virtual void ubind();
+    //tolua_end
+    // Errors detecting
+    static bool CheckError();
+    // AL/ALC context info
+    virtual void RendererInfo();
+    //tolua_begin
+    string default_device;
+    string device;
+    string alc_extensions;
     //tolua_end
   };//tolua_export
 }//tolua_export

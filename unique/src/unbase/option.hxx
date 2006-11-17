@@ -40,6 +40,30 @@ namespace unbase{//tolua_export
     static string __info(string);
     //tolua_end
   };//tolua_export
+}
+
+#include<vector>
+
+namespace unbase{
+  class MULTNAME{//tolua_export
+  protected:
+    vector<string> name;
+    void parse(string);
+    string cnstr(int i=0);
+  public:
+    //tolua_begin
+    string prefix;
+    string suffix;
+    
+    MULTNAME(string s="");
+    void operator()(string s);
+    string operator()(int i=0);
+    operator string();
+    string& operator[](int);
+    int operator~();
+    //tolua_end
+  };//tolua_export
+  
   
   inline std::ostream& operator<<(std::ostream& stm, STATE& err){return stm<<string(err);}
   class LOCALE{

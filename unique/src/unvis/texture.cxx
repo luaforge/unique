@@ -28,6 +28,7 @@
 #include<toluaxx.h>
 
 namespace unvis{
+  using namespace undata;
   
   TEXGROUP::TEXGROUP():autoload(true){}
   TEXGROUP::TEXGROUP(bool al):autoload(al){}
@@ -191,9 +192,19 @@ namespace unvis{
     OGL_DEBUG();
     binded=false;
   }
-  bool TEXTURE::update(){}
+  bool TEXTURE::update(){
+    if(osrc!=src){
+      osrc=src;
+      load();
+    }
+    if(!inited){
+      osrc=src="Auto Generate Texture";
+      init();
+    }
+  }
   void TEXTURE::copy(){}
   void TEXTURE::init(){}
+  void TEXTURE::load(){}
 
   TEXTURE::operator string(){
     return "TEXTURE{}";

@@ -25,16 +25,16 @@
 #pragma once
 #include "texture.hxx"
 
-namespace unvis{
-  class TEX2D: public unvis::TEXTURE{
+namespace unvis{//tolua_export
+  class TEX2D: public TEXTURE{//tolua_export
   protected:
   public:
-    static const GLuint textarget;
+    //tolua_begin
     TEX2D();
     virtual ~TEX2D();
     void init();
-    bool reload();
-    bool update();
+    void load();
     void copy();
-  };
-}
+    //tolua_end
+  };//tolua_export
+}//tolua_export

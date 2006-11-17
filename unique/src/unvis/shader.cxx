@@ -31,6 +31,7 @@
 
 namespace unvis{
   using namespace unbase;
+  using namespace undata;
   using namespace unogl;
   
   SHADER::operator string(){
@@ -105,12 +106,15 @@ namespace unvis{
     }else return false;
   }
   bool GLSLSHADER::load(){
-    //DRES* s=DRES::get(src,"shd");
-    //if(s){
-      //text=s->str();
-      //DRES::put(s);
+    RESOURCE r;
+    //if(parent)r=undata::resource(parent->fullhiername(src),"shaderdata");
+    if(r.type!=RESOURCE::stm)r=undata::resource(src,"shaderdata");
+    if(r.type==RESOURCE::stm&&r.access&STREAM::inp){
+      STREAM s=r.stream();
+      text=s.read();
+      r.stream(s);
       return true;
-      //}return false;
+    }return false;
   }
   bool GLSLSHADER::compile(){
     GLint nreturn; // Return state

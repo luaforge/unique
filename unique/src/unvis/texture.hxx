@@ -256,6 +256,7 @@ namespace unvis{//tolua_export
     virtual bool update();
     virtual void copy();
     virtual void init();
+    virtual void load();
     //tolua_end
     
   };//tolua_export
@@ -266,8 +267,8 @@ namespace unvis{//tolua_export
     typedef map<string,TEXTURE*>::iterator ITER;
     POOL pool;
     bool autoload;
-    string fullhiername(string n="");
   public:
+    string fullhiername(string n="");
     const TEXTURE* operator[](string);
     //tolua_begin
     TEXGROUP();

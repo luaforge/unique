@@ -25,6 +25,8 @@
 #include "image.hxx"
 
 namespace unvis{
+  using namespace undata;
+
   const char IMAGE::className[]="IMAGE";
   const int IMAGE::sign=0x00000000;
   
@@ -38,21 +40,18 @@ namespace unvis{
     // Мой формат образа текстуры (Сплит обычного JPG и JPG градации серого в качестве альфа канала)
     };*/
 
-  IMAGE::IMAGE(){
-    pixels=NULL;
-  }
-  IMAGE::~IMAGE(){
-  }
-  void IMAGE::PixelsInit(){
+  IMAGE::IMAGE():pixels(NULL){}
+  IMAGE::~IMAGE(){}
+  void IMAGE::init(){
     if(pixels==NULL)pixels=new unsigned char[width*height*channels];
   }
-  void IMAGE::PixelsDest(){
+  void IMAGE::dest(){
     if(pixels!=NULL){
       delete []pixels;
       pixels=NULL;
     }
   }
-
+  
   bool IMAGE::Read(STREAM& res){
     return false;
   }
@@ -88,7 +87,7 @@ namespace unvis{
     if(type::CheckType(buf)){ ((type*)this)->Read(buf); return true; } \
     }
   */
-  bool IMAGE::Load(STREAM& ibuf){// Чтение из любого формата
+  bool IMAGE::load(STREAM& ibuf){// Чтение из любого формата
     if(!ibuf.good())return false;
     unsigned int i;
     //for(i=0;i)

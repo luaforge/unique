@@ -28,8 +28,6 @@
 #include"unogl.hxx"
 
 namespace unvis{
-  using namespace undata;
-
   class IMAGE{
   public:
     enum {// Image formats (OpenGL compatible)
@@ -58,17 +56,17 @@ namespace unvis{
     IMAGE();
     IMAGE(IMAGE &im){}
     virtual ~IMAGE();
-    void PixelsInit();
-    void PixelsDest();
+    void init();
+    void dest();
     // Reading
-    bool Load(STREAM& ibuf);
+    bool load(undata::STREAM&);
     
-    virtual bool Read(STREAM& buf);
+    virtual bool Read(undata::STREAM&);
     
-    bool ReadPNG(STREAM& buf);
-    bool ReadTGA(STREAM& buf);
-    bool ReadJPG(STREAM& buf);
-    bool ReadAJP(STREAM& buf);
+    bool ReadPNG(undata::STREAM&);
+    bool ReadTGA(undata::STREAM&);
+    bool ReadJPG(undata::STREAM&);
+    bool ReadAJP(undata::STREAM&);
     
     // Raster working
     void AddAlpha(unsigned char *buf,unsigned int stp);
@@ -83,7 +81,7 @@ namespace unvis{
   private:
   public:
     static const int sign;
-    virtual bool Read(STREAM&res);
+    virtual bool Read(undata::STREAM&res);
     
     static const char className[];
   };
@@ -92,7 +90,7 @@ namespace unvis{
   private:
   public:
     static const int sign;
-    virtual bool Read(STREAM&res);
+    virtual bool Read(undata::STREAM&res);
     
     static const char className[];
   };
@@ -101,7 +99,7 @@ namespace unvis{
   private:
   public:
     static const int sign;
-    virtual bool Read(STREAM&res);
+    virtual bool Read(undata::STREAM&res);
     
     static const char className[];
   };
@@ -110,7 +108,7 @@ namespace unvis{
   private:
   public:
     static const int sign;
-    virtual bool Read(STREAM&res);
+    virtual bool Read(undata::STREAM&res);
     
     static const char className[];
   };
