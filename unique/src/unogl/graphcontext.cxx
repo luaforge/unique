@@ -8,7 +8,7 @@ const vec2 GRAPHCONTEXT::_640x480(640,480);
 const vec2 GRAPHCONTEXT::_800x600(800,600);
 const vec2 GRAPHCONTEXT::_1024x768(1024,768);
 
-GRAPHCONTEXT::GRAPHCONTEXT():CONTEXT(),buffering(1),sampling(1),size(320,240){}
+GRAPHCONTEXT::GRAPHCONTEXT():CONTEXT(),buffering(2),osampling(0),sampling(2),size(320,240){}
 GRAPHCONTEXT::~GRAPHCONTEXT(){}
 // OpenGL
 void GRAPHCONTEXT::bind(){}  // Binding context (similar make current)
@@ -21,6 +21,7 @@ void GRAPHCONTEXT::RendererInfo(){
 }
 void GRAPHCONTEXT::InitExtensions(){
   glInitExtensions();
+  //InitExtensionsLocal();
 }
 void GRAPHCONTEXT::clear(){
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
@@ -42,6 +43,9 @@ void KEYS::operator()(int&num,KEY*&key){
 }
 const KEY* KEYS::operator[](int num){
   if(num>0&&num<=array.size())return &(array[num-1]);else return NULL;
+}
+void KEYS::clear(){
+  array.clear();
 }
 KEYS::operator string(){
   string ret="{";

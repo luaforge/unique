@@ -5,16 +5,22 @@ runable.design = option
 
 runable.dep = $(T.target)
 
-m.suf=);
-m.pre=\nUNMODULE(
+runable.m.suf=);
+runable.m.pre=\nUNMODULE(
 
-$(call C.S,runable,main): $(call C.H,runable,modules)
+runable.moddef=$(call C.H,runable,modules)
 
-$(call C.H,runable,modules): 
-	@$(call U.EX,$(call U.RM,$@))
+$(call C.S,runable,main): $(runable.moddef)
+
+prepare.runable: $(runable.moddef)
+
+preclean.runable:
+	@$(call U.EH,Clean modules define $(runable.moddef))
+	@$(call U.EX,$(call U.RM,$(runable.moddef)))
+
+$(runable.moddef): 
+	@$(call U.EH,Generate modules define $@)
 	@$(call U.EX,$(call U.EF,/*,$@))
 	@$(call U.EX,$(call U.EF, * Automatic generated modules define header,$@))
 	@$(call U.EX,$(call U.EF, */,$@))
-	@$(call U.EX,$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(runable.dep))),$@))
-
-.PHONY: $(call C.H,runable,modules)
+	@$(call U.EX,$(call U.EF,$(addsuffix $(runable.m.suf),$(addprefix $(runable.m.pre),$(runable.dep))),$@))

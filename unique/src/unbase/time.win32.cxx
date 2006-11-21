@@ -23,7 +23,7 @@
  */
 
 #include"time.hxx"
-#ifdef _WIN32
+#if _WIN32 || _MINGW
 #  include<windows.h>
 #  include<sys/timeb.h>
 
@@ -39,18 +39,14 @@ namespace unbase{
   
   double estimate_cpu_frequency(){
     double start,stop;
-    unsigned int before,after;
-    //LARGE_INTEGER start,stop;
+    double before,after;
     
     before=curtime();
-    //QueryPerformanceCounter(&start);
     start=rdtsc();
     Sleep((unsigned long)(double(1000)*double(ESTIMATE_TIME)));
     after=curtime();
-    //QueryPerformanceCounter(&stop);
     stop=rdtsc();
     
-    //return double((stop.QuadPart-start.QuadPart)/(after-before));
     return double(stop-start)/double(after-before);
   }
 }

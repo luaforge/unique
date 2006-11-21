@@ -13,6 +13,7 @@ namespace unogl{//tolua_export
     //tolua_begin
     KEYS();
     ~KEYS();
+    void clear();
     void operator()(int&num/**=-1 asnil**/,KEY*&key/**=NULL asnil**/); //iterator
     const KEY* operator[](int); // get
     operator string();
@@ -27,6 +28,7 @@ namespace unogl{//tolua_export
     int blue; // 8
     int alpha; // 8
     int depth; // 24
+    //int accum; // 
     int stencil; // 8
     PIXELMODE();
   };
@@ -34,7 +36,8 @@ namespace unogl{//tolua_export
   
   class GRAPHCONTEXT: public unbase::CONTEXT{//tolua_export
   protected:
-    vec2 osize,opointer;
+    int osampling;
+    unmath::vec2 osize,opointer;
   public:
     //tolua_begin
     // VidSize constants
@@ -43,10 +46,11 @@ namespace unogl{//tolua_export
     static tolua_readonly unmath::vec2 _800x600;
     static tolua_readonly unmath::vec2 _1024x768;
     // Properties
+    string localextensions;
     unmath::vec2 size,pointer,pointervel;
     unogl::KEYS key;
     int buffering; // 1 - single buffering, 2 - double buffering (default 1)
-    int sampling;  // 1 - without multisample, 2 - 2x multisample,
+    int sampling;  // 1 - without multisample, 2 - 2x multisample, 4x multisample
     // 4 - 4x multisample (default 1)
     PIXELMODE pixel;
     // Constructor / destructor

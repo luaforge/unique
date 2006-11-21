@@ -21,10 +21,10 @@ namespace unogl{
   glExtFuncPtr glGetProcAddress(const char* name){
     glExtFuncPtr address;
 #   if _WIN32 || _MINGW
-    address=wglGetProcAddress(name);
+    address=(glExtFuncPtr)wglGetProcAddress(name);
 #   endif
 #   if _LINUX
-    address=glXGetProcAddress((const GLubyte*)name);
+    address=(glExtFuncPtr)glXGetProcAddress((const GLubyte*)name);
 #   endif
     if(address) return address;
     else cout<<"Warning: Extension `"<<name<<"` not found...."<<endl;

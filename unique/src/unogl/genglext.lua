@@ -98,7 +98,7 @@ function process(ta,src)
       --local pat="APIENTRY%s+(gl.+)%;\n"
       --local pat="^%s*([^%(\n]+)%s*(%b())%s*(c?o?n?s?t?)%s*(=?%s*0?)%s*;%s*"
       local codepat="#ifndef%s+([^%(\n]+)%s*(.-)%s*#endif%s*"
-      local funcpat="(gl[^%s%(\n]+)%s*%b()%s*;"
+      local funcpat="%s(%w?gl[^%s%(\n]+)%s*%b()%s*;"
       for ne,ce in string.gmatch(src,codepat) do
 	 local i=1
 	 te[ne]={}

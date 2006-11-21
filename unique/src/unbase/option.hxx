@@ -117,7 +117,10 @@ namespace unbase{
 	}								\
       }									\
     }									\
-    if(pool.find(name)==pool.end())return NULL;else return pool[name];	\
+    if(pool.find(name)==pool.end())return NULL;				\
+    else{								\
+      return pool[name];						\
+    }									\
   }									\
   /* newindex method */							\
   void group_class::set(string k, object_class* o){			\
@@ -136,6 +139,15 @@ namespace unbase{
 	o->parent=this;							\
       }									\
     }									\
-  }
+  }									\
 
+#define nonenullllll()							\
+  /* begin() method */							\
+  std::map<string,object_class>::iterator group_class::begin(){		\
+    return pool.begin();						\
+  }									\
+  /* end() method */							\
+  std::map<string,object_class>::iterator group_class::end(){		\
+    return pool.end();							\
+  }									\
 

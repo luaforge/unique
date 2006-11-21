@@ -10,7 +10,7 @@
 #  
 ##############################
 
-unvis.state = enable
+#unvis.state = enable
 
 linux-gcc.unvis.C.flags = $(shell pkg-config --cflags libpng)
 linux-gcc.unvis.L.opts = $(shell pkg-config --libs libpng)

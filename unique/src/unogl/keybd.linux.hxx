@@ -1,5 +1,5 @@
 #pragma once
-#ifdef _LINUX
+#if _LINUX
 #  include"unbase.hxx"
 #  include<deque>
 #  include<keysym.h>

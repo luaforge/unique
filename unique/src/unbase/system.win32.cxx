@@ -1,5 +1,6 @@
+#if _WIN32 || _MINGW
 #include"system.hxx"
-#ifdef _WIN32
+
 using namespace unbase;
 
 void RESUSAGE::operator()(){

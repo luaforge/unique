@@ -137,7 +137,8 @@ endif
 endif
 ###### << module build rule <<
 ###### >> module clean rule >>
-clean.$(1):
+.PHONY: preclean.$(1)
+clean.$(1): preclean.$(1)
 	@$(call U.EH,Clean $(1) module)
 	@$(call U.EX,$(call U.RM,$$($(1).obj) $$($(1).pks) $$($(1).target) $$($(1).tps)))
 T.clean+=clean.$(1)

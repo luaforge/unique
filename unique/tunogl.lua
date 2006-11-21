@@ -27,40 +27,52 @@ c.size=unmath.vec2(640,480)
 --c.size=unmath.vec2(1024,768)
 --c.mode=true
 
+c.buffering=2
+c.sampling=4
+
 c:open()
 
 print(c.state)
 
-local frames=0
-local oldtime,curtime=unbase.TIME(),unbase.TIME()
-local run=true
+if c.state.state then
+   local frames=0
+   local oldtime,curtime=unbase.TIME(),unbase.TIME()
+   local run=true
 
-print(gl.glGetString(gl.GL_VERSION))
+   --print(gl.glGetString(gl.GL_VERSION))
+   print(c.renderer,c.version,c.vendor,"\n",string.gsub(c.extensions," ","\n"))
+   print(string.gsub(c.localextensions," ","\n"))
 
-while run do
+   gl.glClearColor(0.0,0.0,0.0,1.0)
 
-for _,k in c.key do
-  if k.state then
-    if k.code==k.esc then run=false end
-    if k.code==k.f1 then c.mode=not c.mode end
-  end
-end
+   while run do
+      if not c.state.state then print(c.state) run=false end
 
-c:bind()
+      for _,k in c.key do
+        if k.state then
+          if k.code==k.esc then run=false end
+          if k.code==k.f1 then c.mode=not c.mode end
+        end
+      end
 
-draw()
+      c:bind()
 
-c:ubind()
+      gl.glClear(gl.GL_COLOR_BUFFER_BIT+gl.GL_DEPTH_BUFFER_BIT)
+      draw()
 
-curtime()
-frames=frames+1
-if (curtime-oldtime).time>=1 then
-  oldtime()
-  print(frames)
-  frames=0
-end
+      c:ubind()
 
+      curtime()
+      frames=frames+1
+      if (curtime-oldtime).time>=1 then
+        oldtime()
+        print("FPS:",frames)
+        frames=0
+      end
+   end
 end
 
 c:close()
+
+print(c.state)
 

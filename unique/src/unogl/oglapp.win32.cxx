@@ -26,376 +26,396 @@ Author:
 
 **********************************************************/
 
-#ifdef _WIN32
+#if _WIN32 || _MINGW
+#  include"oglapp.win32.hxx"
 
-#include"glapp.win32.hpp" // Системные заголовочные файлы
-
-using namespace unogl;
-
-//#include <map>
-//typedef map<HWND, OSAPP*, less<HWND> > WINAPPS;
-//WINAPPS wapps;
-APP* appw;
-
-typedef BOOL (APIENTRY * wglSwapIntervalEXT_Func)(int);
-wglSwapIntervalEXT_Func wglSwapIntervalEXT=wglSwapIntervalEXT_Func(wglGetProcAddress("wglSwapIntervalEXT"));
-// Та самая функция расширения управления вертикальной синхронизации
-
-// Реализация
-
-void *OGLEXT::GetProcAddress(const char *func_name){
-// Это обеспечивает нахождение функций расширений OpenGL по их имени
-  void *func_pointer=NULL;
-  func_pointer=wglGetProcAddress(func_name);
-  //if(func_pointer==NULL)Luna<OSAPP>::msg("$err_notsupported_ext",func_name);
-  return func_pointer;
-}
-
-LRESULT CALLBACK MainWindowProc(HWND hWindow,UINT message,WPARAM wParam,LPARAM lParam){
-  // Перехват сообщений Windows, ненавистная оконная функция, которая мешает 
-  // объектно-ориентированному программированию ;)
-  appw->procMessage(hWindow,message,wParam,lParam);
-  //OSAPP* wa=wapps[hWindow];
-  //wa->  
-  return (DefWindowProc(hWindow, message, wParam, lParam));
-}
-
-APP::APP(){ // Конструктор
-  //memset(this,0,sizeof(OSAPP));
-  hWnd=NULL;
-  hInst=GetModuleHandle(NULL);
-}
-APP::~APP(){close();}
-
-void APP::sync(bool state){// Вертикальная синхронизация
-  if(wglSwapIntervalEXT){
-    vsync_state=state;
-    wglSwapIntervalEXT((int)state);
-  }
-}
-bool APP::sync(){
-  return vsync_state;
-}
-void APP::mode(bool m){// Видеорежим true - полноэкранный, false - в окне
-  wmode=m;
-  if(m){
-    DEVMODE dmScreenSettings;	// Полноэкраннаая конфигурация
-    // Полноекранное приложение
-    memset(&dmScreenSettings,0,sizeof(DEVMODE));
-    dmScreenSettings.dmSize      =sizeof(DEVMODE);
-    dmScreenSettings.dmPelsWidth =wsize.x;
-    dmScreenSettings.dmPelsHeight=wsize.y;
-    dmScreenSettings.dmFields    =DM_PELSWIDTH | DM_PELSHEIGHT;
-    ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN);
-  }else{
-    ChangeDisplaySettings(NULL,0);// Возврат к предыдущим настройкам
-  }
-  //Luna<OSAPP>::msg("$OK");
-}
-bool APP::mode(){
-  return wmode;
-}
-void APP::size(vec2& s){// Установка разрешения \ размера окна
-  if(s.x>0 && s.y>0){
-    if(hWnd)SetWindowPos(hWnd,HWND_TOP,0,0,(GLuint)s.x,(GLuint)s.y,SWP_NOMOVE);
-  }else{
-  }
-  glViewport(0,0,s.x,s.y);// Порт вывода
-}
-vec2& APP::size(){
-  osize=wsize; // Чтоб проверить потом, был ли изменен размер программно
-  return (vec2&)wsize;
-}
-void APP::pos(vec2& p){
-  if(p.x<0 || p.y<0){
-  }else{
-    if(hWnd)SetWindowPos(hWnd,HWND_TOP,p.x,p.y,0,0,SWP_NOSIZE);
-  }
-}
-vec2& APP::pos(){
-  opos=wpos; // Чтоб проверить потом, была ли измена позиция программно
-  return (vec2&)wpos;
-}
-void APP::ReGeom(){ // Check Program Change Window Geometry
-  if(wpos!=opos){ pos(wpos); opos=wpos; }
-  if(wsize!=osize){ size(wsize); osize=wsize; } // Проверяем, был ли изменен размер программно
-}
-void APP::ReUser(){ // Check Program Change User Interface (mousing and etc)
-  if(omouse!=wmouse){ mouse(wmouse); wmouse=omouse; }
-}
-//Мышь
-void APP::cursor(bool cur){// Видимость курсора
-  cursorvis=cur;
-  ShowCursor(cur);// Скрываем курсор
-}
-bool APP::cursor(){// Видимость курсора
-  return cursorvis;
-}
-void APP::mouse(vec2& cpos){// Установка положения курсора в пределах окна
-// Координаты курсора задаются как в OpenGL
-//
-//     В OpenGL:                   В OS:
-//                        _________________
-//         ^ 1           |             width
-//         |             |
-//         |   +         |          
-//  _______|_______      |         +
-//  -1     |       1     |
-//         |             |
-//         | -1          | height
-//
-//  Поэтому следует преобразовать из 1-го во 2-й.
-//
-//SetCursorPos((1.0+cpos.x)*wwidth/2+wxpos,(1.0-cpos.y)*wheight/2+wypos);
-
-//  Далее я отказался от етой идеи, доверя все программисту на Луа
-  SetCursorPos(cpos.x+wpos.x,cpos.y+wpos.y);
-}
-vec2& APP::mouse(){// Взятие положения курсора в пределах окна
-//
-//  Здесь следует произвести обратное преобразование.
-//
-//cpos.x=2.0f*(mXpos-wxpos)/wwidth-1.0;
-//cpos.y=-2.0f*(mYpos-wypos)/wheight+1.0;
-
-//  Далее я отказался от етой идеи, доверя все программисту на Луа
-  omouse=wmouse; // Чтоб проверить, передвинули ли мышь программно
-  return (vec2&)wmouse;
-}
-/*void OSAPP::WinRect(){
-  tagRECT wpos;
-  GetWindowRect(hWnd,&wpos);// где начало окна
-  wxpos=wpos.left;
-  wypos=wpos.top;
-  wwidth=wpos.right;
-  wheight=wpos.bottom;
-}*/
-void APP::Title(const char *nwname){
-  SetWindowText(hWnd,nwname);
-}
-#define STYLE_CHECK(style,dws,type,name){ if(style>=type){ dws |= name; style-=type; cout<<"Style:"<<#type<<"\n"; } }
-void APP::Style(GLuint newstyle){
-  dwstyle=0;
-  //int newhstyle=newstyle-st_default;
-  //if(!newstyle)dwstyle |=WS_POPUP;
-  //if(newhstyle&(char)pow(2,st_none-st_default-1)){dwstyle |=WS_POPUP; /*loger<<msg[st_none];*/ }
-  //if(newhstyle&(char)pow(2,st_border-st_default-1)){dwstyle |=WS_BORDER; /*loger<<msg[st_border];*/ }
-  //if(newhstyle&(char)pow(2,st_head-st_default-1)){dwstyle |=WS_CAPTION; /*loger<<msg[st_head];*/ }
-  //if(newhstyle&(char)pow(2,st_system-st_default-1)){dwstyle |=WS_SYSMENU; /*loger<<msg[st_system];*/ }
-  //if(newhstyle&(char)pow(2,st_max-st_default-1)){dwstyle |=WS_MAXIMIZE; /*loger<<msg[st_max];*/ }
-  //loger<<msg[A_OK]<<NS;
+namespace unogl{
+  using namespace unbase;
   
-  dwstyle|=WS_POPUP;
-  STYLE_CHECK(newstyle,dwstyle,sbtn,WS_SYSMENU);
-  STYLE_CHECK(newstyle,dwstyle,head,WS_CAPTION);
-  STYLE_CHECK(newstyle,dwstyle,bord,WS_BORDER);
-  STYLE_CHECK(newstyle,dwstyle,none,WS_POPUP);
-}
-bool APP::open(vec2 size,int bpp,GLuint style){
-  // Заполняем параметры класса окна
-  WinClass.style		 =CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
-  WinClass.lpfnWndProc	 =(WNDPROC)MainWindowProc;
-  WinClass.cbClsExtra	 =0;
-  WinClass.cbWndExtra	 =0;
-  WinClass.hInstance	 =hInst;
-  WinClass.hIcon		 =NULL;
-  WinClass.hCursor		 =LoadCursor(NULL, IDC_ARROW);
-  WinClass.hbrBackground =NULL;
-  WinClass.lpszMenuName  =NULL;
-  WinClass.lpszClassName ="SolvEngine - Win32";
-  if(!RegisterClass(&WinClass)){// Регистрируем класс окна
-    //"Ошибка создания класса окна","Фатальная ошибка!!!"
-    return false;
-  }
-  appw=this;
-  Style(style);
-  //std::cout<<size.x<<","<<size.y<<":"<<bpp;
-  if(!(hWnd=CreateWindow(// Создаем окно
-			 WinClass.lpszClassName, // Класс окна
-			 WinClass.lpszClassName, // Имя окна	
-			 dwstyle,// Стиль окна
-			 0,0,// Верхний левый угол
-			 size.x,size.y,// Размер
-			 NULL,NULL,hInst,NULL))){// Обработка ошибки создания окна
-    //"Ошибка создания окна!"    
-    return false;
-  }
-
-  ShowWindow(hWnd,SW_SHOW); // Показываем окно
-  UpdateWindow(hWnd);       // Обновляем
-  SetFocus(hWnd);           // Устанавливаем фокус
-
-  //Luna<OSAPP>::msg("$OK");
-  // Инициализайия OpenGL
-  //Luna<OSAPP>::msg("$gl_init");
-  // Установка формата пикселей
-  pfd.nSize=sizeof(PIXELFORMATDESCRIPTOR);// размер
-  pfd.nVersion=1;							// версия
-  pfd.dwFlags=PFD_DRAW_TO_WINDOW|PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER;
-  // Формат должен поддерживаться Window // Формат должен поддерживатьса OpenGL
-  // Должен поддерживать двойной буфер
-  pfd.iPixelType=PFD_TYPE_RGBA;			    // требуется RGBA формат
-  pfd.cColorBits=32;					    // Глубина цвета
-  pfd.cRedBits=16;
-  pfd.cRedShift=16;
-  pfd.cGreenBits=16;
-  pfd.cGreenShift=16;
-  pfd.cBlueBits=16;
-  pfd.cBlueShift=16;						// Игнорируемые биты цвета
-  pfd.cAlphaBits=16;						// Нет альфа буфера
-  pfd.cAlphaShift=16;						// бит Игнорирования сдвига 
-  pfd.cAccumBits=16;						// Нет буфера накопления
-  pfd.cAccumRedBits=16;
-  pfd.cAccumGreenBits=16;
-  pfd.cAccumBlueBits=16;
-  pfd.cAccumAlphaBits=16;					// Игнорируемые биты буфера накопления
-  pfd.cDepthBits=32;						// Глубина z-буфера
-  pfd.cStencilBits=32;						// Нет стенсил буфера
-  pfd.cAuxBuffers=32;						// Нет вспомогательного буфера
-  pfd.iLayerType=PFD_MAIN_PLANE;			// Главный слой вывода
-  pfd.bReserved=32;						    // Резерв
-  pfd.dwLayerMask=32;
-  pfd.dwVisibleMask=32;
-  pfd.dwDamageMask=32;						// Игнорируемая маска слоя
+  map<HWND,GLAPP*> GLAPP::__opened_apps_; // opened windows
   
-  hDC=GetDC(hWnd);
-  if(!(PixelFormat=ChoosePixelFormat(hDC,&pfd))){// выбор формата пикселей
-    //"Не могу найти подходящий Формат пикселей"
-    //Luna<OSAPP>::msg("$ER","$er_choose_pixel_format");
-    return false;
+  static LRESULT CALLBACK MainWindowProc(HWND hWindow,UINT message,WPARAM wParam,LPARAM lParam){
+    map<HWND,GLAPP*>::iterator n;
+    if((n=GLAPP::__opened_apps_.find(hWindow))!=GLAPP::__opened_apps_.end())
+      if(n->second)if(n->second->procMessage(hWindow,message,wParam,lParam))return 1;
+    return DefWindowProc(hWindow,message,wParam,lParam);
   }
-  if(!(SetPixelFormat(hDC, PixelFormat,&pfd))){// Обработка ошибки установки формата пикселей
-    //"Не могу установить Формат пикселей","Ошибка"
-    //Luna<OSAPP>::msg("$ER","$er_set_pixel_format");
-    return false;
-  }
-  if(!(hRC=wglCreateContext(hDC))){// Установка OpenGL контекста Windows // Обработка ошибки
-    //"Не могу создать контекст устройства рендеринга","Ошибка"
-    //Luna<OSAPP>::msg("$ER","$er_wgl_create_context");
-    return false;
-  }
-  if(!wglMakeCurrent(hDC,hRC)) {
-    //"Не могу установить поток контекста устройства рендеринга","Ошибка"
-    //Luna<OSAPP>::msg("$ER","$er_wgl_make_current");
-    return false;
-  }
-  
-  //oglext.Init();
-  glInitNamesArray(); // Инициализируем массив имен свободными значениями
-  vendor=(const char*)glGetString(GL_VENDOR);
-  renderer=(const char*)glGetString(GL_RENDERER);
-  version=(const char*)glGetString(GL_VERSION);
-  extensions=(const char*)glGetString(GL_EXTENSIONS);
-  //Size(size);
-  return true;
-}
-void APP::close(){
-  // Деинициализация OpenGL
-  //Luna<OSAPP>::msg("$gl_dest");
-  ChangeDisplaySettings(NULL,0);// Возвращение установок дисплея к первоначальным
-  //Luna<OSAPP>::msg("$OK");
-  wglMakeCurrent(hDC,NULL);
-  //Luna<OSAPP>::msg("$glx_decontext");
-  wglDeleteContext(hRC);// Удаление OpenGL контекста Windows
-  //Luna<OSAPP>::msg("$OK");
-  ReleaseDC(hWnd,hDC);
-  // Закрытие окна
-  //Luna<OSAPP>::msg("$x_close");
-  DestroyWindow(hWnd);
-  //Luna<OSAPP>::msg("$OK");
-}
 
-bool APP::procMessage(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam){
-  //hWnd=hWindow;
-  switch(message){ // Обработка сообщений
-  case WM_CREATE:  // Создание окна
-    break;
-  case WM_CLOSE:   // Закрытие окна
-  case WM_DESTROY: // Останов приложения
-  case WM_QUIT:  break;
-  case WM_MOUSEMOVE:
-    tagPOINT pos;
-    GetCursorPos(&pos);// где курсор
-    wmouse=vec2(pos.x-wpos.x,pos.y-wpos.y);
-    break;
-  case WM_LBUTTONDOWN: wkey=KEY::mleft;   wkeystate=true;  break;
-  case WM_LBUTTONUP:   wkey=KEY::mleft;   wkeystate=false; break;
-  case WM_MBUTTONDOWN: wkey=KEY::mcenter; wkeystate=true;  break;
-  case WM_MBUTTONUP:   wkey=KEY::mcenter; wkeystate=false; break;
-  case WM_RBUTTONDOWN: wkey=KEY::mright;  wkeystate=true;  break;
-  case WM_RBUTTONUP:   wkey=KEY::mright;  wkeystate=false; break;
-  case 0x020A: // Вертаем колесо мыши
-    if(wParam==0x00780000)wkey=KEY::wheel_up;
-    if(wParam==0xFF880000)wkey=KEY::wheel_down;
-    //mwheel=wParam; 
-    break;	// 
-  case WM_KEYDOWN:// Нажатие клавиши
-	wkey=wParam; wkeystate=true;  break;
-  case WM_KEYUP:// Опускание клавиши
-	wkey=wParam; wkeystate=false; break;
-  case WM_SYSKEYDOWN:// Нажатие клавиши
-	wkey=wParam; wkeystate=true;  break;
-  case WM_SYSKEYUP:// Опускание клавиши
-	wkey=wParam; wkeystate=false; break;
-  case WM_MOVE:
-  case WM_SIZE:// Изменение размеров окна
-    tagRECT wr;
-    GetWindowRect(hWnd,&wr);// где начало окна
-    wpos=vec2(wr.left,wr.top);
-    wsize=vec2(wr.right-wr.left,wr.bottom-wr.top);
-    break;
-  default:// Обработка остальных сообщений
-    return false;
-  }
-  if(wkey!=0){
-	xkeys->push_back(KEY(wkey,wkeystate));
-	wkey=0;  wkeystate=false;
-	while(xkeys->size()>MAX_KEYS_STATE)xkeys->pop_front();
-  }
-  return true;
-}
-bool APP::run(){// Трансляция сообщений
-  ReGeom();
-  ReUser();
-  if(PeekMessage(&mes,NULL,0,0,PM_NOREMOVE)){
-    if(GetMessage(&mes,NULL,0,0)){
-      TranslateMessage(&mes);
-      DispatchMessage(&mes);
-    }else{
-      return false;
+  GLAPP::GLAPP():GRAPHCONTEXT(),hDC(NULL),hRC(NULL),hWnd(NULL),hInst(GetModuleHandle(NULL)),
+		 mode(false),omode(false),cursor(true),ocursor(true),
+		 osync(1),sync(0),ogamma(),gamma(vec3::one){
+    {
+      WORD** g=(WORD**)oGamma;
+      HDC hdc = GetDC(GetDesktopWindow());
+      GetDeviceGammaRamp(hdc,g);
+      ReleaseDC(GetDesktopWindow(),hdc);
+      
+      //gamma.r=float(g[0])/256.0f;
+      //gamma.g=float(g[1])/256.0f;
+      //gamma.b=float(g[2])/256.0f;
     }
   }
-  return true;
-}
-
-void APP::bind(){
-  if(!wglMakeCurrent(hDC,hRC)) {
-    //"Не могу установить поток контекста устройства рендеринга","Ошибка"
+  GLAPP::~GLAPP(){close();}
+  
+  void GLAPP::update(){
+    if(!hWnd||!hDC||!hRC)return;
+    if(osampling!=sampling){
+      if(sampling>1)glEnable(GL_MULTISAMPLE);
+      else glEnable(GL_MULTISAMPLE);
+      osampling=sampling;
+    }
+    if(ogamma!=gamma){
+      {
+	//HDC hdc = GetDC(GetDesktopWindow());
+	WORD g[3][256];
+	if(GetDeviceGammaRamp(hDC,g)){
+	  for(int i=0;i<256;i++){
+	    g[0][i]=255*(WORD)(255.0f*pow(scalar(i)/255.0f,1.0f/gamma.R));
+	    g[1][i]=255*(WORD)(255.0f*pow(scalar(i)/255.0f,1.0f/gamma.G));
+	    g[2][i]=255*(WORD)(255.0f*pow(scalar(i)/255.0f,1.0f/gamma.B));
+	  }
+	  if(!SetDeviceGammaRamp(hDC,g))state=STATE("Set gamma filed!",false);
+	}
+	//ReleaseDC(GetDesktopWindow(),hDC);
+      }
+      ogamma=gamma;
+    }
+    if(omode!=mode){ // Video mode
+      if(mode){
+	DEVMODE dmScreenSettings;
+	
+	memset(&dmScreenSettings,0,sizeof(DEVMODE));
+	dmScreenSettings.dmSize      =sizeof(DEVMODE);
+	dmScreenSettings.dmPelsWidth =int(size.x);
+	dmScreenSettings.dmPelsHeight=int(size.y);
+	dmScreenSettings.dmFields    =DM_PELSWIDTH|DM_PELSHEIGHT;
+	ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN);
+      }else{
+	ChangeDisplaySettings(NULL,0);
+      }
+      omode=mode;
+    }
+    if(osync!=sync){ // Vertical sync
+      if(wglSwapInterval){
+	//if(sync)wglSwapInterval(default_sync);else wglSwapInterval(0);
+	wglSwapInterval(sync);
+      }
+      osync=sync;
+    }
+    if(pos!=opos){ // Window position
+      SetWindowPos(hWnd,HWND_TOP,int(pos.x),int(pos.y),0,0,SWP_NOSIZE);
+      opos=pos;
+    }
+    if(size!=osize){ // Window density
+      if(size.x>0 && size.y>0){
+	SetWindowPos(hWnd,HWND_TOP,0,0,int(size.x),int(size.y),SWP_NOMOVE);
+	start=vec2::null;
+	glViewport(int(start.x),int(start.y),int(size.x-start.x),int(size.y-start.y));
+      }
+      osize=size;
+    }
+    // Check Program Change User Interface (mousing and etc)
+    if(opointer!=pointer){ // Mouse move
+      // Координаты курсора задаются как в OpenGL
+      //
+      //     В OpenGL:                   В OS:
+      //                        _________________
+      //         ^ 1           |             width
+      //         |             |
+      //         |   +         |
+      //  _______|_______      |         +
+      //  -1     |       1     |
+      //         |             |
+      //         | -1          | height
+      //
+      //  Поэтому следует преобразовать из 1-го во 2-й.
+      //
+      vec2 cpos=glfGL2W(pointer,size);
+      SetCursorPos(int(cpos.x),int(cpos.y));
+      pointervel=pointer-opointer;
+      opointer=pointer;
+    }
+    if(cursor!=ocursor){ // Cursor visibility
+      ShowCursor(cursor);
+      ocursor=cursor;
+    }
   }
-}
-void APP::ubind(){// Своп буфера
-  SwapBuffers(hDC);
-  //glClearColor(0.5,0.5,0.5,1.0);
-  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
 
-// Клавиатура
-KEY& APP::keys(){
-  KEY kb;
-  if(xkeys->size()>0){
-    kb=*(xkeys->begin());
-	//cout<<"Key state "<<KEYBOARD::f12<<" "<<kb.key<<" "<<kb.state<<"\n";
-    xkeys->pop_front();
-	//kb.key+=0x20;
-  }else{
-	kb=KEY(0,false);
+#define STYLE_CHECK(style,dws,type,name) {	\
+    if(style>=type){				\
+      dws |= name;				\
+      style-=type;				\
+    }						\
   }
-  return kb;
-}
-bool APP::key(unsigned int& k){// Клавиатура
-  k=(unsigned int)wkey;
-  wkey=0;
-  return wkeystate;
+
+  bool GLAPP::open(){
+    if(hWnd||hDC||hRC)return false;
+    
+    WinClass.style         = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
+    WinClass.lpfnWndProc   = (WNDPROC)(unogl::MainWindowProc);
+    WinClass.cbClsExtra    = 0;
+    WinClass.cbWndExtra    = 0;
+    WinClass.hInstance     = hInst;
+    WinClass.hIcon         = NULL;
+    WinClass.hCursor	   = LoadCursor(NULL,IDC_ARROW);
+    WinClass.hbrBackground = NULL;
+    WinClass.lpszMenuName  = NULL;
+    WinClass.lpszClassName = "lUniquE-Win32";
+    if(!RegisterClass(&WinClass)){// Register win32 application class
+      state=STATE("Register WIN application class",false);
+      return false;
+    }
+    
+    dwstyle=0;
+    dwstyle|=WS_POPUP;
+    dwstyle|=WS_CAPTION|WS_BORDER|WS_SYSMENU;
+    //STYLE_CHECK(newstyle,dwstyle,sbtn,WS_SYSMENU);
+    //STYLE_CHECK(newstyle,dwstyle,head,WS_CAPTION);
+    //STYLE_CHECK(newstyle,dwstyle,bord,WS_BORDER);
+    //STYLE_CHECK(newstyle,dwstyle,none,WS_POPUP);
+    
+    if(!(hWnd=CreateWindow(// Create window
+			   WinClass.lpszClassName,// window name
+			   WinClass.lpszClassName,// window class
+			   dwstyle,// window style
+			   //int(pos.x-0.5*size.x),int(pos.y-0.5*size.y),// window position
+			   int(pos.x),int(pos.y),
+			   int(size.x),int(size.y),// window size
+			   NULL,NULL,hInst,NULL))){
+      state=STATE("Create window",false);
+      return false;
+    }
+    SetWindowText(hWnd,WinClass.lpszClassName);
+
+    ShowWindow(hWnd,SW_SHOW);
+    UpdateWindow(hWnd);
+    SetFocus(hWnd);
+    
+    hDC=GetDC(hWnd);
+    
+    // OpenGL
+    // Init glx extensions
+    InitExtensionsLocal();
+    if(wglGetExtensionsString)localextensions=wglGetExtensionsString(hDC);
+    if(wglGetSwapInterval)default_sync=wglGetSwapInterval();else default_sync=0;
+    
+    // pixel format
+    pfd.nSize=sizeof(PIXELFORMATDESCRIPTOR);
+    pfd.nVersion=1;
+    pfd.dwFlags=PFD_DRAW_TO_WINDOW|PFD_SUPPORT_OPENGL;
+    if(buffering==2)pfd.dwFlags|=PFD_DOUBLEBUFFER;
+    pfd.iPixelType=PFD_TYPE_RGBA;
+    pfd.cColorBits=pixel.red+pixel.green+pixel.blue+pixel.alpha;
+    pfd.cRedBits=pixel.red;
+    pfd.cRedShift=0;
+    pfd.cGreenBits=pixel.green;
+    pfd.cGreenShift=0;
+    pfd.cBlueBits=pixel.blue;
+    pfd.cBlueShift=0;
+    pfd.cAlphaBits=pixel.alpha;
+    pfd.cAlphaShift=0;
+    pfd.cAccumBits=pfd.cColorBits;
+    pfd.cAccumRedBits=pfd.cRedBits;
+    pfd.cAccumGreenBits=pfd.cGreenBits;
+    pfd.cAccumBlueBits=pfd.cBlueBits;
+    pfd.cAccumAlphaBits=pfd.cAlphaBits;
+    pfd.cDepthBits=pixel.depth;
+    pfd.cStencilBits=pixel.stencil;
+    pfd.cAuxBuffers=0;
+    pfd.iLayerType=PFD_MAIN_PLANE;
+    pfd.bReserved=0;
+    pfd.dwLayerMask=0;
+    pfd.dwVisibleMask=0;
+    pfd.dwDamageMask=0;
+    
+    vector<int> va;
+    va.push_back(WGL_DRAW_TO_WINDOW_ARB);
+    va.push_back(true);
+    va.push_back(WGL_SUPPORT_OPENGL_ARB);
+    va.push_back(true);
+    va.push_back(WGL_ACCELERATION_ARB);
+    va.push_back(WGL_FULL_ACCELERATION_ARB);
+    if(buffering>1){
+      va.push_back(WGL_DOUBLE_BUFFER_ARB);
+      va.push_back(true);
+    }else{
+      va.push_back(WGL_DOUBLE_BUFFER_ARB);
+      va.push_back(false);
+    }
+    va.push_back(WGL_RED_BITS_ARB);
+    va.push_back(pixel.red);
+    va.push_back(WGL_GREEN_BITS_ARB);
+    va.push_back(pixel.green);
+    va.push_back(WGL_BLUE_BITS_ARB);
+    va.push_back(pixel.blue);
+    va.push_back(WGL_ALPHA_BITS_ARB);
+    va.push_back(pixel.alpha);
+    va.push_back(WGL_DEPTH_BITS_ARB);
+    va.push_back(pixel.depth);
+    va.push_back(WGL_STENCIL_BITS_ARB);
+    va.push_back(pixel.stencil);
+    if(sampling>1){
+      va.push_back(WGL_SAMPLE_BUFFERS_ARB);
+      va.push_back(true);
+      va.push_back(WGL_SAMPLES_ARB);
+      va.push_back(sampling);
+    }
+    va.push_back(0);
+    
+    if(wglChoosePixelFormat){
+      unsigned int retcode=0;
+      wglChoosePixelFormat(hDC,&va[0],NULL,1,&PixelFormat,&retcode);
+      if(!retcode){
+	state=STATE("Choose pixel format",false);
+	return false;
+      }
+    }else{
+      if(!(PixelFormat=ChoosePixelFormat(hDC,&pfd))){
+	state=STATE("Choose pixel format",false);
+	return false;
+      }
+    }
+    if(!(SetPixelFormat(hDC,PixelFormat,&pfd))){
+      state=STATE("Set pixel format",false);
+      return false;
+    }
+
+    if(!(hRC=wglCreateContext(hDC))){
+      state=STATE("Wgl create context",false);
+      return false;
+    }
+    if(!wglMakeCurrent(hDC,hRC)) {
+      state=STATE("Wgl make current",false);
+      return false;
+    }
+    
+    RendererInfo();
+    InitExtensions();
+    
+    state=STATE("context opened",true);
+  
+    __opened_apps_[hWnd]=this;
+    
+    return true;
+  }
+  
+  void GLAPP::close(){
+    if(!hWnd||!hDC||!hRC)return;
+  
+    if(mode){
+      ChangeDisplaySettings(NULL,0);
+      omode=mode;
+    }
+    wglMakeCurrent(hDC,NULL);
+    wglDeleteContext(hRC);
+    ReleaseDC(hWnd,hDC);
+    DestroyWindow(hWnd);
+
+    hWnd=NULL; hDC=NULL; hRC=NULL;
+  
+    __opened_apps_.erase(hWnd);
+
+    state=STATE("Context closed",true);
+  }
+
+  bool GLAPP::procMessage(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam){
+    switch(message){
+    case WM_CREATE:
+      break;
+    case WM_CLOSE:
+    case WM_DESTROY:
+    case WM_QUIT:
+      break;
+    case WM_LBUTTONDOWN: xkey=KEY::mleft;   xkeystate=true;  break;
+    case WM_LBUTTONUP:   xkey=KEY::mleft;   xkeystate=false; break;
+    case WM_MBUTTONDOWN: xkey=KEY::mcenter; xkeystate=true;  break;
+    case WM_MBUTTONUP:   xkey=KEY::mcenter; xkeystate=false; break;
+    case WM_RBUTTONDOWN: xkey=KEY::mright;  xkeystate=true;  break;
+    case WM_RBUTTONUP:   xkey=KEY::mright;  xkeystate=false; break;
+    case 0x020A:
+      if(wParam==0x00780000)xkey=KEY::wheel_up;
+      if(wParam==0xFF880000)xkey=KEY::wheel_down;
+      break;
+    case WM_KEYDOWN:
+      xkey=wParam; xkeystate=true;  break;
+    case WM_KEYUP:
+      xkey=wParam; xkeystate=false; break;
+    case WM_SYSKEYDOWN:
+      xkey=wParam; xkeystate=true;  break;
+    case WM_SYSKEYUP:
+      xkey=wParam; xkeystate=false; break;
+    case WM_MOUSEMOVE:
+      {
+	tagPOINT cpos;
+	GetCursorPos(&cpos);
+	pointer.x=cpos.x;
+	pointer.y=cpos.y;
+      }
+      pointer=glfW2GL(pointer,size);
+      pointervel=pointer-opointer;
+      opointer=pointer;
+      break;
+    case WM_MOVE:
+    case WM_SIZE:
+      tagRECT wr;
+      GetWindowRect(hWnd,&wr);
+      size.width=wr.right-wr.left;
+      size.height=wr.bottom-wr.top;
+      osize=size;
+      pos.x=wr.left;
+      pos.y=wr.top;
+      opos=pos;
+      break;
+    default:
+      return false;
+      break;
+    }
+    if(xkey!=0){
+      key.array.push_back(KEY(xkey,xkeystate));
+      xkey=0; xkeystate=false;
+    }
+    //cout<<":::procMessage::: "<<endl;
+    return true;
+  }
+  bool GLAPP::run(){
+    if(!hWnd||!hDC||!hRC)return false;
+    
+    pointervel=vec2::null;
+    key.clear(); // Erase all key events
+    update(); // update states
+    for(;PeekMessage(&mes,NULL,0,0,PM_NOREMOVE);){
+      if(!GetMessage(&mes,NULL,0,0))break;
+      TranslateMessage(&mes);
+      DispatchMessage(&mes);
+    }
+    return true;
+  }
+  
+  void GLAPP::bind(){
+    if(!hWnd||!hDC||!hRC)return;
+    //cout<<":::bind::: "<<endl;
+    run();
+    if(!wglMakeCurrent(hDC,hRC))state=STATE(false,"glXMakeCurrent filed!");
+  }
+  void GLAPP::ubind(){
+    if(!hWnd||!hDC||!hRC)return;
+    //cout<<":::ubind::: "<<endl;
+    if(buffering>1)SwapBuffers(hDC);else glFlush();
+    //glClearColor(0.5,0.5,0.5,1.0);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
+
+# define GLEXT_FUNC(name,type,real) PFN##type##PROC name;
+# include"oglext.platform.func.hxx"
+# undef GLEXT_FUNC
+  
+# define GLEXT_FUNC(name,type,real) name=(PFN##type##PROC)glGetProcAddress(#real);
+  void GLAPP::InitExtensionsLocal(){
+    cout<<"Init Wgl extensions...."<<endl;
+    # include"oglext.platform.func.hxx"
+  }
+# undef GLEXT_FUNC
+  
 }
 
 #endif

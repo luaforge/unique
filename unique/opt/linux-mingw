@@ -61,7 +61,7 @@ P.O=$(addprefix src/$(1)/bind.,$(addsuffix $(X.CXX),$(2)))
 
 ####### >> compiler >> #######
 ifndef MINGW_NAME
-  MINGW_NAME=i586-mingw32msvc
+  MINGW_NAME=i586-mingw32msvc-
 endif
 ifndef MINGW_PREFIX
   MINGW_PREFIX=/usr/$(MINGW_NAME)
@@ -74,7 +74,7 @@ ifndef PREFIX
 endif
 ## C        - compiler properties
 ## C.XX     - compiler call {$(1)-input source, $(2)-output object, $(3)-options}
-C.XX=$(MINGW_NAME)-g++ -c $(1) -o $(2) $(3)
+C.XX=$(MINGW_NAME)g++ -c $(1) -o $(2) $(3)
 ## C.H      - header call {$(1)-module,$(2)-source}
 ## C.S      - source call {$(1)-module,$(2)-source}
 ## C.O      - full object call {$(1)-module,$(2)-object}
@@ -100,9 +100,9 @@ C.FLAGS.RELEASE+=
 ####### >> linker >> #######
 ## L        - linker options
 ## L.XX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
-L.XX=$(MINGW_NAME)-g++ -shared -o $(2) $(3) $(filter $(call L.SO,%),$(1)) $(filter $(call C.OO,%),$(1))
+L.XX=$(MINGW_NAME)g++ -shared -o $(2) $(filter $(call C.OO,%),$(1)) $(filter $(call L.SO,%),$(1)) $(3)
 ## L.RX     - linker call {$(1)-input objects, $(2)-output file, $(3)-options and libs}
-L.RX=$(MINGW_NAME)-g++ -o $(2) $(3) $(filter $(call L.RO,%),$(1)) $(filter $(call C.OO,%),$(1))
+L.RX=$(MINGW_NAME)g++ -o $(2) $(filter $(call C.OO,%),$(1)) $(filter $(call L.RO,%),$(1)) $(3)
 ## L.SO     - link library name out call {$(1)-library}
 ## L.RO     - link runable name out call {$(1)-runable}
 ## L.L      - link path call {$(1)-link paths}

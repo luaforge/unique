@@ -19,112 +19,86 @@ Author:
     Fenix R.S.
 
 **********************************************************/
-
-#ifdef _WIN32
-# ifndef _WINAPP_H
-#  define _WINAPP_H
+#if _WIN32 || _MINGW
+#  pragma once
+#  include"graphcontext.hxx"
 
 #  include<windows.h>
-#  include<gl/gl.h>// Опен ГЛ заголовочный файл
-#  include<gl/glu.h>// Дополнение ГЛ заголовочный файл
-#  include<gl/glext.h>// Опен ГЛ расширения
+#  include<gl.h>
+#  include<glu.h>
+#  include<glext.h>
 
-// Включаемые файлы
+#  include<wglext.h>
 
-#  include "oglext.hpp"
+namespace unogl{
+# define GLEXT_FUNC(name,type,real) extern PFN##type##PROC name;
+# include"oglext.platform.func.hxx"
+# undef GLEXT_FUNC
 
-class GLAPP: public GRAPHCONTEXT{
- public:
-  enum{
-    // Стили окна
-    dflt=0, // Пустой стиль
-    none=1,    // Просто окно
-    bord=2,  // Окно c рамкой
-    head=4,    // Окно с шапкой
-    sbtn=8,  // Окно с кнопками системного меню
-    maxw=10,     // Максимальное окно
+  class GLAPP: public GRAPHCONTEXT{
+  public:
+    enum {
+      // Стили окна
+      dflt=0, // Пустой стиль
+      none=1, // Просто окно
+      bord=2, // Окно c рамкой
+      head=4, // Окно с шапкой
+      sbtn=8, // Окно с кнопками системного меню
+      maxw=10 // Максимальное окно
+    };
+  protected:
+    // Идентификаторы форточек
+    HINSTANCE hInst;   // Ид задачи
+    HWND      hWnd;    // Контекст окна
+    WNDCLASS  WinClass;// Класс окна
+    DWORD     dwstyle; // Стили окна
+    MSG       mes;     // Сообщения виндовс
+    // Идентификаторы устройства вывода
+    RECT      Rect;    // Область вывода
+    HGLRC     hRC;     // Контекст рендеринга
+    HDC       hDC;     // Контекст устройства вывода
+    PIXELFORMATDESCRIPTOR pfd;// Дескриптор Формата пикселов
+    WORD      oGamma[3][256];
+    int       PixelFormat;// Формат пикселов
+    int       default_sync;
+    
+    int       xkey;     // Active key number
+    bool      xkeystate;// Active key state (pressing/releasing)
+    
+    vec2 opos;
+    bool ocursor,omode;
+    unsigned int osync;
+    unsigned int mwheel;
+    vec3 ogamma;
+    
+    // wgl extensions init
+    virtual void InitExtensionsLocal();
+  public:
+    static map<HWND,GLAPP*> __opened_apps_; // opened windows
+    
+    vec3 gamma;
+    vec2 pos,start;
+    bool cursor,mode; // cursor visibility / window mode 
+    unsigned int sync;// vertical sync
+    
+    GLAPP();
+    ~GLAPP();
+    
+    bool open();
+    void close();
+    
+    bool run();
+    
+    // OpenGL
+    void bind();
+    void ubind();
+    
+    // Updates state
+    void update();
+    // window proc
+    bool procMessage(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam);
+    
   };
- protected:
-  bool regeom;       // Пересчитать геометрию окна
-  bool reui;         // пересчитать интерфейс
-  bool wcrted;
-  // Идентификаторы форточек
-  HINSTANCE hInst;   // Ид задачи
-  HWND      hWnd;    // Контекст окна
-  WNDCLASS  WinClass;// Класс окна
-  DWORD     dwstyle; // Стили окна
-  MSG       mes;     // Сообщения виндовс
-  // Идентификаторы устройства вывода
-  RECT      Rect;    // Область вывода
-  HGLRC     hRC;     // Контекст рендеринга
-  HDC       hDC;     // Контекст устройства вывода
-  PIXELFORMATDESCRIPTOR pfd;// Дескриптор Формата пикселов
-  GLuint    PixelFormat;// Формат пикселов
-  //OGLEXT    oglext;  // Контекст расширений OpenGL
- public:
-  // Переменные проложеня
+}
 
-  deque<KEY>* xkeys;
-
-  vec2         opos,          // Предыдущая позиция
-	           wpos,          // Позиция окна
-			   osize,         // предшествующий размер
-               wsize,         // Размер окна || разрешение
-			   omouse,
-	           wmouse;        // Координаты курсора в пределах окна
-  bool         wmode;         // Способ вывода (false - в окно || true - во весь экран)
-  unsigned int wkey,          // Код активированной клавиши
-               mwheel;
-  bool         wkeystate,     // Состояние активации (нажата ли)
-               vsync_state, // Вертикальная синхронизация вкл\выкл
-               cursorvis;   // Видим ли курсор
-
-  const char* vendor;
-  const char* renderer;
-  const char* version;
-  const char* extensions;
-  // Методы класса
-  GLAPP();
-  ~GLAPP();
-  // Мышь
-  bool key(unsigned int& k);// Клавиша k 
-  KEY& keys();
-  void  cursor(bool cur);  // Установка видимости курсора
-  bool  cursor();    // Проверка видимости курсора
-  void  mouse(vec2& cpos); // Установка положения курсора в пределах окна
-  vec2& mouse();     // Взятие положения курсора в пределах окна
-  // Окно
-  void Style(GLuint newstyle); // Установка стиля окна
-  void Title(const char *nwname); // Установка заголовка окна  
-  // Окно
-  void  pos(vec2& p);
-  vec2& pos();
-  void  size(vec2& s);
-  vec2& size();
-  void mode(bool m);
-  bool mode();
-  void sync(bool state); // Включение \ отключение вертикальной синхронизации
-  bool sync();
-  //bool open(vec2 size=vec2(640,480),int bpp=16,GLuint style=APP::st_none);
-  bool open(vec2 size, int bpp, GLuint style);
-  bool open(vec2 size, int bpp){ return open(size,bpp,APP::head+APP::bord+APP::sbtn); }
-  bool open(vec2 size){ return open(size,16,APP::none); }
-  bool open(){ return open(vec2(640,480),16,APP::none); }
-  void close();
-  // Процессинг сообщений
-  bool procMessage(HWND hWindow, UINT message, WPARAM wParam, LPARAM lParam);
-  bool run();    // Транслация событий (требуется выполнять циклически,
-                 // чтобы не потерять связь процесса с операционной системой)
-  // OpenGL
-  void bind();     // Делает контекст буффера рендеринга текущим
-  void ubind();    // Своп буфера (чтобы картинка вывелась на экран) и отключение контекста
-  // Была идейка сделать следующее в качестве оконной функции
-  //LRESULT CALLBACK operator ()(HWND hWindow,UINT message,WPARAM wParam,LPARAM lParam);
-  void ReGeom();
-  void ReUser();
-};
-
-static const vec2 default_size(640,480);
-
-# endif
 #endif

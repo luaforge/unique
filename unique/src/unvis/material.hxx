@@ -95,13 +95,13 @@ namespace unvis{//tolua_export
     typedef map<string,MATERIAL*> POOL;
     typedef map<string,MATERIAL*>::iterator ITER;
     POOL pool;
-    string fullhiername(string n="");
-  public:
     bool autoload;
+  public:
+    string fullhiername(string n="");
     //tolua_begin
     MATGROUP();
+    virtual ~MATGROUP();
     MATGROUP(bool autoload);
-    ~MATGROUP();
     void operator()(string&/** k="" asnil**/,MATERIAL*&);
     /**tolua_getindex {**/
     MATERIAL* get(string);
