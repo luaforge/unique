@@ -1,0 +1,6 @@
+#
+# Frame buffer config
+#
+
+unfbo.state = enable
+unfbo.dep = unbase unogl unvis
