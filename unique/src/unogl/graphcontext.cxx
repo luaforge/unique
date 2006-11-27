@@ -29,6 +29,12 @@ void GRAPHCONTEXT::clear(){
 
 KEYS::KEYS(){}
 KEYS::~KEYS(){}
+KEYS::ITER KEYS::begin(){
+  return array.begin();
+}
+KEYS::ITER KEYS::end(){
+  return array.end();
+}
 void KEYS::operator()(int&num,KEY*&key){
   num++;
   if(num>0&&num<array.size()){

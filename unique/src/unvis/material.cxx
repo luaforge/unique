@@ -39,7 +39,7 @@ namespace unvis{
 			  unvis::MATERIAL,
 			  material,
 			  "return unvis.MATGROUP()",
-			  "local MATERIAL=unvis.MATERIAL");
+			  "local MATERIAL=unvis.MATERIAL",,);
   
   MATGROUP::operator string(){
     string r="MATGROUP{";

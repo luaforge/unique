@@ -1,1 +1,2 @@
-#include "../../src/unobj/unobj.hxx"
+#include"config.hxx"
+#include UNHEADER(unobj)

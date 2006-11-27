@@ -49,7 +49,7 @@ namespace unvis{
 			  "local SHADER=unvis.SHADER\n"
 			  "local GLSLPROG=unvis.GLSLPROG\n"
 			  "local GLSLVERT=unvis.GLSLVERT\n"
-			  "local GLSLFRAG=unvis.GLSLFRAG");
+			  "local GLSLFRAG=unvis.GLSLFRAG",,);
 
   SHDGROUP::operator string(){
     string r="SHDGROUP{";
@@ -62,25 +62,59 @@ namespace unvis{
     return r;
   }
   
-  const SLSAMP sampler[8]={
-    SLSAMP(0),SLSAMP(1),SLSAMP(2),SLSAMP(3),
-    SLSAMP(4),SLSAMP(5),SLSAMP(6),SLSAMP(7)
-  };
   GLSLUNIFORM::GLSLUNIFORM(GLSLPROG* o):prog(o){}
   GLSLUNIFORM::~GLSLUNIFORM(){}
-#  define ASSERT_MACROS(glfunc) {glUseProgram(prog->obj);GLint param;if((param=prog->uniformlocation(name))>=0)glfunc;glUseProgram(0);OGL_DEBUG();}
-  bool GLSLUNIFORM::get(string name){ return bool(prog->uniformlocation(name)>=0); }
-  void GLSLUNIFORM::setbool(string name, bool value){ ASSERT_MACROS(glUniform1i(param,value)); }
-  void GLSLUNIFORM::setsint(string name, SLINT& value){ ASSERT_MACROS(glUniform1i(param,value())); }
-  void GLSLUNIFORM::setscal(string name, scalar value){ ASSERT_MACROS(glUniform1f(param,value)); }
-  void GLSLUNIFORM::setsamp(string name, SLSAMP& value){
-    ASSERT_MACROS(glUniform1i(param,value()));
+# define GET_MACROS(glvar,glfunc,gltype,gldef,glret) {			\
+    glvar glret;							\
+    glUseProgram(prog->obj);						\
+    int param;								\
+    if((param=prog->uniformlocation(name))>=0){				\
+      if(type.find(name)!=type.end()){					\
+	glfunc;								\
+      }else{								\
+	ret=gldef;							\
+      }									\
+    }else{								\
+      ret=gldef;							\
+    }									\
+    glUseProgram(0);							\
+    OGL_DEBUG();							\
+    return glret;							\
   }
-  void GLSLUNIFORM::setvec2(string name, vec2& value){ ASSERT_MACROS(glUniform2fv(param,1,value)); }
-  void GLSLUNIFORM::setvec3(string name, vec3& value){ ASSERT_MACROS(glUniform3fv(param,1,value)); }
-  void GLSLUNIFORM::setvec4(string name, vec4& value){ ASSERT_MACROS(glUniform4fv(param,1,value)); }
-  void GLSLUNIFORM::setmat3(string name, mat3& value){ ASSERT_MACROS(glUniformMatrix3fv(param,1,GL_FALSE,value)); }
-  void GLSLUNIFORM::setmat4(string name, mat4& value){ ASSERT_MACROS(glUniformMatrix4fv(param,1,GL_FALSE,value)); }
+  void GLSLUNIFORM::getbool(string name, bool* ret)
+    GET_MACROS(,glGetUniformiv(param,1,(GLint*)ret);nobool=!ret,BOOL,&nobool,);
+  void GLSLUNIFORM::getscal(string name,float* ret)
+    GET_MACROS(,glGetUniformfv(param,1,ret);noscal=*ret+0.1,SCAL,&noscal,);
+  /*
+  sint* GLSLUNIFORM::getsint(string name)GET_MACROS(sint,glGetUniformiv(param, 1,ret),SINT,NULL,&ret);
+  vec2* GLSLUNIFORM::getvec2(string name)GET_MACROS(vec2,glGetUniformfv(param, 2,ret),VEC2,NULL,&ret);
+  vec3* GLSLUNIFORM::getvec3(string name)GET_MACROS(vec3,glGetUniformfv(param, 3,ret),VEC3,NULL,&ret);
+  vec4* GLSLUNIFORM::getvec4(string name)GET_MACROS(vec4,glGetUniformfv(param, 4,ret),VEC4,NULL,&ret);
+  mat3* GLSLUNIFORM::getmat3(string name)GET_MACROS(mat3,glGetUniformfv(param, 9,ret),MAT3,NULL,&ret);
+  mat4* GLSLUNIFORM::getmat4(string name)GET_MACROS(mat4,glGetUniformfv(param,16,ret),MAT4,NULL,&ret);
+  */
+# define SET_MACROS(glfunc,gltype) {					\
+    glUseProgram(prog->obj);						\
+    int param;								\
+    if((param=prog->uniformlocation(name))>=0){				\
+      glfunc;								\
+      type[name]=gltype;						\
+    }									\
+    glUseProgram(0);							\
+    OGL_DEBUG();							\
+  }
+  void GLSLUNIFORM::setbool(string name, bool   value)SET_MACROS(glUniform1i(param,value),BOOL);
+  void GLSLUNIFORM::setsint(string name, sint&  value)SET_MACROS(glUniform1i(param,value()),SINT);
+  void GLSLUNIFORM::setscal(string name, scalar value)SET_MACROS(glUniform1f(param,value),SCAL);
+  void GLSLUNIFORM::setvec2(string name, vec2&  value)SET_MACROS(glUniform2fv(param,1,value),VEC2);
+  void GLSLUNIFORM::setvec3(string name, vec3&  value)SET_MACROS(glUniform3fv(param,1,value),VEC3);
+  void GLSLUNIFORM::setvec4(string name, vec4&  value)SET_MACROS(glUniform4fv(param,1,value),VEC4);
+  void GLSLUNIFORM::setmat3(string name, mat3&  value)SET_MACROS(glUniformMatrix3fv(param,1,GL_FALSE,value),MAT3);
+  void GLSLUNIFORM::setmat4(string name, mat4&  value)SET_MACROS(glUniformMatrix4fv(param,1,GL_FALSE,value),MAT4);
+  void GLSLUNIFORM::setnull(string name, void* value){
+    if(value!=NULL)return;
+    if(type.find(name)!=type.end())type.erase(name);
+  }
   GLSLUNIFORM::operator string(){return "UNIFORM()";}
   
   GLSLSHADER::GLSLSHADER():SHDCHUNK(){}

@@ -98,6 +98,8 @@ namespace unvis{//tolua_export
     bool autoload;
   public:
     string fullhiername(string n="");
+    ITER begin();
+    ITER end();
     //tolua_begin
     MATGROUP();
     virtual ~MATGROUP();

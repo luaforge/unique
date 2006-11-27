@@ -8,12 +8,12 @@ using namespace std;
 #define RU "ru_RU"
 
 #define CLASSINFODECL static string __info(string);
-#define CLASSINFO(class,cont) \
-string class::__info(string l){ \
-  cont \
-  return string("Info unit for locale \"")+l+"\" not found!"; \
-} // Class Info wraper
-#define CLASSINFOENT(locale,contain) \
+#define CLASSINFO(class,cont)						\
+  string class::__info(string l){					\
+    cont;								\
+    return string("Info unit for locale \"")+l+"\" not found!";		\
+  } // Class Info wraper
+#define CLASSINFOENT(locale,contain)					\
   if(l==#locale)return string(#contain); // Class Info Entire wraper
 
 namespace unbase{//tolua_export
@@ -82,7 +82,7 @@ namespace unbase{
  *
  */
 
-#define __GROUP_IMPLEMENTATION_(group_class,object_class,resource_type,group_create_luacode,object_create_luacode) \
+#define __GROUP_IMPLEMENTATION_(group_class,object_class,resource_type,group_create_luacode,object_create_luacode,set_object_cxxcode,del_object_cxxcode) \
   /* full hierarchy name */						\
   string group_class::fullhiername(string n){				\
     string r=name;							\
@@ -117,22 +117,26 @@ namespace unbase{
 	}								\
       }									\
     }									\
-    if(pool.find(name)==pool.end())return NULL;				\
-    else{								\
-      return pool[name];						\
+    if(pool.find(k)==pool.end()){					\
+      return NULL;							\
+    }else{								\
+      return pool[k];							\
     }									\
   }									\
   /* newindex method */							\
   void group_class::set(string k, object_class* o){			\
     if(k.length()<=0)return;						\
     if(pool.find(k)!=pool.end()){					\
+      object_class* o=pool[k];						\
+      del_object_cxxcode;						\
       if(autoload){							\
-	pool[k]->name="";						\
-	pool[k]->parent=NULL;						\
+	o->name="";							\
+	o->parent=NULL;							\
       }									\
       pool.erase(k);							\
     }									\
     if(o){								\
+      set_object_cxxcode;						\
       pool[k]=o;							\
       if(autoload){							\
 	o->name=k;							\
@@ -140,14 +144,51 @@ namespace unbase{
       }									\
     }									\
   }									\
-
-#define nonenullllll()							\
   /* begin() method */							\
-  std::map<string,object_class>::iterator group_class::begin(){		\
+  std::map<string,object_class*>::iterator group_class::begin(){	\
     return pool.begin();						\
   }									\
   /* end() method */							\
-  std::map<string,object_class>::iterator group_class::end(){		\
+  std::map<string,object_class*>::iterator group_class::end(){		\
     return pool.end();							\
   }									\
 
+#define __COUNT_IMPLEMENTATION_(group_class,object_class,resource_type,group_create_luacode,object_create_luacode,set_object_cxxcode,del_object_cxxcode) \
+  /* iterator method */							\
+  void group_class::operator()(string&k,object_class*&n){		\
+    map<string,object_class*>::iterator i;				\
+    if(k.length()>0){ i=pool.find(k); if(i!=pool.end())i++; }		\
+    else i=pool.begin();						\
+    if(i==pool.end()){ k=""; n=NULL; }					\
+    else{ k=i->first; n=i->second; }					\
+  }									\
+  /* index method */							\
+  object_class* group_class::get(string k){				\
+    if(k.length()<=0)return NULL;					\
+    if(pool.find(k)==pool.end()){					\
+      return NULL;							\
+    }else{								\
+      return pool[k];							\
+    }									\
+  }									\
+  /* newindex method */							\
+  void group_class::set(string k, object_class* o){			\
+    if(k.length()<=0)return;						\
+    if(pool.find(k)!=pool.end()){					\
+      object_class* o=pool[k];						\
+      del_object_cxxcode;						\
+      pool.erase(k);							\
+    }									\
+    if(o){								\
+      set_object_cxxcode;						\
+      pool[k]=o;							\
+    }									\
+  }									\
+  /* begin() method */							\
+  std::map<string,object_class*>::iterator group_class::begin(){	\
+    return pool.begin();						\
+  }									\
+  /* end() method */							\
+  std::map<string,object_class*>::iterator group_class::end(){		\
+    return pool.end();							\
+  }

@@ -1,0 +1,18 @@
+##############################
+#
+#  Unique Engine, jan,2006
+# *module: unsound
+# *author: PhoenixIV
+# *description: listener,
+#               sound source,
+#               playing
+#  
+##############################
+
+unsnd.state = enable
+unsnd.dep = unbase unmath undata unogl unobj unoal
+
+linux-gcc.unsnd.C.flags += $(shell pkg-config --cflags ogg vorbis vorbisfile)
+linux-gcc.unsnd.L.opts += $(shell pkg-config --libs ogg vorbis vorbisfile)
+
+

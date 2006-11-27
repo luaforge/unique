@@ -1,0 +1,6 @@
+#
+#  Main Engine build config
+#
+
+unique.state = enable
+unique.dep = unbase unmath unogl unoal unvis unobj

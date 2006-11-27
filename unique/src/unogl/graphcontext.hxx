@@ -5,11 +5,15 @@
 
 namespace unogl{//tolua_export
   class KEYS{//tolua_export
+  protected:
+    
   public:
-    static const KEY defkey;
     typedef deque<KEY> CONT;
-    typedef deque<KEY>::iterator ITER;
     CONT array;
+    static const KEY defkey;
+    typedef deque<KEY>::iterator ITER;
+    ITER begin();
+    ITER end();
     //tolua_begin
     KEYS();
     ~KEYS();

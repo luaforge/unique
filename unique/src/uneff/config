@@ -1,0 +1,6 @@
+#
+#  Particle system library build config
+#
+
+uneff.state = enable
+uneff.dep = unbase unmath unogl unvis unobj

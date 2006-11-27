@@ -216,19 +216,17 @@ namespace unvis{//tolua_export
     unsigned int owidth;
     unsigned int oheight;
     
-    unsigned int glid;   // OpenGL texture identifier
-    
-    unsigned int typetarget;
-    
     bool inited;
     bool binded;
   public:
+    unsigned int glid;   // OpenGL texture identifier
+    unsigned int typetarget;
     //tolua_begin
     unbase::STATE state;
     // Texturing parameters
     FILTER filter;  // Filtration type
     FUNC func;      // Texturing function
-    bool    mipmap; // Mipmapping
+    bool mipmap;    // Mipmapping
     WRAP wrap;      // Texture wraping
     GENCRD cgen;    // Texture coord automatic generation
     string  src;    // Texture source
@@ -264,11 +262,13 @@ namespace unvis{//tolua_export
   class TEXGROUP: public TEXTURE{//tolua_export
   protected:
     typedef map<string,TEXTURE*> POOL;
-    typedef map<string,TEXTURE*>::iterator ITER;
     POOL pool;
     bool autoload;
   public:
+    typedef map<string,TEXTURE*>::iterator ITER;
     string fullhiername(string n="");
+    ITER begin();
+    ITER end();
     const TEXTURE* operator[](string);
     //tolua_begin
     TEXGROUP();

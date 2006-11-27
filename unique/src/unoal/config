@@ -2,7 +2,7 @@
 #  Audio library build config
 #
 
-#unoal.state = enable
+unoal.state = enable
 unoal.dep = unbase
 
 linux-gcc.unoal.C.I += /usr/include/AL

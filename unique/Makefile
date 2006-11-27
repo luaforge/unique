@@ -131,13 +131,15 @@ $$($(1).target): $$($(1).obj) $$($(1).modep)
 #	@$(call U.EX,$(call L.XX,$$(filter $(call C.O,$(1),%),$$^),$$@,$$($(1).L.opts) $(L.OPTS))) 
 	@$(call U.EX,$$(call L.XX,$$^,$$@,$$($(1).L.opts) $(L.OPTS))) 
 .PHONY: prepare.$(1)
-build.$(1): prepare.$(1) $$($(1).target)
+  T.prepare+=prepare.$(1)
+build.$(1): $$($(1).target)
   T.build+=build.$(1)
 endif
 endif
 ###### << module build rule <<
 ###### >> module clean rule >>
 .PHONY: preclean.$(1)
+T.preclean+=preclean.$(1)
 clean.$(1): preclean.$(1)
 	@$(call U.EH,Clean $(1) module)
 	@$(call U.EX,$(call U.RM,$$($(1).obj) $$($(1).pks) $$($(1).target) $$($(1).tps)))
@@ -204,6 +206,7 @@ modules.clean: $(T.clean)
 	@$(call U.EH,Clean modules complete....)
 #### << design modules <<
 #### >> design monolith >>
+ifeq ($(monolith.state),enable)
 monolith.target=$(call L.SO,$(T.NAME))
 $(monolith.target): $(T.obj)
 	@$(call U.EH,Build $(T.NAME) module)
@@ -213,8 +216,13 @@ monolith.build: $(monolith.target)
 monolith.clean: $(T.clean)
 	@$(call U.RM,$(monolith.target))
 	@$(call U.EH,Clean monolith complete....)
+else
+monolith.build:
+monolith.clean:
+endif
 #### << design monolith <<
 #### >> design runable >>
+ifeq ($(runable.state),enable)
 runable.target=$(call L.RO,$(T.NAME))
 $(runable.target): $(T.obj)
 	@$(call U.EH,Build $(T.NAME) module)
@@ -224,11 +232,15 @@ runable.build: $(runable.target)
 runable.clean: $(T.clean)
 	@$(call U.RM,$(runable.target))
 	@$(call U.EH,Clean runable complete....)
+else
+runable.build:
+runable.clean:
+endif
 #### << design runable <<
 .PHONY: prepare prepare.local prepare.global modules.prepare runable.prepare monolith.prepare
 prepare.global:
 	@$(call U.EH,Preparing build lunique for PLATFORM=$(PLATFORM) with COMPILER=$(COMPILER) MODE=$(MODE)....)
-prepare: prepare.global prepare.local $(call TARGET.DESIGN,prepare,$(DESIGN))
+prepare: prepare.global prepare.local $(T.prepare) $(call TARGET.DESIGN,prepare,$(DESIGN))
 build: prepare $(call TARGET.DESIGN,build,$(DESIGN))
 clean: $(call TARGET.DESIGN,clean,$(DESIGN))
 ## << global build rules

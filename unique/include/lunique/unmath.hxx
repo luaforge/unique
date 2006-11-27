@@ -1,1 +1,2 @@
-#include "../../src/unmath/unmath.hxx"
+#include"config.hxx"
+#include UNHEADER(unmath)

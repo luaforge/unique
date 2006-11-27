@@ -36,6 +36,12 @@ namespace unoal{//tolua_export
 # define GET_AL_STR(name) string((char*)alGetString(name))
 # define GET_ALC_STR(dev,name) string((char*)alcGetString(dev,name))
 
+# ifdef DEBUG_MODE
+#   define OAL_DEBUG() unoal::ALAPP::CheckError();
+# else
+#   define OAL_DEBUG() ;
+# endif
+
   class ALAPP: public unbase::CONTEXT{//tolua_export
   protected:
     ALCdevice  *alDevice;  // AL устройство

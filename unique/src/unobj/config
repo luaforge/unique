@@ -1,0 +1,6 @@
+#
+#  Object library build config
+#
+
+unobj.state = enable
+unobj.dep = unbase unmath unogl unvis undata

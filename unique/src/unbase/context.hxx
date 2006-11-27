@@ -31,10 +31,13 @@ namespace unbase{//tolua_export
   //tolua_end
   
   class CONTEXTS{//tolua_export
+  protected:
+    typedef map<string,CONTEXT*> POOL;
+    POOL pool;
   public:
-    typedef map<string,CONTEXT*> CONT;
     typedef map<string,CONTEXT*>::iterator ITER;
-    CONT array;
+    ITER begin();
+    ITER end();
     //tolua_begin
     CONTEXTS();
     ~CONTEXTS();

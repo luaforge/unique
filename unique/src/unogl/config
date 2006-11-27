@@ -12,7 +12,8 @@ linux-gcc.unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
 linux-gcc.unogl.L.l += GL GLU
 linux-gcc.unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
 linux-gcc.unogl.platform.glext = glxext.h
-linux-gcc.unogl.platform.glext.name += GLX_SGI_swap_control GLX_ARB_multisample GLX_ARB_fbconfig_float GLX_SGIX_pbuffer
+linux-gcc.unogl.platform.glext.name += GLX_SGI_swap_control GLX_ARB_multisample GLX_SGIX_pbuffer
+#  GLX_SGIX_fbconfig
 
 ## linux-mingw build options ##
 linux-mingw.unogl.C.I.opengl = /usr/i586-mingw32msvc/include/GL
@@ -36,7 +37,9 @@ unogl.platform.glext.name = $($(PLATFORM)-$(COMPILER).unogl.platform.glext.name)
 prepare.unogl: $(call C.H,unogl,oglext.func) $(call C.H,unogl,oglext.platform.func)
 preclean.unogl:
 	@$(call U.EH,Clean OpenGL extensions define)
-	@$(call U.EX,$(call U.RM,$(call C.H,unogl,oglext.func) $(call C.H,unogl,oglext.platform.func)))
+	@$(call U.EX,$(call U.RM,$(call C.H,unogl,oglext.func)))
+	@$(call U.EH,Clean OpenGL platform related extensions define)
+	@$(call U.EX,$(call U.RM,$(call C.H,unogl,oglext.platform.func)))
 
 $(call C.H,unogl,oglext.func): $(D.SRC)/unogl/config $(addprefix $($(PLATFORM)-$(COMPILER).unogl.C.I.opengl)/,$(unogl.glext))
 	@$(call U.EH,Generate OpenGL extensions to $@)

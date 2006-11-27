@@ -50,4 +50,5 @@ namespace unmath{
     bool intersect(const vec3&);       // Point in triangle
     bool collision(vec3&,const LINE&); // Collision line and triangle
   };
+  typedef TRIANGLE POLYGON;
 }

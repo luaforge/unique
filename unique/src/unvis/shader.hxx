@@ -74,8 +74,10 @@ namespace unvis{//tolua_export
     typedef map<string,SHADER*>::iterator ITER;
     POOL pool;
     bool autoload;
-    string fullhiername(string n="");
   public:
+    string fullhiername(string n="");
+    ITER begin();
+    ITER end();
     //tolua_begin
     SHDGROUP();
     SHDGROUP(bool autoload);
@@ -95,50 +97,61 @@ namespace unvis{//tolua_export
   /*
    *  GLSL
    */
-  class SLINT{//tolua_export
+  class sint{//tolua_export
   protected:
     int value;
   public:
     //tolua_begin
-    SLINT(int v):value(v){}
-    int operator()(){return value;}
+    sint(int v):value(v){}
+    operator int* (){return &value;}
+    int& operator()(){return value;}
     void operator()(int v){value=v;}
     //tolua_end
   };//tolua_export
-  class SLSAMP{//tolua_export
-  protected:
-    int value;
-  public:
-    //tolua_begin
-    SLSAMP(int v):value(v){}
-    int operator()(){return value;}
-    void operator()(int v){value=v;}
-    //tolua_end
-  };//tolua_export
-  //tolua_begin
-  extern const SLSAMP sampler[8];
-  //tolua_end
   class GLSLPROG;
   class GLSLUNIFORM{//tolua_export
   protected:
     GLSLPROG* prog;
+    enum TYPE{
+      BOOL=0x1,
+      SCAL=0x2,
+      SINT=0x3,
+      VEC2=0x4,
+      VEC3=0x5,
+      VEC4=0x6,
+      MAT3=0x7,
+      MAT4=0x8,
+    };
+    map<string,int> type;
   public:
+    bool nobool;
+    float noscal;
+    
     GLSLUNIFORM(GLSLPROG*);
     ~GLSLUNIFORM();
     //tolua_begin
     /**tolua_getindex {**/
-    bool get(string name);
+    void getbool(string name, bool* ret/**=self->nobool asnil**/);
+    void getscal(string name,float* ret/**=self->noscal asnil**/);
+    /*
+    sint* getsint(string name);
+    vec2* getvec2(string name);
+    vec3* getvec3(string name);
+    vec4* getvec4(string name);
+    mat3* getmat3(string name);
+    mat4* getmat4(string name);
+    */
     /**}**/
     /**tolua_setindex {**/
     void setbool(string,bool);
-    void setscal(string,scalar);
-    void setsint(string,SLINT&);
-    void setvec2(string,vec2&);
-    void setvec3(string,vec3&);
-    void setvec4(string,vec4&);
-    void setmat3(string,mat3&);
-    void setmat4(string,mat4&);
-    void setsamp(string,SLSAMP&);
+    void setscal(string,float);
+    void setsint(string,sint&);
+    void setvec2(string,unmath::vec2&);
+    void setvec3(string,unmath::vec3&);
+    void setvec4(string,unmath::vec4&);
+    void setmat3(string,unmath::mat3&);
+    void setmat4(string,unmath::mat4&);
+    void setnull(string,void*);
     /**}**/
     operator string();
     //tolua_end

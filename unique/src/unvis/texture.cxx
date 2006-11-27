@@ -38,7 +38,7 @@ namespace unvis{
 			  unvis::TEXTURE,
 			  texture,
 			  "return unvis.TEXGROUP()",
-			  "local TEXTURE=unvis.TEXTURE");
+			  "local TEXTURE=unvis.TEXTURE",,);
   
   TEXGROUP::operator string(){
     string r="TEXGROUP{";
