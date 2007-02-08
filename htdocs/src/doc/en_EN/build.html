@@ -1,0 +1,64 @@
+<h2>Building on <i>linux</i> platform with <i>gcc</i> compiler</h2>
+
+<h3>Requirements</h3>
+<p>For building lUniquE you need GNU Make (>=3.81) and GNU C++ compiler (>=3.4).
+<p>Some modules require external libraries :
+<menu>
+  <li>lua5.1 - a virtual machine 
+  <li>toluaxx5.1 - a tool to integrate C++ and lua (see project <a href="http://toluaxx.luaforge.net/">toluaxx on luaforge.net</a>)
+  <li>OpenGL&reg; - 3D graphics API
+  <li>OpenAL&reg; - 3D sound API
+  <li>libjpeg - JPEG 2D image library
+  <li>libpng - PNG 2D image library
+  <li>freetype - FreeType TTF font library
+</menu>
+
+<h3>Configure</h3>
+<p>Check if pkg-config tool is installed in your system. In your linux distribution this tool must installed by default.
+<p>Extract project sources and edit options in a <i>config</i> file ( in the project sources root directory ) to correspond your system parameters.
+
+<p>For instance,
+<p class=code>
+## OS Platform<br>
+## linux|win32<br>
+PLATFORM=linux<br>
+<br>
+## Compiler<br>
+## gcc|mingw<br>
+COMPILER=gcc<br>
+<br>
+## Design<br>
+## modules|&monolith|&runable<br>
+DESIGN=modules monolith runable<br>
+<br>
+## Mode<br>
+## test|real<br>
+MODE=real<br>
+<br>
+## Debug<br>
+## enable|disable<br>
+DEBUG=disable<br>
+<br>
+## Main name<br>
+## lunique<br>
+NAME=lunique<br>
+<br>
+## Optimize<br>
+## disable|enspeed|ensize<br>
+OPTIM=enspeed<br>
+<br>
+</p>
+
+<h3>Make calls</h3>
+<p>If all configured correctly, you can use the following command for building:
+<p class=code>
+make all
+</p>
+
+<h2>Building on <i>linux</i> platform for <i>win32</i> with <i>mingw</i> cross compiler</h2>
+
+<p>
+
+<h2>Building on <i>win32</i> platform with <i>mingw</i> compiler</h2>
+
+<p class=post><!-- hhmts start -->Last modified: Wed Dec  6 16:38:31 YEKT 2006 <!-- hhmts end --></p>

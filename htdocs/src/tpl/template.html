@@ -1,0 +1,141 @@
+## T.xxxxxxx - template
+## M.xxxxxxx - module
+
+#### $(1) - page name; $(2) - page language;
+T.pagename=$(1).$(2).html
+T.pagesrcn=$(D.src)/$(2)/$(1).html
+
+#### $(1) - page name; $(2) - page header; $(3) - page title; $(4) - page contents;	
+T.page=\
+<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\
+<html>\
+<head>\
+<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\
+<link href=\"style.css\" rel=\"stylesheet\" type=\"text/css\"></link>\
+<title>.:: lUnique lua based virtual reality engine :::: $(1) ::.</title>\
+</head>\
+\
+<body id=body>\
+\
+$(2)\
+<div id=cont>\
+$(3)\
+\
+$(4)\
+</div>\
+\
+<script type=\"text/javascript\">\
+if(navigator.appName==\"Microsoft Internet Explorer\"){\
+  document.write(\"<div id=noie>Do not use Micro$oft Internet Explorer to view this page!</div>\");\
+}\
+</script>\
+</body>\
+</html>
+
+
+#### $(1) - menu items
+T.menupanel=\
+<div id=gnueva></div>\
+<div id=logo></div>\
+<!-- Main menu panel {{{ -->\
+<div id=navi>\
+$(1)\
+</div>\
+<!-- Main menu panel }}} -->\
+<!-- Language selection menu {{{ -->\
+<div id=lang>\
+$(2)\
+</div>\
+<!-- Language selection menu }}} -->
+
+
+#### $(1) - page H1
+T.headline=\
+<h1>$(1)</h1>
+
+#### $(1) - page file name; $(2) - page view name
+T.menuitem=\
+<div class=head onclick=\"javascript:location.replace('$(1)');\">\
+<a href=\"$(1)\" class=headlink>$(2)</a>\
+</div>
+
+#### $(1) - page view name
+T.menuitem_active=\
+<div class=head_active>\
+$(1)\
+</div>
+
+#### $(1) - lang link; $(2) - lang view name
+T.langitem=\
+<a href=\"$(1)\" class=langlink>$(2)</a> |
+
+#### $(1) - lang view name
+T.langitem_active=\
+<font class=langactv>$(1)</font> |
+
+T.emptypage=\
+<p>Site are being developed....<p>\
+<p class=post><!-- hhmts start -->Last modified: Thu Feb  8 17:23:17 YEKT 2007 <!-- hhmts end --></p>
+
+#### $(1) - page name, $(2) - page contents, $(3) - language
+M.content=$(2)
+
+#### $(1) - item name, $(2) - item content, $(3) - page name
+T.news.item=\
+<div class=newsitem>\
+<table><tr>\
+  <td class=newsdate>$(1)</td>\
+  <td class=newstext>$(2)</td>\
+</tr></table>\
+</div>
+
+#### $(1) - item names array, $(2) - item texts array, $(3) - page name
+T.screenshot=\
+<form name=screenshot_form>\
+<table align=center><tr>\
+  <td><a href=\"javascript:screenshot_turn(-1)\" class=scrsctrl>[</a></td>\
+  <td><img name=screenshot_image class=scrsimg src=\"\" alt=\"\"/></td>\
+  <td><a href=\"javascript:screenshot_turn(+1)\" class=scrsctrl>]</a></td>\
+</tr><tr>\
+  <td></td>\
+  <td><textarea name=screenshot_comment class=scrstext readonly onChange=\"screenshot_turn(0)\" onBlur=\"screenshot_turn(0)\"></textarea></td>\
+  <td></td>\
+</tr></table>\
+</form>\
+<script type=\"text/javascript\">\
+var screenshot_names=new Array($(1) \"\");\
+var screenshot_texts=new Array($(2) \"\");\
+var screenshot_current=0;\
+function screenshot_turn(next){\
+  screenshot_current+=next;\
+  if(screenshot_current<0)screenshot_current=screenshot_names.length-2;\
+  if(screenshot_current>=screenshot_names.length-1)screenshot_current=0;\
+  document.images[\"screenshot_image\"].src=\"shot/\"+screenshot_names[screenshot_current]+\".jpg\";\
+  document.images[\"screenshot_image\"].alt=screenshot_names[screenshot_current];\
+  document.forms[\"screenshot_form\"].screenshot_comment.value=screenshot_texts[screenshot_current];\
+}\
+screenshot_turn(0);\
+</script>
+
+####  $(1) - page name, $(2) - page contents, $(3) - page template, $(4) - page language
+M.view=\
+$(subst VIEWAREA,\
+$(call T.$(3),\
+$(foreach i,\
+$(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).view/*.html))),\
+\"$(i)\",),\
+$(foreach i,\
+$(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).view/*.html))),\
+\"$(shell cat $(D.src)/$(4)/$(1).view/$(i).html)\",),\
+$(1)),\
+$(2))
+
+####  $(1) - page name, $(2) - page contents, $(3) - page template, $(4) - page language
+M.list=\
+$(subst LISTITEMS,\
+$(foreach i,\
+$(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).list/*.html))),\
+$(call T.$(3).item,$(i),$(shell cat $(D.src)/$(4)/$(1).list/$(i).html),$(1))\
+),\
+$(2))
+
