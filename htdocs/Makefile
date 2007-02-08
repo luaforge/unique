@@ -39,7 +39,7 @@ $$(call T.page,$$($$*.name),\
         $$(call T.menuitem,$$(call T.pagename,$$($$(i).name),$(1)),$$($(1).$$(i).caption))\
         )\
       ),\
-    $$(foreach i,$(AVAILABLE_LANGS),\
+    $$(foreach i,$(lang),\
       $$(if $$(findstring $$(i),$(1)),\
         $$(call T.langitem_active,$$($$(i).title)),\
         $$(call T.langitem,$$(call T.pagename,$$($$*.name),$$(i)),$$($$(i).title))\
@@ -67,12 +67,12 @@ clean.$(1):
 
 endef
 
-AVAILABLE_LANGS=$(notdir $(wildcard $(D.src)/*))
-$(foreach i,$(AVAILABLE_LANGS),$(eval $(call batch_template,$(i))))
-batch_group=$(addprefix $(1).,$(AVAILABLE_LANGS))
+#AVAILABLE_LANGS=$(notdir $(wildcard $(D.src)/*))
+$(foreach i,$(lang),$(eval $(call batch_template,$(i))))
+batch_group=$(addprefix $(1).,$(lang))
 
 build: $(call batch_group,build)
 clean: $(call batch_group,clean)
 probe: $(call batch_group,probe)
-	@echo AVAILABLE_LANGS=$(AVAILABLE_LANGS)
+	@echo lang=$(lang)
 
