@@ -1,8 +1,8 @@
 body{ margin: 0px 0px 0px 0px;
       padding: 1px 2px 1px 2px;
       font-family: sans-serif;
-      font-size: 14px;
-      color: #616161; }
+      font-size: 12px;
+      color: #161616; }
 #body{ background-image: url("back.png");
        background-color: #FFFFFF; }
 #head{ width: 100%;
@@ -153,17 +153,30 @@ h1:after{ content: " ::.";
 h2{ font-size: 16px;
     font-weight: bold;
     text-align: center;
-    color: #717171; }
+    color: #717171; margin-top: 24px; }
 h3{ padding-left: 20px;
     font-size: 14px;
     font-weight: bold;
     text-align: left;
-    color: #818181; }
-p{ margin: 20px 30px 20px 30px;
+    color: #818181; margin-top: 24px; }
+h4{ padding-left: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: left;
+    color: #818181; margin-top: 24px; }
+p{ margin: 20px 10px 20px 10px;
    font-size: 14px;
    font-weight: normal;
-   text-align: left;
+   text-align: justify;
+   text-indent: 24px;
    color: #616161; }
+ul{ margin: 4px 10px 4px 10px;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: justify;
+    text-indent: 10px;
+    list-style-type: square;
+    color: #616161; }
 p.post{ font-size: 12px;
         font-weight: normal;
         text-align: right;
@@ -235,3 +248,55 @@ h6.bookitem{ font-size:  7px; }
                      border: 1px; }
 .bookreturn{ text-align: center;
              font-weight: bolder; }
+/* tables */
+table.docum{ text-align: left;
+             border-collapse: collapse;
+             border-spacing: 0px;
+             padding: 10px 4px 10px 6px; }
+/* scheme */
+table.scheme{ text-align: left;
+              border-collapse: collapse;
+              border-spacing: 0px;
+              }
+table.scheme td{ padding: 10px 4px 10px 6px;
+                 border: #070707 1px dashed;
+                 text-align: center; }
+table.scheme thead td{ border-right: #070707 1px dashed;
+                       border-top: none;
+                       border-bottom: #070707 1px dashed;
+                       border-left: #070707 1px dashed;
+                       text-align: left;
+                       font-weight:bold;
+                       padding: 10px; }
+table.scheme th{ border-bottom: #070707 1px dashed;
+                 border-top: none;
+                 border-left: none;
+                 border-right: #070707 1px dashed;
+                 text-align: right;
+                 padding: 10px; }
+table.scheme caption { caption-side: bottom;
+                       text-align: right;
+                       color: #171717;
+                       font-size: 13px;
+                       font-style: italic;
+                       border-bottom: #070707 1px solid; }
+table.scheme tfoot th{ border-bottom: #070707 1px dashed;
+                 border-top: none;
+                 border-left: none;
+                 border-right: #070707 1px dashed;
+                 text-align: right;
+                 padding: 10px; }
+ 
+table.dashed{ text-align: left; }
+table.space{ border-collapse: separate;
+             border-spacing: 4px; }
+td.dashed_l{ border-left: #070707 1px dashed; }
+td.dashed_r{ border-right: #070707 1px dashed; }
+td.dashed_lr{ border-left: #070707 1px dashed;
+          border-right: #070707 1px dashed; }
+td.dashed_t{ border-top: #070707 1px dashed; }
+td.dashed_b{ border-bottom: #070707 1px dashed; }
+td.dashed_tb{ border-top: #070707 1px dashed;
+          border-bottom: #070707 1px dashed; }
+td.dashed{ border: #070707 1px dashed; }
+td.boxed{ border: #070707 1px solid; }
