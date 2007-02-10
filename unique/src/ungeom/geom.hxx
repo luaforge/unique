@@ -47,8 +47,8 @@ namespace ungeom{//tolua_export
 
     PLANE();
     virtual ~PLANE();
- 
-    void draw(unsigned int mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl); // Renderering
+    
+    void draw_geom(class unobj::MODE&); // Renderering
     bool update();
 
     operator string();
@@ -76,7 +76,7 @@ namespace ungeom{//tolua_export
     BOX();
     virtual ~BOX();
  
-    void draw(GLenum mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl); // Renderering
+    void draw_geom(const unobj::MODE&); // Renderering
     bool update();
   
     operator string();
@@ -95,8 +95,8 @@ namespace ungeom{//tolua_export
   
     SPHERE();
     virtual ~SPHERE();
-
-    void draw(GLenum mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl); // Renderering  
+    
+    void draw_geom(const unobj::MODE&); // Renderering  
     bool update();
   
     operator string();

@@ -30,20 +30,40 @@
 namespace unvis{
   using namespace undata;
   
-  TEXGROUP::TEXGROUP():autoload(true){}
-  TEXGROUP::TEXGROUP(bool al):autoload(al){}
+  TEXGROUP::TEXGROUP():TEXTURE(),autoload(false){}
+  TEXGROUP::TEXGROUP(bool al):TEXTURE(),autoload(al){}
   TEXGROUP::~TEXGROUP(){}
   
   __GROUP_IMPLEMENTATION_(unvis::TEXGROUP,
 			  unvis::TEXTURE,
-			  texture,
-			  "return unvis.TEXGROUP()",
-			  "local TEXTURE=unvis.TEXTURE",,);
-  
+			  __GROUP_HIER_TRY_GET_CXXCODE_(unvis::TEXGROUP,
+							unvis::TEXTURE,
+							texture,
+							"return unvis.TEXGROUP(true)",
+							"local TEXTURE=unvis.TEXTURE\n"
+							"local TEX2D=unvis.TEX2D\n"
+							"local TEX3D=unvis.TEX3D\n"
+							"local TEXCUBE=unvis.TEXCUBE\n"
+							),
+			  __GROUP_HIER_SET_CXXCODE_(),
+			  __GROUP_HIER_DEL_CXXCODE_()
+			  );
+
+  void TEXGROUP::chautoload(bool al){
+    for(ITER i=begin();i!=end();i++)chautoload(al);
+    autoload=al;
+  }
+
+  bool TEXGROUP::update(){
+    for(ITER i=begin();i!=end();i++){
+      i->second->update();
+    }
+  }
+
   TEXGROUP::operator string(){
     string r="TEXGROUP{";
     int t=r.length();
-    for(ITER i=pool.begin();i!=pool.end();i++)r+=(*i).first+",";
+    for(ITER i=begin();i!=end();i++)r+=(*i).first+",";
     if(t<r.length())r.erase(r.length()-1);
     r+="}";
     return r;
@@ -130,7 +150,7 @@ namespace unvis{
   }
   
   TEXTURE::TEXTURE():mipmap(true),filter(TEXTURE::linear),screen(false),
-		     inited(false),binded(false),format(0),storage(0){
+		     inited(false),binded(false),format(0),storage(0),parent(NULL){
     glGenTextures(1,&glid);
     OGL_DEBUG();
     typetarget=GL_TEXTURE_1D;
@@ -212,8 +232,8 @@ namespace unvis{
   
   int glTextureCompatSize(int s){
     for(int i=1;true;i++){
-      if(pow((double)2,(double)i)>=s){
-	return pow((double)2,(double)i);
+      if(pow(double(2),double(i))>=s){
+	return int(pow(double(2),double(i)));
       }
     }
   }

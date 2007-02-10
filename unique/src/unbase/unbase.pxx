@@ -1,5 +1,5 @@
 
-$lfile "base.lua"
+$lfile "base.lxx"
 
 $hfile"option.hxx"
 $hfile"cpu.hxx"

@@ -201,7 +201,7 @@ namespace unogl{
     if(xcontext)glXDestroyContext(xdisplay,xcontext);
     if(xwindow) XDestroyWindow(xdisplay,xwindow);
     if(xdisplay)XCloseDisplay(xdisplay);
-    xwindow=NULL; xdisplay=NULL;
+    xdisplay=NULL;
 
     state=STATE("context closed",true);
   }

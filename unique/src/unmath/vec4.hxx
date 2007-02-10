@@ -19,14 +19,14 @@ namespace unmath{//tolua_export
     inline operator const scalar*() const{ return array; }
     //tolua_begin
     // Computation
-    const vec4 operator*(const mat4&)const;
-    inline const vec4 operator*(scalar f) const{ return vec4(x*f, y*f, z*f, w*f); }
-    inline const vec4 operator/(scalar f) const{ return vec4(x/f, y/f, z/f, w/f); }
-    inline const vec4 operator+(const vec4& v) const{ return vec4(x+v.x, y+v.y, z+v.z, w+v.w); }
-    inline const vec4 operator-() const{ return vec4(-x,-y,-z,-w); }
+    vec4 operator*(const mat4&)const;
+    inline vec4 operator*(scalar f) const{ return vec4(x*f, y*f, z*f, w*f); }
+    inline vec4 operator/(scalar f) const{ return vec4(x/f, y/f, z/f, w/f); }
+    inline vec4 operator+(const vec4& v) const{ return vec4(x+v.x, y+v.y, z+v.z, w+v.w); }
+    inline vec4 operator-() const{ return vec4(-x,-y,-z,-w); }
     //inline const vec4 operator-(const vec4 v) const{ return vec4(x-v.x, y-v.y, z-v.z, z-v.w); }
-    inline const vec4 operator-(const vec4& v) const{ return vec4(x-v.x, y-v.y, z-v.z, z-v.w); }
-    inline const vec4 operator^(const vec4& v){ return vec4(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x, w); } // Cross product
+    inline vec4 operator-(const vec4& v) const{ return vec4(x-v.x, y-v.y, z-v.z, z-v.w); }
+    inline vec4 operator^(const vec4& v){ return vec4(y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x, w); } // Cross product
     //tolua_end
     inline vec4 &operator*=(float f){ return *this=*this*f; }
     inline vec4 &operator/=(float f){ return *this=*this/f; }

@@ -29,7 +29,7 @@ namespace ungeom{
 	for(unsigned int i=0;i<count;i++)free[i]=true;
       }
     }
-    BSPPROC(const MCHUNK& m){
+    BSPPROC(const CHUNK& m){
       polygon=(POLYGON*)m.data;
       count=(unsigned int)(m.size/3);
       free=new bool[count];
@@ -78,7 +78,7 @@ namespace ungeom{
   //proc.free[i]=false;
   //return true;
 
-  void BSPTREE::build(const MCHUNK& data){
+  void BSPTREE::build(const CHUNK& data){
     BSPPROC proc=BSPPROC(data);
     clean();
     root=procnode(proc);

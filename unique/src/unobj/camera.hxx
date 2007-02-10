@@ -88,7 +88,7 @@ namespace unobj{//tolua_export
     virtual ~CAMERA();
     void bind();
     void ubind();
-    void draw(unsigned int mode=RENDERMODE::imad);
+    virtual void draw_model();
     operator string();
     //tolua_end
     void ProjCalc();

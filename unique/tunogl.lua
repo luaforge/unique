@@ -19,7 +19,7 @@ function draw()
    gl.glEnd()
 end
 
-local cs=unbase.CONTEXTS()
+local cs=unbase.CTXGROUP()
 local c=unogl.GLAPP()
 cs.main=c
 print(cs)

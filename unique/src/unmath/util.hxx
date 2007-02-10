@@ -43,7 +43,7 @@ namespace unmath{
   extern quat& conj(quat& p, const quat& q);
   extern quat& add_quats(quat& p, const quat& q1, const quat& q2);
   extern quat& axis_to_quat(quat& q, const vec3& a, const scalar phi);
-  extern mat3& quat_2_mat(mat3&M, const quat&q );
+  extern mat3& quat_2_mat(mat3&M, const quat&q);
   extern quat& mat_2_quat(quat&q,const mat3&M);
   extern quat& mat_2_quat(quat&q,const mat4&M);
   // surface properties

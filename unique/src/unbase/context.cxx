@@ -11,14 +11,21 @@ namespace unbase{
   void CONTEXT::clear(){}
   CONTEXT::operator string(){return "CONTEXT()";}
 
-  CONTEXTS::CONTEXTS(){}
-  CONTEXTS::~CONTEXTS(){}
+  CTXGROUP::CTXGROUP(){}
+  CTXGROUP::~CTXGROUP(){}
   
-  __COUNT_IMPLEMENTATION_(unbase::CONTEXTS,
+  /*
+  __GROUP_TRY_GET_CXXCODE_(unbase::CTXGROUP,
+			   unbase::CONTEXT,
+			   context,"local CONTEXT=unbase.CONTEXT"
+			   )
+  */
+  
+  __GROUP_IMPLEMENTATION_(unbase::CTXGROUP,
 			  unbase::CONTEXT,
-			  context,
-			  "return unbase.CONTEXTS()",
-			  "local CONTEXT=unbase.CONTEXT",,);
+			  ,
+			  ,
+			  );
   /*
     CONTEXT* &CONTEXTS::operator[](string name){
     //if(node)array.insert(std::make_pair(name,node));
@@ -26,7 +33,7 @@ namespace unbase{
     return array[name];
     }
   */
-  CONTEXTS::operator string(){
+  CTXGROUP::operator string(){
     string ret="{";
     for(ITER i=begin();i!=end();i++){
       if(!i->second)continue;

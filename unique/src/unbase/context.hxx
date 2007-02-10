@@ -30,7 +30,7 @@ namespace unbase{//tolua_export
   };
   //tolua_end
   
-  class CONTEXTS{//tolua_export
+  class CTXGROUP{//tolua_export
   protected:
     typedef map<string,CONTEXT*> POOL;
     POOL pool;
@@ -39,15 +39,15 @@ namespace unbase{//tolua_export
     ITER begin();
     ITER end();
     //tolua_begin
-    CONTEXTS();
-    ~CONTEXTS();
+    CTXGROUP();
+    ~CTXGROUP();
     void operator()(string&/**n="" asnil**/,CONTEXT*&/**c=NULL**/);
     //CONTEXT *& operator[](string);
     /**tolua_getindex {**/
     CONTEXT* get(string);
     /**}**/
     /**tolua_setindex {**/
-    void set(string, CONTEXT*);
+    void set(string,CONTEXT*);
     /**}**/
     operator string();
   };

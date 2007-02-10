@@ -96,73 +96,69 @@ namespace unobj{
 #define lsize 0.04
 #define ldir axlen.x*2
 
-  void LIGHT::draw(GLenum mode){
-    BindLoc();
-    if(mode & RENDERMODE::imad || showaxis){
-      //glDisable(GL_DEPTH_TEST);
-      glDisable(GL_LIGHTING);
-      glEnable(GL_DEPTH_TEST);
-      //glDepthFunc(GL_NEVER);//GL_NOTEQUAL GL_ALWAYS GL_LEQUAL GL_EQUAL GL_GEQUAL GL_GREATER
-      glColor4f(1.0,1.0,1.0,1.0);
-      glLineWidth(1.0);
-      glBegin(GL_LINES);
-      // Тренога верхняя
-      glVertex3f(-lsize,   0.0,   0.0);
-      glVertex3f(   0.0, lsize,   0.0);
-      
-      glVertex3f(-lsize,   0.0,   0.0);
-      glVertex3f(   0.0,-lsize,   0.0);
-      
-      glVertex3f(-lsize,   0.0,   0.0);
-      glVertex3f(   0.0,   0.0, lsize);
-      
-      glVertex3f(-lsize,   0.0,   0.0);
-      glVertex3f(   0.0,   0.0,-lsize);
-      
-      // Тренога нижняя
-      glVertex3f( lsize,   0.0,   0.0);
-      glVertex3f(   0.0, lsize,   0.0);
-      
-      glVertex3f( lsize,   0.0,   0.0);
-      glVertex3f(   0.0,-lsize,   0.0);
-      
-      glVertex3f( lsize,   0.0,   0.0);
-      glVertex3f(   0.0,   0.0, lsize);
-      
-      glVertex3f( lsize,   0.0,   0.0);
-      glVertex3f(   0.0,   0.0,-lsize);
-      
-      // Обод, соединяющий треноги
-      glVertex3f(   0.0, lsize,   0.0);
-      glVertex3f(   0.0,   0.0, lsize);
-      
-      glVertex3f(   0.0,-lsize,   0.0);
-      glVertex3f(   0.0,   0.0, lsize);
-      
-      glVertex3f(   0.0,   0.0,-lsize);
-      glVertex3f(   0.0,-lsize,   0.0);
-      
-      glVertex3f(   0.0,   0.0,-lsize);
-      glVertex3f(   0.0, lsize,   0.0);
-      
-      // Вектор прожектора
-      glVertex3f(   0.0,   0.0,   0.0);
-      glVertex3f(   0.0,   0.0, -ldir);
-      // Стрелка
-      glVertex3f( 0.0,     0.0, -ldir         );
-      glVertex3f( 0.0, axend.y, -ldir+axend.x );
-      glVertex3f( 0.0,     0.0, -ldir         );
-      glVertex3f( 0.0,-axend.y, -ldir+axend.x );
-      
-      glEnd();
-      glDepthFunc(GL_LESS);
-      glEnable(GL_LIGHTING);
-    }
-    uBindLoc();
-  
+  void LIGHT::draw_model(){
+    //glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    //glDepthFunc(GL_NEVER);//GL_NOTEQUAL GL_ALWAYS GL_LEQUAL GL_EQUAL GL_GEQUAL GL_GREATER
+    glColor4f(1.0,1.0,1.0,1.0);
+    glLineWidth(1.0);
+    glBegin(GL_LINES);
+    // Top tripod
+    glVertex3f(-lsize,   0.0,   0.0);
+    glVertex3f(   0.0, lsize,   0.0);
+    
+    glVertex3f(-lsize,   0.0,   0.0);
+    glVertex3f(   0.0,-lsize,   0.0);
+    
+    glVertex3f(-lsize,   0.0,   0.0);
+    glVertex3f(   0.0,   0.0, lsize);
+    
+    glVertex3f(-lsize,   0.0,   0.0);
+    glVertex3f(   0.0,   0.0,-lsize);
+    
+    // Bottom tripod
+    glVertex3f( lsize,   0.0,   0.0);
+    glVertex3f(   0.0, lsize,   0.0);
+    
+    glVertex3f( lsize,   0.0,   0.0);
+    glVertex3f(   0.0,-lsize,   0.0);
+    
+    glVertex3f( lsize,   0.0,   0.0);
+    glVertex3f(   0.0,   0.0, lsize);
+    
+    glVertex3f( lsize,   0.0,   0.0);
+    glVertex3f(   0.0,   0.0,-lsize);
+    
+    // Frame
+    glVertex3f(   0.0, lsize,   0.0);
+    glVertex3f(   0.0,   0.0, lsize);
+    
+    glVertex3f(   0.0,-lsize,   0.0);
+    glVertex3f(   0.0,   0.0, lsize);
+    
+    glVertex3f(   0.0,   0.0,-lsize);
+    glVertex3f(   0.0,-lsize,   0.0);
+    
+    glVertex3f(   0.0,   0.0,-lsize);
+    glVertex3f(   0.0, lsize,   0.0);
+    
+    // Project vector
+    glVertex3f(   0.0,   0.0,   0.0);
+    glVertex3f(   0.0,   0.0, -ldir);
+    // Project vector arrow
+    glVertex3f( 0.0,     0.0, -ldir         );
+    glVertex3f( 0.0, axend.y, -ldir+axend.x );
+    glVertex3f( 0.0,     0.0, -ldir         );
+    glVertex3f( 0.0,-axend.y, -ldir+axend.x );
+    
+    glEnd();
+    glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
+    
     OGL_DEBUG();
   }
-
+  
   LIGHT::operator string(){
     return "LIGHT()";
   }
@@ -199,9 +195,11 @@ namespace unobj{
     r+=")";
     return r;
   }
-  __COUNT_IMPLEMENTATION_(unobj::LHTGROUP,
+  
+  __GROUP_IMPLEMENTATION_(unobj::LHTGROUP,
 			  unobj::LIGHT,
-			  light,
-			  "return unobj.LHTGROUP()",
-			  "local LIGHT=unobj.LIGHT",,);
+			  ,
+			  ,
+			  );
+  
 }

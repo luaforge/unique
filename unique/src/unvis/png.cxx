@@ -44,20 +44,26 @@ namespace unvis{
     STREAM* buffer=(STREAM*)png_get_io_ptr(png_ptr);
     buffer->read((char *)data,slength);
   }
+  
+# define IMAGE_DEBUG(n) cout<<#n<<endl;
+
   bool IMAGE::ReadPNG(STREAM& inbuf){// чтение PNG данных из виртуального буфера.
     inbuf.seekg(0,STREAM::beg);			//Сбрасываем буфер
     png_byte sig[NUM_SIGN];
     inbuf.read(sig,sizeof(png_byte)*NUM_SIGN);// проверяем сигнатуру, мы уже проверили,
+    //IMAGE_DEBUG(1);
     int gc=inbuf.gcount();
     if(!png_check_sig(sig,NUM_SIGN))return false;// но пусть библиотека сама это сделает на всякий случай
     png_structp png_ptr=png_create_read_struct(PNG_LIBPNG_VER_STRING,0,0,0);// создаем внутреннюю
     //структуру png для работы с файлом
+    //IMAGE_DEBUG(2);
     if(!png_ptr)return false;// создаем структуру с информацией о содержимом буффера
     png_infop info_ptr=png_create_info_struct(png_ptr);
     if(!info_ptr){// если где-то при создании произошла ошибка, убиваем внутреннюю структуру
       png_destroy_read_struct(&png_ptr,0,0);
       return false;
     }
+    //IMAGE_DEBUG(3);
     png_set_read_fn(png_ptr,(void*)&inbuf,my_png_read_func);// настраиваем библиотеку на наш
     // способ чтения данных
     png_set_sig_bytes(png_ptr,NUM_SIGN);// говорим библиотеке, что мы уже прочли NUM_SIGN байт

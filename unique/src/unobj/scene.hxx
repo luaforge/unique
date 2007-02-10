@@ -32,6 +32,8 @@ namespace unobj{//tolua_export
   protected:
     string osrc;
   public:
+    bool autoload;
+    
     //tolua_begin
     unogl::GRAPHCONTEXT* eventer;
     string src;
@@ -42,6 +44,7 @@ namespace unobj{//tolua_export
     unobj::CAMGROUP camera;   // scene cameras
     unobj::LHTGROUP light;    // scene light sources
     unobj::GROUP    object;   // scene objects
+    
     //  CHILD listen;   // слушатели сцены
     //  CHILD sound;    // источники звука сцены
     //  CHILD control;  // контроллеры сцены
@@ -51,8 +54,8 @@ namespace unobj{//tolua_export
     virtual ~SCENE();
     virtual bool update();
     virtual void event();
-    virtual void step(unbase::TIME&);
-    virtual void draw(unsigned int mode=RENDERMODE::geom|RENDERMODE::matl);
+    virtual void step(const unbase::TIME&);
+    virtual void draw(const unobj::MODE&);
     operator string();
     //tolua_end
     void drawshadow(const LIGHT&);
@@ -78,6 +81,7 @@ namespace unobj{//tolua_export
     void set(string,SCENE*);
     /**}**/
     operator string();
+    bool update();
     //tolua_end
   };//tolua_export
 }//tolua_export

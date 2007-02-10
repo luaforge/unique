@@ -8,7 +8,7 @@
 #  
 ##############################
 
-ungui.state = enable
+ungui.state = disable
 ungui.dep = unbase unmath unogl unvis unobj
 
 # linux-gcc build options

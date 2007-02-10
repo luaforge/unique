@@ -38,7 +38,8 @@ namespace uneff{//tolua_export
     FAKE();
     virtual ~FAKE();
     
-    void draw(unsigned int mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl);
+    virtual void draw_geom();
+    virtual void bind_location();
     //  void step(scalar s=10);
     operator string();
     //static string __info(string);

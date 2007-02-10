@@ -89,7 +89,7 @@ namespace unobj{
 #define ldir axlen.x*2
 #define lsep -0.0011
 
-  void CAMERA::draw(GLenum mode){
+  void CAMERA::draw_model(){
     /*
       glBegin(GL_TRIANGLE_STRIP);
       glVertex3fv(plane[1]);
@@ -98,47 +98,41 @@ namespace unobj{
       glVertex3fv(plane[2]);
       glEnd();
     */
-
-    BindLoc();
-
-    if(mode & RENDERMODE::imad){
-      glDisable(GL_LIGHTING);
-      glEnable(GL_DEPTH_TEST);
-      glDisable(GL_BLEND);
-      glColor4f(1.0,1.0,1.0,1.0);
-      glLineWidth(1.0);
-      glBegin(GL_LINES);
-      // Обод
-      glVertex3f(-lsize, lsize, lsep);
-      glVertex3f( lsize, lsize, lsep);
-      glVertex3f( lsize, lsize, lsep);
-      glVertex3f( lsize,-lsize, lsep);
-      glVertex3f( lsize,-lsize, lsep);
-      glVertex3f(-lsize,-lsize, lsep);
-      glVertex3f(-lsize,-lsize, lsep);
-      glVertex3f(-lsize, lsize, lsep);
-      // Объем
-      glVertex3f(   0.0,   0.0,  0.0);
-      glVertex3f( lsize, lsize, lsep);
-      glVertex3f(   0.0,   0.0,  0.0);
-      glVertex3f( lsize,-lsize, lsep);
-      glVertex3f(   0.0,   0.0,  0.0);
-      glVertex3f(-lsize,-lsize, lsep);
-      glVertex3f(   0.0,   0.0,  0.0);
-      glVertex3f(-lsize, lsize, lsep);
-      // Вектор направления камеры
-      //glVertex3f(   0.0,   0.0,   0.0);
-      //glVertex3f(   0.0,   0.0, -ldir);
-      // Стрелка
-      //glVertex3f( 0.0,     0.0, -ldir         );
-      //glVertex3f( 0.0, axend.y, -ldir+axend.x );
-      //glVertex3f( 0.0,     0.0, -ldir         );
-      //glVertex3f( 0.0,-axend.y, -ldir+axend.x );
-      glEnd();
-      glDepthFunc(GL_LESS);
-      glEnable(GL_LIGHTING);
-    }
-    uBindLoc();
+    glDisable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    glColor4f(1.0,1.0,1.0,1.0);
+    glLineWidth(1.0);
+    glBegin(GL_LINES);
+    // Camera frame
+    glVertex3f(-lsize, lsize, lsep);
+    glVertex3f( lsize, lsize, lsep);
+    glVertex3f( lsize, lsize, lsep);
+    glVertex3f( lsize,-lsize, lsep);
+    glVertex3f( lsize,-lsize, lsep);
+    glVertex3f(-lsize,-lsize, lsep);
+    glVertex3f(-lsize,-lsize, lsep);
+    glVertex3f(-lsize, lsize, lsep);
+    // Camera area
+    glVertex3f(   0.0,   0.0,  0.0);
+    glVertex3f( lsize, lsize, lsep);
+    glVertex3f(   0.0,   0.0,  0.0);
+    glVertex3f( lsize,-lsize, lsep);
+    glVertex3f(   0.0,   0.0,  0.0);
+    glVertex3f(-lsize,-lsize, lsep);
+    glVertex3f(   0.0,   0.0,  0.0);
+    glVertex3f(-lsize, lsize, lsep);
+    // Camera vector
+    //glVertex3f(   0.0,   0.0,   0.0);
+    //glVertex3f(   0.0,   0.0, -ldir);
+    // Arrow
+    //glVertex3f( 0.0,     0.0, -ldir         );
+    //glVertex3f( 0.0, axend.y, -ldir+axend.x );
+    //glVertex3f( 0.0,     0.0, -ldir         );
+    //glVertex3f( 0.0,-axend.y, -ldir+axend.x );
+    glEnd();
+    glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
   }
   CAMERA::operator string(){
     return string("CAMERA{}");
@@ -208,12 +202,11 @@ namespace unobj{
   CAMGROUP::operator string(){
     return "CAMGROUP{}";
   }
-
-  __COUNT_IMPLEMENTATION_(unobj::CAMGROUP,
+  
+  __GROUP_IMPLEMENTATION_(unobj::CAMGROUP,
 			  unobj::CAMERA,
-			  camera,
-			  "return unobj.CAMGROUP()",
-			  "local CAMERA=unobj.CAMERA",
+			  ,
 			  ,
 			  );
+  
 }

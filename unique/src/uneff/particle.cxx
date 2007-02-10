@@ -26,7 +26,6 @@
 
 namespace uneff{
   PARTICLE::PARTICLE():OBJECT(){
-    rtype=unobj::RENDERTYPE::blend;
     mass=1.0f;
     gravity=vec3::null;
     num=1;
@@ -39,8 +38,8 @@ namespace uneff{
     popul=1.0f; // Одна частица должна быть, иначе это будет не популяция
   }
 
-  PARTICLE::~PARTICLE(){
-  }
+  PARTICLE::~PARTICLE(){}
+  
   void PARTICLE::drawpart(PART* node){// Рисовка  i частицы
     glColor4fv(node->color);
     vec3 p=node->pos;
@@ -60,22 +59,22 @@ namespace uneff{
       glTexCoord2d(0,1); glVertex2f(-psize.x, psize.y);
       glTexCoord2d(0,0); glVertex2f(-psize.x,-psize.y);
       glTexCoord2d(1,0); glVertex2f( psize.x,-psize.y);
-      num_tri+=2;
+      triangles+=2;
       break;
     case ttria:
       glTexCoord2d(1,1); glVertex2f(psize.x,psize.y);
       glTexCoord2d(0,1); glVertex2f(psize.x,psize.y);
       glTexCoord2d(1,0); glVertex2f(psize.x,psize.y);
-      num_tri+=1;
+      triangles+=1;
       break;
     case tline:
       glTexCoord2d(1,1); glVertex2f(psize.x,psize.y);
       glTexCoord2d(0,1); glVertex2f(psize.x,psize.y);
-      num_tri+=1;
+      triangles+=1;
       break;
     case tpoint:
       glVertex3f(0.0,0.0,0.0);
-      num_tri+=1;
+      triangles+=1;
       break;
     }
     glEnd();
@@ -87,15 +86,12 @@ namespace uneff{
 
   int numrend=0;
 
-  void PARTICLE::draw(GLenum mode){
-    if(!visible)return;
-    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  void PARTICLE::bind_location(){
+    glPushMatrix();
+  }
 
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
-  
-    num_tri=0;
+  void PARTICLE::draw_geom(const unobj::MODE&m){
+    triangles=0;
     //glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
     //glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -130,14 +126,6 @@ namespace uneff{
       }else break;
     }
     OGL_DEBUG();
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-  
-    OGL_DEBUG();
-  
-    glPopClientAttrib();
   }
 
 #define RANDVAL(f) 0.01*(rand()%200-100)*f

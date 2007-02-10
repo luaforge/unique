@@ -47,7 +47,7 @@ namespace unvis{
     unbase::MULTNAME pn(name);
     for(char i=0;i<~pn;i++){
       RESOURCE r;
-      if(parent)r=undata::resource(parent->fullhiername(pn(i)),"texturedata");
+      //if(parent)r=undata::resource(parent->fullhiername(pn(i)),"texturedata");
       if(r.type!=RESOURCE::stm)r=undata::resource(pn(i),"texturedata");
       if(r.type==RESOURCE::stm&&r.access&STREAM::inp){
 	STREAM&s=r.stream(STREAM::inp);

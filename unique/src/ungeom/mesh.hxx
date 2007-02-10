@@ -16,55 +16,62 @@ Author:
 **********************************************************/
 
 #pragma once
-//#include"bsp.hxx"
-//#include"portal.hxx"
-
 #include"unobj.hxx"
 
-#define MESH_TEST_MODE
+//#define MESH_TEST_MODE
 
 namespace ungeom{//tolua_export
   /*
    *  Poligonal geometry chunk
    */
-  class MCHUNK{
+  class CHUNK{//tolua_export
   public:
+    //tolua_begin
     enum { // type of chunk
-      vert=0x01,// vertexes
-      norm=0x02,// normals
-      binm=0x04,// binormals
-      tang=0x05,// tangents
-      texc=0x03,// texture coords
-      face=0x06,// faces
-      matl=0x07,// materials
-      bone=0x08 // bones
+      vertex=0x0,   // vertexes
+      normal=0x1,   // normals
+      binormal=0x2, // binormals
+      tangent=0x3,  // tangents
+      texcoord=0x4, // texture coords
+      element=0x5,  // face elements (triangle's vertex indexes)
+      material=0x6, // material's indexes
+      bone=0x7,     // bone's indexes
+      weight=0x8,   // weights
     };
     // Chunk properties
-    unsigned int  id;   // Chunk identifier
-    unsigned int  link; // Target link
-    unsigned char type; // Chunk type
-    unsigned int  size; // Data size
-    unsigned int  lim;  // Data byte count
-    unsigned char format; // Component format (or byte per number)
-    unsigned char compon; // Count components per element
-    unsigned char aux;
-    unsigned int  glid; // OpenGL identifier
-    void*         data; // Data pointer
-    void*         offset;
+    /* field :  full 
+       size  : segment
+       _____ : length
+       _______________*/
+    /*   4   :    4   */unsigned int  id;     // Attrib identifier
+    /*   4   :    8   */unsigned int  surf;   // Surface identifier
+    /*   1   :    9   */unsigned char type;   // Chunk type
+    /*   1   :   10   */unsigned char seq;    // Sequence number
+    /*   1   :   11   */unsigned char format; // Component format (or byte per number)
+    /*   1   :   12   */unsigned char compon; // Count components per element
+    /*   4   :   16   */unsigned int  size;   // Data size
+    unsigned int lim;  // Data byte count
+    unsigned int glid; // OpenGL identifier
+    void*        data; // Data pointer
+    void*        offset; // Data offset
     // Chunk methods
-    MCHUNK();
-    ~MCHUNK();
+    CHUNK();
+    ~CHUNK();
     void init();
     void dest();
-  };
+    //tolua_end
+  };//tolua_export
   /*
    *  Poligonal surface
    */
-  class MSURF{
+  class SURFACE{//tolua_export
   public:
-    vector<MCHUNK*> attrib;
+    vector<CHUNK*> attrib;
+    //tolua_begin
     bool smooth;
+    unvis::MATERIAL* mat;
     unsigned int maxangle;
+    //tolua_end
     vector<unsigned int> nocoincidedvertex;
     vector<vector<unsigned int> > coincidedvertex; // Coincided vertex table
     /*
@@ -120,9 +127,9 @@ namespace ungeom{//tolua_export
      *
      */
   public:
-    MSURF();
-    ~MSURF();
-    MCHUNK* findattrib(char type);
+    //tolua_begin
+    SURFACE();
+    ~SURFACE();
     void init();
     void dest();
     void draw();
@@ -132,119 +139,76 @@ namespace ungeom{//tolua_export
     void calc_coincidedvertexes();
     void calc_againsttriangles();
     void calc_openedges();
-
-    void casteshadow(const vec3&);
-
-    unsigned int chunks(){return attrib.size();}
-    MCHUNK* chunk(unsigned int i){
-      if(i>=0&&i<attrib.size())return attrib[i];else return NULL;
-    }
-  
+    //tolua_end
+    CHUNK* findattrib(char type);
+    //void casteshadow(const vec3&);
+    //tolua_begin
+    unsigned int operator~();
+    void operator()(int&/** k=-1 asnil**/,ungeom::CHUNK*&);
+    /**tolua_getindex {**/
+    ungeom::CHUNK* get(int);
+    /**}**/
+    ///**tolua_setindex {**/
+    //void set(int,ungeom::SURFACE*);
+    ///**}**/
+    //tolua_end
     vector<unsigned int>&coincidedvertexes(vec3); // Return coincided vertexes array
+  };//tolua_export
   
-  };
-
-  class MDATA;
-  /*
-   *  Mesh processor
-   */
-  class MPROC{
-  protected:
-    MDATA* data;
-  public:
-    MPROC();
-    ~MPROC();
-    void init(MDATA*);
-    void compile();
-    void draw();
-  };
-  /*
-   *  Poligonal geometry loader
-   */
-  class MDATA{
-  protected:
-    static map<string,MDATA*> mesh; // loaded meshes
-    unsigned int used; // Num of geted
-  public:
-    struct TRIANGLENODE{
-      unsigned int t; // triangle number
-      unsigned int s; // surface number
-    };
-    struct AGAINSTTRIANGLE{
-      union{
-	struct{
-	  TRIANGLENODE a,b,c;
-	};
-	TRIANGLENODE __t_[3];
-      };
-      inline TRIANGLENODE&operator[](unsigned char i){return __t_[i];}
-    };
-  public:
-    static bool Enable_VBO; // Vertex Buffer Object
-    // get / put
-    static MDATA* get(string);
-    static void put(MDATA*);
-    // constructor
-    string src;
-    unbase::STATE state;
-    bool bsp;
-    vector<MCHUNK> chunk;
-    vector<MSURF> surface;
-    MDATA();
-    ~MDATA();
-    // loading / saving
-    virtual bool load(undata::STREAM&);
-    bool GenData();
-    // Surface
-    unsigned int surfs(){return surface.size();}
-    MSURF* surf(unsigned int n){if(n>=0&&n<surface.size())return &surface[n];else return NULL;}
-  };
-
-  unsigned int GLIndexType(unsigned char); // Выставляет тип индеска по размеру
-  unsigned int GLDrawPrim(unsigned char);  // Выставляет тип примитивов по числу компонент
+  unsigned int GLIndexType(unsigned char); // type of index from num of bytes
+  unsigned int GLDrawPrim(unsigned char);  // type of primitive from num of components
   unsigned int GLIndex2uint(void* data, unsigned char node);
   
   /*
+   *  Poligonal geometry loader
+   */
+  class MESH;
+  /*
    *  Mesh loader
    */
-  class MLOADER{
+  class LOADER{
   public:
-    typedef bool (*METHOD)(MDATA&,undata::STREAM&);
+    typedef bool (*METHOD)(LOADER&,undata::STREAM&);
     typedef vector<METHOD>::iterator ITER;
   protected:
     static vector<METHOD> loader;
   public:
-    MLOADER();
-    ~MLOADER();
+    unbase::STATE state;
+    vector<CHUNK*> chunk;
+    
+    LOADER();
+    ~LOADER();
     static void Register(METHOD);
     static void init();
-    static bool load(MDATA&,undata::STREAM&);
-  };
-  
-  class MDISPATCHER{
-  public:
-    MDISPATCHER();
-    virtual ~MDISPATCHER();
+    static bool load(MESH&,undata::STREAM&);
+    bool gen(MESH&);
   };
   
   class MESH: public unobj::OBJECT{//tolua_export
   protected:
     string osrc;
   public:
+    static bool VBO;//tolua_export
+    vector<SURFACE*> surface;
     //tolua_begin
-    /**tolua_readonly **/MDATA* data;
+    unsigned int operator~();
+    void operator()(int& /** k=-1 asnil**/,ungeom::SURFACE*&);
+    /**tolua_getindex {**/
+    ungeom::SURFACE* get(int);
+    /**}**/
+    ///**tolua_setindex {**/
+    //void set(int,ungeom::SURFACE*);
+    ///**}**/
+    
     string src;
     
     MESH();
     virtual ~MESH();
-    
-    void draw(unsigned int mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl);
+    void draw_geom(const unobj::MODE&);
     bool update();
     operator string();
-    
-    int maxvertexattribs;
     //tolua_end
-    void casteshadow(const vec3&);
+    //void casteshadow(const vec3&);
   };//tolua_export
 
 #define tridex(base,our) (base<2-our?base+our+1:base+our-2)

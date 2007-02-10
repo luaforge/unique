@@ -69,6 +69,7 @@ namespace unogl{//tolua_export
     virtual void bind();  // Binding context (similar make current)
     virtual void ubind(); // Unbinding context (similar swap buffer or flush buffer)
     virtual void clear(); // Clearing context
+    operator string();
   }; 
 }
 //tolua_end

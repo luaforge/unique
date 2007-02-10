@@ -22,15 +22,15 @@ namespace unmath{
     inline operator const scalar*() const{ return array; }
     //tolua_begin
     // Computations
-    const vec3 operator*(const mat3& m)const;
-    const vec3 operator*(const mat4& m)const;
-    inline const vec3 operator*(scalar f)const{ return vec3(x*f,y*f,z*f); }
-    inline const vec3 operator/(scalar f)const{ return vec3(x/f,y/f,z/f); }
-    inline const vec3 operator+(const vec3& v)const{ return vec3(x+v.x,y+v.y,z+v.z); }
-    inline const vec3 operator+(const scalar f)const{ return vec3(x+f, y+f, z+f); }  // Add scalar
-    inline const vec3 operator-()const{return vec3(-x,-y,-z);}
-    inline const vec3 operator-(const vec3& v)const{ return vec3(x-v.x, y-v.y, z-v.z); }
-    inline const vec3 operator^(const vec3& v)const{ vec3 r; return cross_vec3_vec3(r,*this,v); } // Cross product
+    vec3 operator*(const mat3& m)const;
+    vec3 operator*(const mat4& m)const;
+    inline vec3 operator*(scalar f)const{ return vec3(x*f,y*f,z*f); }
+    inline vec3 operator/(scalar f)const{ return vec3(x/f,y/f,z/f); }
+    inline vec3 operator+(const vec3& v)const{ return vec3(x+v.x,y+v.y,z+v.z); }
+    inline vec3 operator+(const scalar f)const{ return vec3(x+f, y+f, z+f); }  // Add scalar
+    inline vec3 operator-()const{return vec3(-x,-y,-z);}
+    inline vec3 operator-(const vec3& v)const{ return vec3(x-v.x, y-v.y, z-v.z); }
+    inline vec3 operator^(const vec3& v)const{ vec3 r; return cross_vec3_vec3(r,*this,v); } // Cross product
     inline scalar operator*(const vec3& v)const{ scalar r; return dot_vec3_vec3(r,*this,v); } // Dot product
     inline const vec3 operator%(const vec3& v)const{return vec3(x*v.x,y*v.y,z*v.z);}// Mult product
     inline scalar operator*(const vec4& v) const;

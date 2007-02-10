@@ -21,10 +21,10 @@ namespace ungeom{
   
     void draw();
   };
-
-  class SECTORER: public MPROC{
+  
+  class PSRENDER: public unobj::RENDER{
   protected:
   public:
-    void compile(MDATA&);
+    void compile(MESH&);
   };
 }

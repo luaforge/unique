@@ -75,7 +75,8 @@ namespace unvis{//tolua_export
     POOL pool;
     bool autoload;
   public:
-    string fullhiername(string n="");
+    void chautoload(bool);
+    //string fullhiername(string n="");
     ITER begin();
     ITER end();
     //tolua_begin
@@ -92,6 +93,7 @@ namespace unvis{//tolua_export
     virtual operator string();
     //tolua_end
     SHADER* operator[](string);
+    virtual bool update();
   };//tolua_export
   
   /*
@@ -214,15 +216,14 @@ namespace unvis{//tolua_export
   
   class GLSLPROG: public SHADER{//tolua_export
   public:
-    typedef vector<GLSLSHADER*> CONT;
-    typedef vector<GLSLSHADER*>::iterator ITER;
+    typedef map<string,GLSLSHADER*> POOL;
+    typedef POOL::iterator ITER;
   protected:
     GLSLSHADER::UNIFORM vars;
     bool upd;     // Update link
-    GLuint osize; // Count Shaders
   public:
     GLuint obj;   // Program Object ARB
-    CONT array;
+    POOL pool;
     
     //tolua_begin
     GLSLUNIFORM uniform;
@@ -236,10 +237,10 @@ namespace unvis{//tolua_export
     void ubind();
 
     /**tolua_getindex {**/
-    GLSLSHADER* get(int);
+    GLSLSHADER* get(string);
     /**}**/
     /**tolua_setindex {**/
-    void set(int, GLSLSHADER*);
+    void set(string,GLSLSHADER*);
     /**}**/
     
     virtual operator string();
@@ -249,9 +250,9 @@ namespace unvis{//tolua_export
   protected:
     bool link();
     
-    bool detach(GLuint);
-    bool attach(GLuint,GLSLSHADER*);
-    GLSLSHADER* attached(GLuint);
+    bool detach(string);
+    bool attach(string,GLSLSHADER*);
+    GLSLSHADER* attached(string);
 
     void defaultattribs();
     void defaultparameters();

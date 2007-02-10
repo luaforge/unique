@@ -110,10 +110,11 @@ namespace unfbo{
     ret.erase(ret.length()-1);
     return ret;
   }
-  __COUNT_IMPLEMENTATION_(unfbo::RBGROUP,
+  
+  __GROUP_IMPLEMENTATION_(unfbo::RBGROUP,
                           unfbo::RENDERBUFFER,
-                          context,
-                          "return unobj.RBGROUP()",
-                          "local RENDERTEXTURE=unfbo.RENDERTEXTURE",,);
+                          ,
+                          ,
+			  );
   
 }

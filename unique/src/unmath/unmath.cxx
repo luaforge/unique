@@ -148,16 +148,16 @@ vec3 mat3::at(){ return vec3(vec3_at)*(mat3&)(*this); }
 vec3 mat3::up(){ return vec3(vec3_up)*(mat3&)(*this); }
 vec3 mat3::dir(){ return vec3(vec3_dir)*(mat3&)(*this); }
 */
-const vec3 vec3::operator*(const mat3& M)const{
+vec3 vec3::operator*(const mat3& M)const{
   return vec3(M.a00*x+M.a10*y+M.a20*z,
 	      M.a01*x+M.a11*y+M.a21*z,
 	      M.a02*x+M.a12*y+M.a22*z);
 }
-const vec3 vec3::operator*(const mat4& M)const{
+vec3 vec3::operator*(const mat4& M)const{
   return vec3(vec4(*this)*M);
 }
 
-const vec4 vec4::operator*(const mat4& M)const{
+vec4 vec4::operator*(const mat4& M)const{
   return vec4(M.a00*x+M.a10*y+M.a20*z+M.a30*w,
 	      M.a01*x+M.a11*y+M.a21*z+M.a31*w,
 	      M.a02*x+M.a12*y+M.a22*z+M.a32*w,
@@ -354,7 +354,7 @@ scalar tb_project_to_sphere(scalar r, scalar x, scalar y){
 }
 
 quat euler_2_quat(vec3 e){
-  e*=0.5; return quat(sin(e.a),0,0,cos(e.a))*quat(0,sin(e.b),0,cos(e.b))*quat(0,0,sin(e.c),cos(e.c));
+  e*=0.5; return (quat(sin(e.a),0,0,cos(e.a))*quat(0,sin(e.b),0,cos(e.b))*quat(0,0,sin(e.c),cos(e.c))).norm();
 }
 
 quat sph_2_quat(vec3 s){

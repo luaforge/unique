@@ -38,18 +38,36 @@ namespace unvis{
     return "SHADERPROG{}";
   }
   
-  SHDGROUP::SHDGROUP():autoload(true){}
-  SHDGROUP::SHDGROUP(bool al):autoload(al){}
+  SHDGROUP::SHDGROUP():SHADER(),autoload(false){}
+  SHDGROUP::SHDGROUP(bool al):SHADER(),autoload(al){}
   SHDGROUP::~SHDGROUP(){}
   
   __GROUP_IMPLEMENTATION_(unvis::SHDGROUP,
 			  unvis::SHADER,
-			  shader,
-			  "return unvis.SHDGROUP()",
-			  "local SHADER=unvis.SHADER\n"
-			  "local GLSLPROG=unvis.GLSLPROG\n"
-			  "local GLSLVERT=unvis.GLSLVERT\n"
-			  "local GLSLFRAG=unvis.GLSLFRAG",,);
+			  __GROUP_HIER_TRY_GET_CXXCODE_(unvis::SHDGROUP,
+							unvis::SHADER,
+							shader,
+							"return unvis.SHDGROUP(true)",
+							"local SHADER=unvis.SHADER\n"
+							"local sint=unvis.sint\n"
+							"local GLSLPROG=unvis.GLSLPROG\n"
+							"local GLSLVERT=unvis.GLSLVERT\n"
+							"local GLSLFRAG=unvis.GLSLFRAG"
+							),
+			  __GROUP_HIER_SET_CXXCODE_(),
+			  __GROUP_HIER_DEL_CXXCODE_()
+			  );
+
+  void SHDGROUP::chautoload(bool al){
+    for(ITER i=begin();i!=end();i++)chautoload(al);
+    autoload=al;
+  }
+
+  bool SHDGROUP::update(){
+    for(ITER i=begin();i!=end();i++){
+      i->second->update();
+    }
+  }
 
   SHDGROUP::operator string(){
     string r="SHDGROUP{";
@@ -98,6 +116,8 @@ namespace unvis{
     int param;								\
     if((param=prog->uniformlocation(name))>=0){				\
       glfunc;								\
+      OGL_DEBUG();							\
+      cout<<"Set shader uniform[\""<<name<<"\"]="<<gltype<<endl;	\
       type[name]=gltype;						\
     }									\
     glUseProgram(0);							\
@@ -123,8 +143,8 @@ namespace unvis{
   GLSLSHADER::~GLSLSHADER(){if(obj)glDeleteShader(obj);}
   bool GLSLSHADER::update(){
     bool t=otext!=text,s=osrc!=src;
-    if(t || s){
-      if(s && !t){ // if changed source only then reload source
+    if(t||s){
+      if(s&&!t){ // if changed source only then reload source
 	load();
 	compile();
 	param();
@@ -144,7 +164,7 @@ namespace unvis{
     //if(parent)r=undata::resource(parent->fullhiername(src),"shaderdata");
     if(r.type!=RESOURCE::stm)r=undata::resource(src,"shaderdata");
     if(r.type==RESOURCE::stm&&r.access&STREAM::inp){
-      STREAM s=r.stream();
+      STREAM& s=r.stream();
       text=s.read();
       r.stream(s);
       return true;
@@ -195,35 +215,35 @@ namespace unvis{
   GLSLFRAG::~GLSLFRAG(){glDeleteShader(obj);}
   GLSLFRAG::operator string(){return string("GLSLFRAG(\"")+src+"\",\""+text+"\")";}
   
-  GLSLSHADER* GLSLPROG::get(int k){
+  GLSLSHADER* GLSLPROG::get(string k){
     return attached(k);
   }
-  void GLSLPROG::set(int k, GLSLSHADER* n){
-    detach(k); attach(k,n);
+  void GLSLPROG::set(string k, GLSLSHADER* n){
+    detach(k); attach(k,n); update();
   }
 
-  GLSLPROG::GLSLPROG():SHADER(),state(),array(0),uniform(this){obj=glCreateProgram();}
+  GLSLPROG::GLSLPROG():SHADER(),state(),uniform(this){obj=glCreateProgram();}
   GLSLPROG::~GLSLPROG(){glDeleteProgram(obj);}
   void GLSLPROG::bind(){update();glUseProgram(obj);binddefaultparameters();}
   void GLSLPROG::ubind(){glUseProgram(0);}
-  bool GLSLPROG::detach(GLuint i){
-    if(i<0 || i>=array.size())return false;
-    if(array[i]!=NULL)glDetachShader(obj,array[i]->obj);
-    return true;
-  }
-  bool GLSLPROG::attach(GLuint i,GLSLSHADER* s){
-    if(i<0)return false;
-    upd=true;
-    if(i>=array.size())array.resize(i+1);
-    array[i]=s;
-    glAttachShader(obj,s->obj);
-    state=STATE(true,string("attach"));
+  bool GLSLPROG::detach(string i){
+    if(pool.find(i)==pool.end())return false;
+    if(pool[i]!=NULL)glDetachShader(obj,pool[i]->obj);
     OGL_DEBUG();
+    pool.erase(i);
     return true;
   }
-  GLSLSHADER* GLSLPROG::attached(GLuint i){
-    if(i<0 || i>=array.size())return NULL;
-    return array[i];
+  bool GLSLPROG::attach(string i,GLSLSHADER* s){
+    upd=true;
+    pool[i]=s;
+    glAttachShader(obj,s->obj);
+    OGL_DEBUG();
+    state=STATE(true,string("attach"));
+    return true;
+  }
+  GLSLSHADER* GLSLPROG::attached(string i){
+    if(pool.find(i)==pool.end())return NULL;
+    return pool[i];
   }
   bool GLSLPROG::link(){
     GLchar str[4096];
@@ -254,7 +274,7 @@ namespace unvis{
   }
 
   bool GLSLPROG::update(){
-    for(int i=0;i<array.size();i++)if(array[i])if(array[i]->update())upd=true;
+    for(ITER i=pool.begin();i!=pool.end();i++)if(i->second)if(i->second->update())upd=true;
     if(upd)link();
     upd=false;
     return true;
@@ -298,7 +318,7 @@ namespace unvis{
     }
     OGL_DEBUG();
     /*
-    // Выставляем текстурные карты по именам
+    
     GLint p=0;
     if((p=glGetUniformLocation(obj,"diffusemap"))>=0)  glUniform1i(p,0);
     if((p=glGetUniformLocation(obj,"ambientmap"))>=0)  glUniform1i(p,1);
@@ -307,7 +327,7 @@ namespace unvis{
     if((p=glGetUniformLocation(obj,"spacularmap"))>=0) glUniform1i(p,2);
     if((p=glGetUniformLocation(obj,"emissionmap"))>=0) glUniform1i(p,3);
     if((p=glGetUniformLocation(obj,"detailmap"))>=0)   glUniform1i(p,3);
-    OGLEXT::CheckGLError(__FILE__,__LINE__,"GLSLPROG::link");
+    OGL_DEBUG();
     */
 #ifdef SESHADER_FAST_UNIFORM
     for(GLuint s=0;s<array.size();s++){
@@ -342,7 +362,7 @@ namespace unvis{
     // Named vertex attribs
     glBindAttribLocation(obj,12,"glTangent");  // Tangent  vector
     glBindAttribLocation(obj,13,"glBinormal"); // Binormal vector
-    glBindAttribLocation(obj,14,"glNormal"); // Normal   vector
+    glBindAttribLocation(obj,14,"glNormal");   // Normal   vector
     OGL_DEBUG();
     glBindAttribLocation(obj,12,"glTangentMatrix"); // Tangent matrix
     glBindAttribLocation(obj,13,"glTangentMatrix");

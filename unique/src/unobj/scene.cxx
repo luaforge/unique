@@ -22,40 +22,39 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "scene.hxx"
+#include"scene.hxx"
 
 namespace unobj{
-
-  SCENE::SCENE():eventer(NULL){}
-  SCENE::~SCENE(){}
   
-  void SCENE::draw(GLenum mode){
+  SCENE::SCENE():eventer(NULL),autoload(true),object(),camera(),light(),material(true),texture(true),shader(true){
+    object.scene=this;
+  }
+  SCENE::~SCENE(){
+    cout<<"delete scene: my "<<endl;
+  }
+  
+  void SCENE::draw(const unobj::MODE&mode){
+    /*
     glEnable(GL_DEPTH_TEST);
+    
     light.bind();
+    
     //cout<<"Begin draw"<<endl;
-    for(GROUP::ITER i=object.begin();i!=object.end();i++){// Рендерим не прозрачные объекты
+    for(GROUP::ITER i=object.begin();i!=object.end();i++){
       OBJECT* oo=(*i).second;
-      if(oo->rtype==RENDERTYPE::normal){
-	//cout<<"Draw "<<(*i).first<<endl;
+      //if(oo->mat.blend){
+	cout<<"Draw normal "<<(*i).first<<endl;
 	oo->draw(mode);
-      }
+	//}
     }
     
-    vec3 dir=unogl::gl_RotateProjectionMatrix()*vec3::pz; // Направление взгляда
-    /*
-      Алгоритм следующий: суть сводится к сортировке по дальности от камеры
-      Создается очередь объектов от дальних к ближним.
-      Дальность каждого нового объекта сверяется с имеющимися в очереди,
-      если объект дальше чем проверяемый, то он помещается перед ним и
-      помечается как проверенный, иначе если он оказался не помеченным
-      (в случае когда он ближе всех или не с чем еще сверять) то он
-      помещается в конец.
-    */
+    vec3 dir=unogl::gl_RotateProjectionMatrix()*vec3::pz;
+    
     //glDepthMask(GL_FALSE);
     deque<OBJECT*> objs;
-    for(GROUP::ITER i=object.begin();i!=object.end();i++){// Рендерим полупрозрачные объекты
+    for(GROUP::ITER i=object.begin();i!=object.end();i++){
       OBJECT* oo=(*i).second;
-      if(oo->rtype==RENDERTYPE::blend){
+      if(oo->mat.blend){
 	bool inserted=false;
 	scalar od=oo->pos*dir;
 	//scalar od=(co->pos-oo->pos).len();
@@ -69,7 +68,7 @@ namespace unobj{
 	    break;
 	  }
 	}
-	if(!inserted)objs.push_back(oo); // если еще нет объектов
+	if(!inserted)objs.push_back(oo);
       }
     }
   
@@ -79,7 +78,7 @@ namespace unobj{
     }
   
     for(deque<OBJECT*>::iterator id=objs.begin();id!=objs.end();id++){
-      //cout<<"Draw "<<(*id)->name<<endl;
+      cout<<"Draw blend "<<(*id)->name<<endl;
       (*id)->draw(mode);
     }
     glDepthMask(GL_TRUE);
@@ -88,9 +87,11 @@ namespace unobj{
     //  co->ubind();
     //}
     //cout<<"End draw"<<endl;
+    */
   }
 
   void SCENE::drawshadow(const LIGHT& l){
+    /*
     vec3 lpos=l.locatematrix()*vec3();
     unsigned int mean_count=0;
     vec4 mean_intensity(vec4::null);
@@ -126,7 +127,7 @@ namespace unobj{
     // Caste all shadows
     for(GROUP::ITER i=object.begin();i!=object.end();i++){
       OBJECT* oo=(*i).second;
-      if(oo->rtype==RENDERTYPE::normal)oo->casteshadow(lpos);
+      if(!oo->mat.blend)oo->casteshadow(lpos);
     }
     // Difference Camera plane
     mat4 pm;
@@ -172,16 +173,22 @@ namespace unobj{
     glPopMatrix();
 
     glPopAttrib();
+    */
   }
   
   void SCENE::event(){
     if(eventer)object.event(*eventer);
   }
-  void SCENE::step(unbase::TIME&t){
+  void SCENE::step(const unbase::TIME&t){
     object.step(t);
   }
   bool SCENE::update(){
+    autoload=true;
     object.update();
+    material.update();
+    texture.update();
+    shader.update();
+    autoload=false;
   }
   SCENE::operator string(){return string("SCENE(")+")";}
   
@@ -191,34 +198,23 @@ namespace unobj{
   SCNGROUP::~SCNGROUP(){
     
   }
+  bool SCNGROUP::update(){
+    for(ITER i=begin();i!=end();i++)i->second->update();
+  }
   SCNGROUP::operator string(){
     string ret="{";
     for(ITER i=pool.begin();i!=pool.end();i++){ret+=(*i).first+",";}
     if(ret[ret.length()-1]==',')ret[ret.length()-1]='}';else ret+="}";
     return ret;
   }
-  __COUNT_IMPLEMENTATION_(unobj::SCNGROUP,
+  __GROUP_IMPLEMENTATION_(unobj::SCNGROUP,
 			  unobj::SCENE,
-			  scene,
-			  "return unobj.SCNGROUP()",
-			  "local SCENE=unobj.SCENE",,);
-  /*
-    string SCENES::next(string name){
-    if(name=="")return (*array.begin()).first;
-    ITER obj=array.find(name);
-    if(obj==array.end())return "";
-    obj++;
-    if(obj==array.end())return "";
-    return (*obj).first;
-    }
-    SCENE* SCENES::get(string name){
-    if(array.find(name)!=array.end())return array[name];else return NULL;
-    }
-    void SCENES::set(string name,SCENE* node){
-    if(node){
-    array.insert(std::make_pair(name,node));
-    node->name=name;
-    }else array.erase(name);
-    }
-  */
+			  __GROUP_TRY_GET_CXXCODE_(unobj::SCNGROUP,
+						   unobj::SCENE,
+						   scene,
+						   "local SCENE=unobj.SCENE"
+						   ),
+			  cout<<"scene set"<<endl,
+			  );
+
 }

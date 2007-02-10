@@ -36,10 +36,10 @@ namespace unvis{
   
   void TEX2D::load(){
     RESOURCE r;
-    if(parent)r=undata::resource(parent->fullhiername(src),"texturedata");
+    //if(parent)r=undata::resource(parent->fullhiername(src),"texturedata");
     if(r.type!=RESOURCE::stm)r=undata::resource(src,"texturedata");
     if(r.type==RESOURCE::stm&&r.access&STREAM::inp){
-      STREAM s=r.stream();
+      STREAM& s=r.stream();
       IMAGE m;
       if(m.load(s)){
 	bind();

@@ -26,26 +26,20 @@
 
 namespace uneff{
   using namespace unogl;
-  //GLuint PARTICLE::rendtype=PARTICLE::blend;
-
-  FAKE::FAKE():OBJECT(),size(0.1,0.1){
-    rtype=unobj::RENDERTYPE::blend;
-  }
+  
+  FAKE::FAKE():OBJECT(),size(0.1,0.1){}
   FAKE::~FAKE(){}
-
-  void FAKE::draw(GLenum mode){
-    if(!visible)return;
-    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
-    //  glDisable(GL_LIGHTING);
+  
+  void FAKE::bind_location(){
     glPushMatrix();
     mat4 trnmtx,posmtx; posmtx.translate(pos);
     if(target)trnmtx.translate(target->pos);
     trnmtx*=posmtx;
     glMultMatrixf(trnmtx);
     glMultMatrixf(unogl::gl_RotateProjectionMatrix());
+  }
+
+  void FAKE::draw_geom(){
     glShadeModel(GL_SMOOTH);
     //  glDisable(GL_LIGHTING);
     glEnable(GL_BLEND);
@@ -62,34 +56,9 @@ namespace uneff{
     glMultiTexCoord2f(0,1.0,0.0); glVertex2f(-half.x, half.y);
     glEnd();
     OGL_DEBUG();
-    glPopMatrix();
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    OGL_DEBUG();
-    glPopClientAttrib();
   }
-
-  //void FAKE::step(scalar s){
-  //  stepHandler(s);
-  //}
-
+  
   FAKE::operator string(){
     return string("FAKE()");
   }
-  /*
-    string FAKE::__info(string lang){
-    if(lang=="ru_RU"){
-    string("Класс FAKE (фэйк эффект, вспышка)"EL
-    ">Методы:"EL
-    "  * FAKE()    - конструктор по умолчанию"EL
-    ">Свойства:"EL
-    "  * vec2 size - размер вспышки"EL
-    "  ....продолжение следует...."EL);
-    }else{
-    return string();
-    }
-    }
-  */
 }

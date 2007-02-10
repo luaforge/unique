@@ -31,21 +31,42 @@ namespace unvis{
   using namespace undata;
   using namespace unogl;
   
-  MATGROUP::MATGROUP():MATERIAL(),autoload(true){}
+  MATGROUP::MATGROUP():MATERIAL(),autoload(false){}
   MATGROUP::MATGROUP(bool al):MATERIAL(),autoload(al){}
-  MATGROUP::~MATGROUP(){}
-
+  MATGROUP::~MATGROUP(){
+    cout<<"delete metarial group: "<<name<<endl;
+  }
+  
   __GROUP_IMPLEMENTATION_(unvis::MATGROUP,
 			  unvis::MATERIAL,
-			  material,
-			  "return unvis.MATGROUP()",
-			  "local MATERIAL=unvis.MATERIAL",,);
+			  __GROUP_HIER_TRY_GET_CXXCODE_(unvis::MATGROUP,
+							unvis::MATERIAL,
+							material,
+							"return unvis.MATGROUP(true)",
+							"local MATERIAL=unvis.MATERIAL"
+							),
+			  __GROUP_HIER_SET_CXXCODE_(blend=false;
+						    for(ITER i=begin();i!=end();i++)
+						      if(i->second->blend)blend=true;
+						    ),
+			  __GROUP_HIER_DEL_CXXCODE_(
+						    blend=false;
+						    for(ITER i=begin();i!=end();i++)
+						      if(i->second->blend)blend=true;
+						    )
+			  );
   
+  bool MATGROUP::update(){
+    for(ITER i=begin();i!=end();i++){
+      i->second->update();
+    }
+  }
+
   MATGROUP::operator string(){
     string r="MATGROUP{";
     {
       int b=r.length();
-      for(ITER i=pool.begin();i!=pool.end();i++){
+      for(ITER i=begin();i!=end();i++){
 	r+=i->first+"="+static_cast<string>(*(i->second))+",";
       }
       if(r.length()>b)r.erase(r.length()-1);
@@ -71,31 +92,38 @@ namespace unvis{
   TEXTURE *& MATERIAL::TEXMAP::operator[](int i){
     i=i>0?i:0;
     i=i<3?i:3;
-    return map[i];
+    return pool[i];
   }
   void MATERIAL::TEXMAP::bind(){
     for(GLuint i=0;i<4;i++){
-      if(map[i]!=NULL){
+      if(int(pool[i])>0x1000){
 	glActiveTexture(GL_TEXTURE0+i);
 	OGL_DEBUG();
-	map[i]->bind();
+	pool[i]->bind();
       }
       OGL_DEBUG();
     }
   }
   void MATERIAL::TEXMAP::ubind(){
     for(GLuint i=0;i<4;i++){
-      if(map[i]!=NULL){
+      if(int(pool[i])>0x1000){
 	glActiveTexture(GL_TEXTURE0+i);
 	OGL_DEBUG();
-	map[i]->ubind();
+	pool[i]->ubind();
       }
       OGL_DEBUG();
     }
   }
   
-  MATERIAL::MATERIAL():parent(NULL),light(true),shader(NULL){}
-  MATERIAL::~MATERIAL(){}
+  MATERIAL::MATERIAL():parent(NULL),light(true),shader(NULL),color(),texture(){}
+  MATERIAL::~MATERIAL(){
+    cout<<"delete metarial: "<<name<<endl;
+  }
+
+  bool MATERIAL::update(){
+    
+  }
+
   void MATERIAL::bind(){
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT|GL_ENABLE_BIT|GL_LIGHTING_BIT);
     glEnable(GL_BLEND);
@@ -120,6 +148,7 @@ namespace unvis{
     if(shader)shader->bind();
     OGL_DEBUG();
   }
+  
   void MATERIAL::ubind(){
     color.ubind();
     OGL_DEBUG();

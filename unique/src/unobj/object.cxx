@@ -27,6 +27,12 @@
 #include"light.hxx"
 #include"scene.hxx"
 
+#if 0
+#define OBJECT_DEBUG(m) {cout<<m<<endl;}
+#else
+#define OBJECT_DEBUG(m)
+#endif
+
 namespace unobj{
   using namespace unbase;
   using namespace unmath;
@@ -34,10 +40,10 @@ namespace unobj{
   using namespace unogl;
   using namespace unvis;
 
-  OBJECT::OBJECT():parent(NULL),target(NULL),mat(false),scene(NULL),
-		   pos(vec3::null),rot(quat::id),visible(true),
-		   rtype(RENDERTYPE::normal),oshadow(false),shadow(false),
-		   locate(NULL),showaxis(false){
+  OBJECT::OBJECT():parent(NULL),target(NULL),locate(NULL),
+		   mat(NULL),scene(NULL),render(NULL),
+		   pos(vec3::null),rot(quat::id),
+		   select(false),active(false){
     glGenNames(1,&id);
     OGL_DEBUG();
     glGenQueries(1,&qid);
@@ -45,52 +51,45 @@ namespace unobj{
   
     axlen=0.2*vec3::one;
     axend=vec2(0.04,0.01);
-
-    sel=false;
-    act=false;
   }
   OBJECT::~OBJECT(){
     glDeleteNames(1,&id);
     OGL_DEBUG();
     glDeleteQueries(1,&qid);
     OGL_DEBUG();
+    cout<<">>> delete object: "<<name<<endl;
   }
   bool OBJECT::update(){
     omtx=mtx;
     mtx=locatematrix();
     vel=(mtx-omtx)*vec3::null;
   }
-  void OBJECT::BindName(GLenum mode){
-    if(mode & RENDERMODE::name)glLoadName(id);
+  void OBJECT::bind_name(){
+    glLoadName(id);
     OGL_DEBUG();
   }
-  void OBJECT::uBindName(GLenum mode){
-    if(mode & RENDERMODE::name)glLoadName(0);
+  void OBJECT::ubind_name(){
+    glLoadName(0);
     OGL_DEBUG();
   }
-  void OBJECT::BindQuery(GLenum mode){
-    if(mode & RENDERMODE::quer)glBeginQuery(GL_SAMPLES_PASSED,qid); // Начинаем запрос на проверку видимости
+  void OBJECT::bind_query(){
+    glBeginQuery(GL_SAMPLES_PASSED,qid);// Occlusion query
     OGL_DEBUG();
   }
-  void OBJECT::uBindQuery(GLenum mode){
-    if(mode & RENDERMODE::quer){
-      glEndQuery(GL_SAMPLES_PASSED);// Заканчиваем запрос
-      glGetQueryObjectuiv(qid,GL_QUERY_RESULT,&num_frag);// Собираем результаты
-    }
+  void OBJECT::ubind_query(){
+    glEndQuery(GL_SAMPLES_PASSED);// Occlusion query
+    glGetQueryObjectuiv(qid,GL_QUERY_RESULT,&fragments);
     OGL_DEBUG();
   }
-  GLuint OBJECT::QueryFrag()const{
-    return num_frag;
-  }
-  void OBJECT::BindLoc(){ // Переход в локальные координаты объекта
-    glMatrixMode(GL_MODELVIEW); // Переключаемся в модельную матрицу
+  void OBJECT::bind_loc(){
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     OGL_DEBUG();
     glMultMatrixf(mtx);
     OGL_DEBUG();
   }
-  void OBJECT::uBindLoc(){
-    glMatrixMode(GL_MODELVIEW); // Переключаемся в модельную матрицу
+  void OBJECT::ubind_loc(){
+    glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     OGL_DEBUG();
   }
@@ -101,189 +100,182 @@ namespace unobj{
     if(locate)return locate->locatematrix()*matrix();
     else return matrix();
   }
-  void OBJECT::BindMat(GLenum mode){
-    if(!(mode & RENDERMODE::matl))return;
-    string k; MATERIAL* m;
-    mat(k,m);
-    if(m)m->bind();
+  void OBJECT::bind_mat(){
+    if(mat)mat->bind();
   }
-  void OBJECT::BindMat(GLenum mode,string name){
-    if(!(mode & RENDERMODE::matl))return;
-    MATERIAL* m=mat.get(name);
-    if(m)m->bind();
-  }
-  void OBJECT::uBindMat(GLenum mode){
-    if(!(mode & RENDERMODE::matl))return;
-    string k; MATERIAL* m;
-    mat(k,m);
-    if(m)m->bind();
-  }
-  void OBJECT::uBindMat(GLenum mode,string name){
-    if(!(mode & RENDERMODE::matl))return;
-    MATERIAL* m=mat.get(name);
-    if(m)m->bind();
+  void OBJECT::ubind_mat(){
+    if(mat)mat->ubind();
   }
   
-  void OBJECT::drawaxis(GLenum mode){
-    if(mode & RENDERMODE::axis){
-      glPushAttrib(GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT | GL_ENABLE_BIT | GL_LIGHTING_BIT);
-
-      glDisable(GL_DEPTH_TEST);
-      glDisable(GL_LIGHTING);
-      glDisable(GL_BLEND);
-      //glEnable(GL_BLEND);
-      //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-      //glDisable(GL_TEXTURE_CUBE);
-      //glDepthFunc(GL_NEVER);//GL_NEVER GL_NOTEQUAL GL_ALWAYS GL_LEQUAL GL_EQUAL GL_GEQUAL GL_GREATER
-      //glDepthRange( 1.0,-1.0);
-      glLineWidth(1.0);
-      glBegin(GL_LINES);
-      // Оси
-      glColor4f(1.0,0.0,0.0,1.0);
-      glVertex3f(     0.0,     0.0,     0.0 ); // X
-      glVertex3f( axlen.x,     0.0,     0.0 );
-      glColor4f(0.0,1.0,0.0,1.0);
-      glVertex3f(     0.0,     0.0,     0.0 ); // Y
-      glVertex3f(     0.0, axlen.y,     0.0 );
-      glColor4f(0.0,0.0,1.0,1.0);
-      glVertex3f(     0.0,     0.0,     0.0 ); // Z
-      glVertex3f(     0.0,     0.0, axlen.z );
-      // Стрелки
-      glColor4f(1.0,0.0,0.0,1.0);
-      glVertex3f( axlen.x,                     0.0,             0.0 ); // X
-      glVertex3f( axlen.x-axend.x,         axend.y,             0.0 );
-      glVertex3f( axlen.x,                     0.0,             0.0 );
-      glVertex3f( axlen.x-axend.x,        -axend.y,             0.0 );
-      glColor4f(0.0,1.0,0.0,1.0);
-      glVertex3f(             0.0, axlen.y,                     0.0 ); // Y
-      glVertex3f(             0.0, axlen.y-axend.x,         axend.y );
-      glVertex3f(             0.0, axlen.y,                     0.0 );
-      glVertex3f(             0.0, axlen.y-axend.x,        -axend.y );
-      glColor4f(0.0,0.0,1.0,1.0);
-      glVertex3f(             0.0,             0.0, axlen.z         ); // Z
-      glVertex3f(             0.0,         axend.y, axlen.z-axend.x );
-      glVertex3f(             0.0,             0.0, axlen.z         );
-      glVertex3f(             0.0,        -axend.y, axlen.z-axend.x );
-      glEnd();
-
-      glPopAttrib();
-    }
+  void OBJECT::draw_axis(){
+    glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT|GL_ENABLE_BIT|GL_LIGHTING_BIT);
+    
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_BLEND);
+    //glEnable(GL_BLEND);
+    //glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    //glDisable(GL_TEXTURE_CUBE);
+    //glDepthFunc(GL_NEVER);//GL_NEVER GL_NOTEQUAL GL_ALWAYS GL_LEQUAL GL_EQUAL GL_GEQUAL GL_GREATER
+    //glDepthRange( 1.0,-1.0);
+    glLineWidth(1.0);
+    glBegin(GL_LINES);
+    // Axis lines
+    glColor4f(1.0,0.0,0.0,1.0);
+    glVertex3f(     0.0,     0.0,     0.0 ); // X
+    glVertex3f( axlen.x,     0.0,     0.0 );
+    glColor4f(0.0,1.0,0.0,1.0);
+    glVertex3f(     0.0,     0.0,     0.0 ); // Y
+    glVertex3f(     0.0, axlen.y,     0.0 );
+    glColor4f(0.0,0.0,1.0,1.0);
+    glVertex3f(     0.0,     0.0,     0.0 ); // Z
+    glVertex3f(     0.0,     0.0, axlen.z );
+    // Axis vectors
+    glColor4f(1.0,0.0,0.0,1.0);
+    glVertex3f( axlen.x,                     0.0,             0.0 ); // X
+    glVertex3f( axlen.x-axend.x,         axend.y,             0.0 );
+    glVertex3f( axlen.x,                     0.0,             0.0 );
+    glVertex3f( axlen.x-axend.x,        -axend.y,             0.0 );
+    glColor4f(0.0,1.0,0.0,1.0);
+    glVertex3f(             0.0, axlen.y,                     0.0 ); // Y
+    glVertex3f(             0.0, axlen.y-axend.x,         axend.y );
+    glVertex3f(             0.0, axlen.y,                     0.0 );
+    glVertex3f(             0.0, axlen.y-axend.x,        -axend.y );
+    glColor4f(0.0,0.0,1.0,1.0);
+    glVertex3f(             0.0,             0.0, axlen.z         ); // Z
+    glVertex3f(             0.0,         axend.y, axlen.z-axend.x );
+    glVertex3f(             0.0,             0.0, axlen.z         );
+    glVertex3f(             0.0,        -axend.y, axlen.z-axend.x );
+    glEnd();
+    
+    glPopAttrib();
     OGL_DEBUG();
   }
-
-  void OBJECT::drawmodel(GLenum mode){
   
+  void OBJECT::draw_model(){
+    glColor4f(1.0,1.0,1.0,1.0);
+    glBegin(GL_TRIANGLES);
+    glColor4f(1.0,0.0,0.0,1.0);
+    glVertex4f(-0.6, 0.6,0.0,1.0);
+    glColor4f(0.0,1.0,0.0,1.0);
+    glVertex4f( 0.6, 0.6,0.0,1.0);
+    glColor4f(0.0,0.0,1.0,1.0);
+    glVertex4f( 0.0,-0.6,0.0,1.0);
+    glEnd();
   }
 
-  void OBJECT::casteshadow(const vec3& light_pos){
+  void OBJECT::draw_geom(const unobj::MODE&m){
+    /* no body */
+  }
   
+  void OBJECT::draw(const unobj::MODE&m){
+    bind_loc();
+    
+    if(m.name)bind_name();
+    //if(m.matl)bind_mat();
+    if(m.quer)bind_query();
+    
+    draw_handler(m);
+    
+    if(m.geom)draw_geom(m);
+    
+    if(m.name)ubind_name();
+    //if(m.matl)ubind_mat();
+    if(m.quer)ubind_query();
+    
+    if(m.axis)draw_axis();
+    if(m.modl)draw_model();
+    
+    ubind_loc();
   }
-
-  /* Generic DRAW */
-  /*
-    BindLoc();
-    BindMat(mode);
-    BindName(mode);
-    BindQuery(mode);
-    // Draw Code
-    uBindName(mode);
-    uBindMat(mode);
-    DrawAxis(mode);
-    uBindLoc();
-  */
-  void OBJECT::draw(GLenum mode){
-    if(!visible)return;
-    BindLoc();
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
-    /*glColor4f(1.0,1.0,1.0,1.0);
-      glBegin(GL_TRIANGLES);
-      glColor4f(1.0,0.0,0.0,1.0);
-      glVertex4f(-0.6, 0.6,0.0,1.0);
-      glColor4f(0.0,1.0,0.0,1.0);
-      glVertex4f( 0.6, 0.6,0.0,1.0);
-      glColor4f(0.0,0.0,1.0,1.0);
-      glVertex4f( 0.0,-0.6,0.0,1.0);
-      glEnd();*/
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    drawmodel(mode);
-    uBindLoc();
+  void OBJECT::step(const unbase::TIME&t){
+    step_handler(t);
   }
-
-  void OBJECT::select(GLuint i){
-    sel=i==id;
-  }
-  void OBJECT::step(TIME&time){
-    update();
-    stepHandler(time);
-  }
-
-  void OBJECT::event(GRAPHCONTEXT& e){
-    eventHandler(e);
+  void OBJECT::event(unogl::GRAPHCONTEXT&e){
+    event_handler(e);
   }
 }
 
-#include "toluaxx.h"
+#include"toluaxx.h"
 namespace unobj{
-  void OBJECT::stepHandler(TIME&event){
-    tolua_callmethod(OBJECT,stephandle,
-		     tolua_pushusertype(L,&event,"TIME"),
+  void OBJECT::step_handler(const unbase::TIME&t){
+    tolua_callmethod(unobj::OBJECT,stephandle,
+		     tolua_pushusertype(L,(void*)&t,"unbase::TIME"),
 		     0,);
   }
-  void OBJECT::drawHandler(GLenum event){
-    tolua_callmethod(OBJECT,drawhandle,
-		     tolua_pushnumber(L,event),
+  void OBJECT::draw_handler(const unobj::MODE&m){
+    tolua_callmethod(unobj::OBJECT,drawhandle,
+		     tolua_pushusertype(L,(void*)&m,"unobj::MODE"),
 		     0,);
   }
-  void OBJECT::eventHandler(GRAPHCONTEXT& event){
-    tolua_callmethod(OBJECT,eventhandle,
-		     tolua_pushusertype(L,&event,"CONTEXT"),
+  void OBJECT::event_handler(unogl::GRAPHCONTEXT&e){
+    tolua_callmethod(unobj::OBJECT,eventhandle,
+		     tolua_pushusertype(L,&e,"unogl::GRAPHCONTEXT"),
 		     0,);
   }
   OBJECT::operator string(){
     return "OBJECT{}";
   }
 
-  GROUP::GROUP():autoload(true){}
-  GROUP::GROUP(bool al):autoload(al){}
-  GROUP::~GROUP(){}
-  void GROUP::draw(unsigned int mode){
-    OBJECT::draw(mode);
-    for(ITER i=pool.begin();i!=pool.end();i++)i->second->draw(mode);
+  GROUP::GROUP():OBJECT(){}
+  GROUP::~GROUP(){
+    cout<<">>> delete group: "<<name<<endl;
+    //pool.clear();
   }
-  void GROUP::casteshadow(const vec3& lp){
-    for(ITER i=pool.begin();i!=pool.end();i++)i->second->casteshadow(lp);
-  }
-  void GROUP::step(TIME&t){
+  
+  void GROUP::step(const unbase::TIME&t){
     OBJECT::step(t);
-    for(ITER i=pool.begin();i!=pool.end();i++)i->second->step(t);
+    for(ITER i=begin();i!=end();i++){
+      i->second->step(t);
+      OBJECT_DEBUG("step object: "<<i->first);
+    }
   }
-  void GROUP::select(unsigned int e){
-    OBJECT::select(e);
-    for(ITER i=pool.begin();i!=pool.end();i++)i->second->select(e);
-  }
-  void GROUP::event(GRAPHCONTEXT& e){
+  void GROUP::event(unogl::GRAPHCONTEXT&e){
     OBJECT::event(e);
-    for(ITER i=pool.begin();i!=pool.end();i++)i->second->event(e);
+    for(ITER i=begin();i!=end();i++){
+      i->second->event(e);
+      OBJECT_DEBUG("event object: "<<i->first);
+    }
   }
   GROUP::operator string(){
     string r="{";
-    for(ITER i=pool.begin();i!=pool.end();i++){r+=i->first+",";}
+    for(ITER i=begin();i!=end();i++){r+=i->first+"="+static_cast<string>(*(i->second))+",";}
     if(r[r.length()-1]==',')r[r.length()-1]='}';else r+="}";
-    return string("GROUP{child=")+r+"}";
+    return string("GROUP{")+r+"}";
   }
+  int GROUP::operator~(){
+    return pool.size();
+  }
+  
   __GROUP_IMPLEMENTATION_(unobj::GROUP,
 			  unobj::OBJECT,
-			  object,
-			  "return unobj.GROUP()",
-			  "local GROUP =unobj.GROUP \n"
-			  "local OBJECT=unobj.OBJECT\n"
-			  "local CAMERA=unobj.CAMERA\n"
-			  "local LIGHT =unobj.LIGHT \n",
-			  o->scene=scene,
-			  o->scene=NULL);  
+			  if(scene && scene->autoload){
+			    __GROUP_HIER_TRY_GET_CXXCODE_(unobj::GROUP,
+							  unobj::OBJECT,
+							  object,
+							  "return unobj.GROUP(true)",
+							  "local GROUP =unobj.GROUP \n"
+							  "local OBJECT=unobj.OBJECT\n"
+							  "local CAMERA=unobj.CAMERA\n"
+							  "local LIGHT =unobj.LIGHT \n"
+							  "local MESH  =ungeom.MESH \n"
+							  "local HMAP  =ungeom.HMAP \n"
+							  "local FAKE  =uneff.FAKE  \n"
+							  "local PARTICLE=uneff.PARTICLE\n"
+							  )
+			      },
+			  __GROUP_HIER_SET_CXXCODE_(o->scene=scene;
+						    CAMERA* c=dynamic_cast<CAMERA*>(o);
+						    if(c)scene->camera.set(o->name,c);
+						    LIGHT* l=dynamic_cast<LIGHT*>(o);
+						    if(l)scene->light.set(o->name,l);
+						    ),
+			  __GROUP_HIER_DEL_CXXCODE_(CAMERA* c=dynamic_cast<CAMERA*>(o);
+						    if(c)scene->camera.set(o->name,NULL);
+						    LIGHT* l=dynamic_cast<LIGHT*>(o);
+						    if(l)scene->light.set(o->name,NULL);
+						    o->scene=NULL;
+						    )
+			  );
+  
 }

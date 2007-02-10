@@ -266,7 +266,8 @@ namespace unvis{//tolua_export
     bool autoload;
   public:
     typedef map<string,TEXTURE*>::iterator ITER;
-    string fullhiername(string n="");
+    void chautoload(bool);
+    //string fullhiername(string n="");
     ITER begin();
     ITER end();
     const TEXTURE* operator[](string);
@@ -282,6 +283,7 @@ namespace unvis{//tolua_export
     void set(string name, TEXTURE* tex);
     /**}**/
     virtual operator string();
+    virtual bool update();
   };
   //tolua_end
 

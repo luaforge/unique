@@ -67,7 +67,7 @@ namespace unobj{//tolua_export
     operator string();
     void bind();
     void ubind();
-    void draw(unsigned int mode=RENDERMODE::imad);
+    virtual void draw_model();
     bool update();
     //tolua_end
   };//tolua_export

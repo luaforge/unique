@@ -32,7 +32,6 @@
 // The OpenGL(R) Shading Language  v1.051
 
 namespace unvis{//tolua_export
-
   class MATGROUP;
   class MATERIAL{//tolua_export
   protected:
@@ -44,7 +43,7 @@ namespace unvis{//tolua_export
       unmath::vec4 ambient;
       unmath::vec4 diffuse;
       unmath::vec4 specular;
-      scalar shininess;
+      float shininess;
       //tolua_end
       COLOR();
       void bind(unsigned int);
@@ -62,7 +61,7 @@ namespace unvis{//tolua_export
 	//tolua_end
 	};
 	//tolua_begin
-	TEXTURE* map[4];
+	unvis::TEXTURE* pool[4];
 	//tolua_end
       };
       TEXMAP();
@@ -78,15 +77,17 @@ namespace unvis{//tolua_export
     /**tolua_readonly**/ string name;
     /**tolua_readonly**/ MATERIAL::COLOR  color;
     /**tolua_readonly**/ MATERIAL::TEXMAP texture;
-    SHADER* shader;
+    unvis::SHADER* shader;
     
     bool light;
+    bool blend;
     
     MATERIAL();
     virtual ~MATERIAL();
     void bind();
     void ubind();
     virtual operator string();
+    virtual bool update();
     //tolua_end
   };//tolua_export
   
@@ -97,7 +98,7 @@ namespace unvis{//tolua_export
     POOL pool;
     bool autoload;
   public:
-    string fullhiername(string n="");
+    //string fullhiername(string n="");
     ITER begin();
     ITER end();
     //tolua_begin
@@ -112,6 +113,7 @@ namespace unvis{//tolua_export
     void set(string,MATERIAL*);
     /**}**/
     virtual operator string();
+    virtual bool update();
     //tolua_end
   };//tolua_export
   

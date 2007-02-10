@@ -8,7 +8,7 @@ namespace ungeom{
     vector<unsigned int> index; // Polygon numbers
     BSPNODE* front;
     BSPNODE* back;
-
+    
     BSPNODE();
     BSPNODE(unsigned int);
     ~BSPNODE();
@@ -26,7 +26,11 @@ namespace ungeom{
     ~BSPTREE();
     void clean();
     void draw();
-    void build(const MCHUNK&);
+    void build(const CHUNK&);
     BSPNODE* procnode(BSPPROC);
+  };
+
+  class BSPRENDER{
+    
   };
 }

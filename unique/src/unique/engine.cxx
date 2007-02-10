@@ -8,7 +8,7 @@ namespace unique{
   using namespace unobj;
   using namespace unogl;
 
-  ENGINE engine;
+  //ENGINE engine;
 
   ENGINE::ENGINE():run(false),eventer(NULL){
     
@@ -16,17 +16,18 @@ namespace unique{
   ENGINE::~ENGINE(){
     
   }
-
+  
   struct SCNCMR{
     unobj::SCENE* scene;
     unobj::CAMERA* camera;
     SCNCMR(unobj::SCENE* s,unobj::CAMERA* c):scene(s),camera(c){}
   };
-
-  void ENGINE::draw(){// òÅÎÄÅÒÉÎÇ
+  
+  void ENGINE::draw(){
     drawtime();
-    for(CONTEXTS::ITER cti=render.begin();cti!=render.end();cti++){
-      GRAPHCONTEXT* ctx=(GRAPHCONTEXT*)(*cti).second;
+    for(CTXGROUP::ITER cti=render.begin();cti!=render.end();cti++){
+      GRAPHCONTEXT* ctx=dynamic_cast<GRAPHCONTEXT*>((*cti).second);
+      if(!ctx)continue;
       deque<SCNCMR> layers;
       for(SCNGROUP::ITER sci=scene.begin();sci!=scene.end();sci++){
 	SCENE* scn=(*sci).second;
@@ -44,32 +45,36 @@ namespace unique{
 	  }
 	}
       }
+      ctx->bind();
       if(layers.size()){
-        ctx->bind();
 	if(ctx->state.state){
 	  glClear(GL_DEPTH_BUFFER_BIT);
-	  //ctx->clear();
+	  glClear(GL_COLOR_BUFFER_BIT);
 	  for(deque<SCNCMR>::iterator lri=layers.begin();lri!=layers.end();lri++){
 	    SCNCMR& l=(*lri);
 	    
 	    l.camera->bind();
-	    l.scene->draw();
+	    unobj::MODE m;
+	    l.scene->draw(m);
 	    l.camera->ubind();
 	    
 	    if(l.camera->selection){
 	      l.camera->pointer.pos=((GRAPHCONTEXT*)ctx)->pointer;
 	      l.camera->pointer.bind();
 	      l.camera->bind();
-	      l.scene->draw(RENDERMODE::name);
+	      unobj::MODE m; m.name=true;
+	      l.scene->draw(m);
 	      l.camera->ubind();
 	      l.camera->pointer.ubind();
-	      l.scene->object.select(l.camera->pointer.top());
+	      //l.scene->object->id==l.camera->pointer.top();
+	      //l.scene->object->select=true;
+	      //l.scene->object.select(l.camera->pointer.top());
 	      //cout<<"ok  "<<(*lri).camera->pointer.top()<<endl;
 	    }
 	  }
 	}
-        ctx->ubind();
       }
+      ctx->ubind();
     }
     drawtime();
   }

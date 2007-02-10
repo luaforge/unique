@@ -28,42 +28,39 @@ namespace ungeom{
   /*
    *  Mesh object
    */
-
-  MESH::MESH():unobj::OBJECT(),data(NULL){
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&maxvertexattribs);
+# ifndef DEFAULT_VBO_ENABLE
+#   define DEFAULT_VBO_ENABLE false // VertexBufferObject GPU rendering
+# endif
+  bool MESH::VBO=DEFAULT_VBO_ENABLE;
+  MESH::MESH():unobj::OBJECT(){
+    //glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&maxvertexattribs);
   }
   MESH::~MESH(){}
   bool MESH::update(){
     OBJECT::update();
     if(osrc!=src){
       osrc=src;
-      MDATA::put(data);
-      data=MDATA::get(src);
-      if(data)state=unbase::STATE(true,string("Mesh \"")+src+"\" loaded...");
-      else state=unbase::STATE(false,string("Mesh \"")+src+"\" not loaded...");
-    }
-  }
-  void MESH::draw(GLenum mode){
-    if(!visible)return;
-    BindLoc();
-    BindName(mode);
-    //BindMat(mode);
-    BindQuery(mode);
-    if(data){
-      for(unsigned int s=0;s<data->surface.size();s++){
-	string i; i+=s;
-	unvis::MATERIAL* m=mat.get(i);
-	if(m)m->bind();
-	data->surface[s].draw();
-	if(m)m->ubind();
+      undata::RESOURCE r=undata::resource(name,"meshdata");
+      if(r.type==undata::RESOURCE::stm && r.access&undata::STREAM::inp){
+	undata::STREAM& s=r.stream();
+	if(LOADER::load(*this,s)){// if loaded ok
+	  r.stream(s);
+	  state=unbase::STATE(true,string("Mesh \"")+src+"\" loaded...");
+	  return true;
+	}
+	r.stream(s);
+	state=unbase::STATE(false,string("Mesh \"")+src+"\" not loaded...");
+	return false;
       }
     }
-    uBindQuery(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    uBindLoc();
+    return false;
   }
-
+  void MESH::draw_geom(const unobj::MODE&m){
+    for(unsigned int s=0;s<surface.size();s++){
+      if(surface[s])surface[s]->draw();
+    }
+  }
+  /*
   void MESH::casteshadow(const vec3& lp){
     BindLoc();
     mat4 model_view;
@@ -73,23 +70,32 @@ namespace ungeom{
 			data->surface[s].casteshadow(lpos);
     uBindLoc();
   }
-
+  */
+  unsigned int MESH::operator~(){
+    return surface.size();
+  }
+  void MESH::operator()(int&k,ungeom::SURFACE*&n){
+    if(k>=0){ if(k<surface.size())k++; }else k=0;
+    if(k==surface.size()){ k=-1; n=NULL; }else{ n=surface[k]; }
+  }
+  ungeom::SURFACE* MESH::get(int k){
+    if(k>=0&&k<surface.size())return surface[k];else return NULL;
+  }
   MESH::operator string(){return string("MESH(\"")+src+"\")";}
-
-
+  
   /*
    *  Mesh chunk
    */
-  MCHUNK::MCHUNK():id(0),lim(0),data(NULL){}
-  MCHUNK::~MCHUNK(){}
-  void MCHUNK::init(){
+  CHUNK::CHUNK():id(0),lim(0),data(NULL){}
+  CHUNK::~CHUNK(){}
+  void CHUNK::init(){
     if(!lim){
       lim=format*compon*size;
       data=new char[lim];
       offset=data;
     }
   }
-  void MCHUNK::dest(){
+  void CHUNK::dest(){
     if(lim){
       delete[](char*)data;
       lim=0;
@@ -132,10 +138,19 @@ namespace ungeom{
     boundbox=end-beg;
     boundsphere=boundbox.len()*0.5;
   */
-
-  MSURF::MSURF(){}
-  MSURF::~MSURF(){dest();}
-  void MSURF::init(){
+  
+  void SURFACE::operator()(int&k,ungeom::CHUNK*&n){
+    if(k>=0){ if(k<attrib.size())k++; }else k=0;
+    if(k>=attrib.size()){ k=-1; n=NULL; }else{ n=attrib[k]; }
+  }
+  CHUNK* SURFACE::get(int k){
+    if(k>=0&&k<attrib.size())return attrib[k];else return NULL;
+  }
+  unsigned int SURFACE::operator~(){return attrib.size();}
+  
+  SURFACE::SURFACE():mat(NULL){}
+  SURFACE::~SURFACE(){dest();}
+  void SURFACE::init(){
 # ifdef MESH_TEST_MODE1
     for(vector<CHUNK*>::iterator i=attrib.begin();i!=attrib.end();i++)if(*i){
 	CHUNK& chunk=*(*i);
@@ -156,11 +171,11 @@ namespace ungeom{
     calc_againsttriangles();
     calc_openedges();
     GLuint type;
-    if(MDATA::Enable_VBO){
-      for(vector<MCHUNK*>::iterator i=attrib.begin();i!=attrib.end();i++){
+    if(MESH::VBO){
+      for(vector<CHUNK*>::iterator i=attrib.begin();i!=attrib.end();i++){
 	if(*i){
-	  MCHUNK&chunk=*(*i);
-	  if(chunk.type==MCHUNK::face)type=GL_ELEMENT_ARRAY_BUFFER;
+	  CHUNK&chunk=*(*i);
+	  if(chunk.type==CHUNK::element)type=GL_ELEMENT_ARRAY_BUFFER;
 	  else type=GL_ARRAY_BUFFER;
 	  glGenBuffers(1,&chunk.glid);
 	  glBindBuffer(type,chunk.glid);
@@ -173,25 +188,25 @@ namespace ungeom{
       }
     }
   }
-  MCHUNK* MSURF::findattrib(char type){
+  CHUNK* SURFACE::findattrib(char type){
     for(int i=0;i<attrib.size();i++)
       if(attrib[i])
 	if(attrib[i]->type==type)
 	  return attrib[i];
     return NULL;
   }
-  void MSURF::dest(){
-    if(MDATA::Enable_VBO)
+  void SURFACE::dest(){
+    if(MESH::VBO)
       for(int i=0;i<attrib.size();i++)
 	if(attrib[i])
 	  glDeleteBuffers(1,&(attrib[i]->glid));
   }
   
-  void MSURF::calc_coincidedvertexes(){
-    MCHUNK*chunk=findattrib(MCHUNK::vert);
+  void SURFACE::calc_coincidedvertexes(){
+    CHUNK*chunk=findattrib(CHUNK::vertex);
     if(!chunk)return;
     coincidedvertex.clear();
-    MCHUNK&cvertex=*chunk;
+    CHUNK&cvertex=*chunk;
     vec3  *pvertex=(vec3*)cvertex.data;
     for(unsigned int i=0;i<cvertex.size;i++){
       bool f=true;
@@ -220,12 +235,12 @@ namespace ungeom{
 # endif
   }
 
-  void MSURF::calc_againsttriangles(){
+  void SURFACE::calc_againsttriangles(){
     if(coincidedvertex.empty())calc_coincidedvertexes();
     if(coincidedvertex.empty())return;
-    MCHUNK*chunk=findattrib(MCHUNK::vert);
+    CHUNK*chunk=findattrib(CHUNK::vertex);
     if(!chunk)return;
-    MCHUNK&cvertex=*chunk;
+    CHUNK&cvertex=*chunk;
     vec3  *pvertex=(vec3*)cvertex.data;
     againsttriangle.clear();
     for(unsigned int i=0;i<cvertex.size;i+=3){
@@ -268,7 +283,7 @@ namespace ungeom{
 # endif
   }
 
-  void MSURF::calc_openedges(){
+  void SURFACE::calc_openedges(){
     if(againsttriangle.empty())calc_againsttriangles();
     if(againsttriangle.empty())return;
     openedge.clear();
@@ -294,21 +309,21 @@ namespace ungeom{
 # endif
   }
 
-  void MSURF::calc_normal(){
+  void SURFACE::calc_normal(){
     // Detect normal chunk
-    MCHUNK*chunk=findattrib(MCHUNK::norm);
+    CHUNK*chunk=findattrib(CHUNK::normal);
     if(chunk)return;
-    chunk=findattrib(MCHUNK::vert);
+    chunk=findattrib(CHUNK::vertex);
     if(!chunk)return;
-    MCHUNK&cvertex=*chunk;
+    CHUNK&cvertex=*chunk;
     // Insert normal chunk
-    attrib.push_back(new MCHUNK());
-    MCHUNK&cnormal=*attrib.back();
+    attrib.push_back(new CHUNK());
+    CHUNK&cnormal=*attrib.back();
     cnormal.id    =cvertex.id;
     cnormal.format=4;
     cnormal.compon=3;
     cnormal.size  =cvertex.size;
-    cnormal.type  =MCHUNK::norm;
+    cnormal.type  =CHUNK::normal;
     cnormal.init();
     // Calculate normals
     vec3*pvertex  =(vec3*)cvertex.data;
@@ -399,37 +414,37 @@ namespace ungeom{
     }
   }
 
-  void MSURF::calc_tangent(){
+  void SURFACE::calc_tangent(){
     // Detect vertex chunk
-    MCHUNK*chunk=findattrib(MCHUNK::vert);
+    CHUNK*chunk=findattrib(CHUNK::vertex);
     if(!chunk)return;
-    MCHUNK&cvertex=*chunk;
+    CHUNK&cvertex=*chunk;
     // Detect texture coord chunk
-    chunk=findattrib(MCHUNK::texc);
+    chunk=findattrib(CHUNK::texcoord);
     if(!chunk)return;
-    MCHUNK&ctexture=*chunk;
+    CHUNK&ctexture=*chunk;
     // Detect normal chunk
-    chunk=findattrib(MCHUNK::norm);
+    chunk=findattrib(CHUNK::normal);
     if(!chunk)calc_normal();// If not exist, auto generate
     // Get normal chunk
-    MCHUNK&cnormal=*chunk;
+    CHUNK&cnormal=*chunk;
     // Insert binormal chunk
-    attrib.push_back(new MCHUNK());
-    MCHUNK&cbinormal=*attrib.back();
+    attrib.push_back(new CHUNK());
+    CHUNK&cbinormal=*attrib.back();
     cbinormal.id    =cnormal.id;
     cbinormal.format=cnormal.format;
     cbinormal.compon=cnormal.compon;
     cbinormal.size  =cnormal.size;
-    cbinormal.type  =MCHUNK::binm;
+    cbinormal.type  =CHUNK::binormal;
     cbinormal.init();
     // Insert tangent chunk
-    attrib.push_back(new MCHUNK());
-    MCHUNK&ctangent=*attrib.back();
+    attrib.push_back(new CHUNK());
+    CHUNK&ctangent=*attrib.back();
     ctangent.id    =cnormal.id;
     ctangent.format=cnormal.format;
     ctangent.compon=cnormal.compon;
     ctangent.size  =cnormal.size;
-    ctangent.type  =MCHUNK::tang;
+    ctangent.type  =CHUNK::tangent;
     ctangent.init();
     // Typefied pointers to data
     vec3*pvertex  =(vec3*)cvertex.data;
@@ -471,16 +486,16 @@ namespace ungeom{
     }
   }
 
-  vector<unsigned int>& MSURF::coincidedvertexes(vec3 v){
+  vector<unsigned int>& SURFACE::coincidedvertexes(vec3 v){
     // Detect vertex chunk
-    MCHUNK*chunk=findattrib(MCHUNK::vert);
+    CHUNK*chunk=findattrib(CHUNK::vertex);
     if(!chunk)return nocoincidedvertex;
     vec3*pvertex=(vec3*)chunk->data;
     for(unsigned int i=0;i<coincidedvertex.size();i++)if(pvertex[coincidedvertex[i][0]]==v)return coincidedvertex[i];
     return nocoincidedvertex;
   }
 
-  void MSURF::draw(){
+  void SURFACE::draw(){
     glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
     glEnable(GL_DEPTH_TEST);
     //glDisable(GL_BLEND);
@@ -490,47 +505,47 @@ namespace ungeom{
     glPolygonMode(GL_BACK,GL_LINE);
     glEdgeFlag(GL_FALSE);
 
-    MCHUNK* face=NULL;
-    MCHUNK* vert=NULL;
+    CHUNK* face=NULL;
+    CHUNK* vert=NULL;
     for(int i=0;i<attrib.size();i++)if(attrib[i]->lim){
-	MCHUNK& chunk=*attrib[i];
+	CHUNK& chunk=*attrib[i];
 	switch(chunk.type){
-	case MCHUNK::vert: // Vertex array
+	case CHUNK::vertex: // Vertex array
 	  vert=&chunk;
 	  glEnableClientState(GL_VERTEX_ARRAY);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glVertexPointer(chunk.compon,GL_FLOAT,0,chunk.offset);
 	  break;
-	case MCHUNK::norm: // Normal array
+	case CHUNK::normal: // Normal array
 	  glEnableClientState(GL_NORMAL_ARRAY);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glNormalPointer(GL_FLOAT,0,chunk.offset);
 	  // As Attrib array
 	  glEnableVertexAttribArray(14);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glVertexAttribPointer(14,chunk.compon,GL_FLOAT,GL_FALSE,0,chunk.offset);
 	  break;
-	case MCHUNK::texc: // Texture coords array
+	case CHUNK::texcoord: // Texture coords array
 	  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glTexCoordPointer(chunk.compon,GL_FLOAT,0,chunk.offset);
 	  break;
-	case MCHUNK::face: // Faces array
+	case CHUNK::element: // Faces array
 	  face=&chunk;
-	  if(MDATA::Enable_VBO){ // Assign element buffer
+	  if(MESH::VBO){ // Assign element buffer
 	    glEnableClientState(GL_INDEX_ARRAY);
 	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,chunk.glid);
 	    glIndexPointer(GL_INT,0,chunk.offset);
 	  }
 	  break;
-	case MCHUNK::binm: // Binormals array as vertex attrib
+	case CHUNK::binormal: // Binormals array as vertex attrib
 	  glEnableVertexAttribArray(13);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glVertexAttribPointer(13,chunk.compon,GL_FLOAT,GL_FALSE,0,chunk.offset);
 	  break;
-	case MCHUNK::tang: // Tangents array as vertex attrib
+	case CHUNK::tangent: // Tangents array as vertex attrib
 	  glEnableVertexAttribArray(12);
-	  if(MDATA::Enable_VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
+	  if(MESH::VBO)glBindBuffer(GL_ARRAY_BUFFER,chunk.glid);
 	  glVertexAttribPointer(12,chunk.compon,GL_FLOAT,GL_FALSE,0,chunk.offset);
 	  break;
 	}
@@ -547,15 +562,16 @@ namespace ungeom{
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_VERTEX_ARRAY);
     for(unsigned int vai=0;vai<2;vai++)glDisableVertexAttribArray(vai);
-    if(MDATA::Enable_VBO){ // Закрываем после себя ассигнованный буффер элементов
+    if(MESH::VBO){ // Close element's buffer
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
       glDisableClientState(GL_INDEX_ARRAY);
     }
     OGL_DEBUG();
     glPopClientAttrib();
   }
-  void MSURF::casteshadow(const vec3& lp){
-    MCHUNK* v=findattrib(MCHUNK::vert);
+  /*
+  void SURFACE::casteshadow(const vec3& lp){
+    CHUNK* v=findattrib(CHUNK::vertex);
     if(v){
       unmath::POLYGON* p=(unmath::POLYGON*)v->data;
       unsigned int s=v->size/3;
@@ -583,90 +599,40 @@ namespace ungeom{
       glDisableClientState(GL_VERTEX_ARRAY);
     }
   }
-
+  */
+  
   /*
    *  Mesh loader
    */
-  vector<MLOADER::METHOD> MLOADER::loader;
-  MLOADER::MLOADER(){}
-  MLOADER::~MLOADER(){}
-  void MLOADER::Register(MLOADER::METHOD m){loader.push_back(m);}
-  bool MLOADER::load(MDATA& d,undata::STREAM& s){
+  vector<LOADER::METHOD> LOADER::loader;
+  LOADER::LOADER(){}
+  LOADER::~LOADER(){}
+  void LOADER::Register(LOADER::METHOD m){loader.push_back(m);}
+  bool LOADER::load(MESH&m,undata::STREAM&s){
     init();
-    for(ITER i=loader.begin();i!=loader.end();i++)if((*i)(d,s))return true;
-    return false;
-  }
-#define MESH_LOADER(func) Register(func);
-#include"mesh_loader_config.hxx"
-  void MLOADER::init(){
-    if(loader.size()==0){MESH_LOADER_LIST}
-  }
-
-  /*
-   *  Mesh data
-   */
-#ifndef DEFAULT_VBO_ENABLE
-# define DEFAULT_VBO_ENABLE false // VertexBufferObject GPU rendering
-#endif
-  bool MDATA::Enable_VBO=DEFAULT_VBO_ENABLE;
-  map<string,MDATA*> MDATA::mesh;
-
-  MDATA::MDATA(){}
-  MDATA::~MDATA(){}
-  MDATA* MDATA::get(string name){
-    map<string,MDATA*>::iterator i=mesh.find(name);
-    if(i!=mesh.end()){
-      (*i).second->used++;
-      return (*i).second;
-    }else{
-      undata::RESOURCE r=undata::resource(name,"metdata");
-      if(r.type==undata::RESOURCE::stm && r.access&undata::STREAM::inp){
-	undata::STREAM& s=r.stream();
-	MDATA* m=new MDATA();
-	if(m->load(s)){// if loaded ok
-	  m->used++;
-	  mesh[name]=m;
-	  r.stream(s);
-	  return m;
-	}
-	r.stream(s);
-	delete m;
-	return NULL;
-	}
-      return NULL;
-    }
-  }
-  void MDATA::put(MDATA* m){
-    if(!m)return;
-    for(map<string,MDATA*>::iterator i=mesh.begin();i!=mesh.end();i++){
-      MDATA* d=(*i).second;
-      if(d==m){
-	d->used--;
-	if(d->used==0){// if nonused then delete
-	  mesh.erase(i);
-	  delete d;
-	}
-	return;
-      }
-    }
-  }
-  bool MDATA::load(undata::STREAM& s){
-    if(MLOADER::load(*this,s)){
-      GenData();
-      state=unbase::STATE(true,string("Mesh [")+src+"] loaded");
+    LOADER l;
+    for(ITER i=loader.begin();i!=loader.end();i++)if((*i)(l,s))break;
+    if(l.state.state){
+      l.gen(m);
       return true;
     }
-    state=unbase::STATE(false,string("Error loading mesh [")+src+"]");
     return false;
   }
-  bool MDATA::GenData(){ // Gen Surfaces
-    for(vector<MCHUNK>::iterator i=chunk.begin();i!=chunk.end();i++){// Find surface
-      if((*i).link>=surface.size())surface.push_back(MSURF());// Make surface
-      surface[(*i).link].attrib.push_back(&(*i));
+    
+  bool LOADER::gen(MESH&m){ // Gen Surfaces
+    for(vector<CHUNK*>::iterator i=chunk.begin();i!=chunk.end();i++){// Find surface
+      if((*i)->surf>=m.surface.size())m.surface.push_back(new SURFACE());// Make surface
+      m.surface[(*i)->surf]->attrib.push_back(*i);
     }
-    for(vector<MSURF>::iterator s=surface.begin();s!=surface.end();s++)(*s).init();
+    for(vector<SURFACE*>::iterator s=m.surface.begin();s!=m.surface.end();s++)(*s)->init();
     //cout<<"Surfaces: "<<surface.size()<<endl;
     //for(int k=0;k<surface.size();k++)cout<<"Surface: "<<k<<" attribs: "<<surface[k].attrib.size()<<" elements: "<<surface[k].attrib[0]->size<<" compon: "<<int(surface[k].attrib[0]->compon)<<endl;
     return true;
+  }
+
+#define MESH_LOADER(func) Register(func);
+#include"mesh_loader_config.hxx"
+  void LOADER::init(){
+    if(loader.size()==0){MESH_LOADER_LIST}
   }
 }

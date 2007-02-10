@@ -2,17 +2,17 @@
 vec2 unhmap_texcrd(0.1,0.1);  // Step texture coords
 vec3 unhmap_density(0.001,0.001,0.001); // Step size per height width depth
 
-static bool unhmap_load(MDATA& d,undata::STREAM& s){
+static bool unhmap_load(LOADER& d,undata::STREAM& s){
   unvis::IMAGE* heightmap=new unvis::IMAGE();
   if(heightmap->load(s)){
     if(heightmap->channels==1){
       vec3* verts;
       { //// Gen vertexes ////
-	d.chunk.push_back(MCHUNK());
-	MCHUNK& c=d.chunk.back();
+	d.chunk.push_back(new CHUNK());
+	CHUNK& c=*d.chunk.back();
 	c.id=1;
-	c.link=0;
-	c.type=MCHUNK::vert;
+	c.surf=1;
+	c.type=CHUNK::vertex;
 	c.size=heightmap->height*heightmap->width;
 	c.format=4;
 	c.compon=3;
@@ -25,11 +25,11 @@ static bool unhmap_load(MDATA& d,undata::STREAM& s){
 	}
       }
       { //// Gen faces ////
-	d.chunk.push_back(MCHUNK());
-	MCHUNK& c=d.chunk.back();
+	d.chunk.push_back(new CHUNK());
+	CHUNK& c=*d.chunk.back();
 	c.id=2;
-	c.link=1;
-	c.type=MCHUNK::face;
+	c.surf=1;
+	c.type=CHUNK::element;
 	c.size=heightmap->height*heightmap->width*2;
 	c.format=4;
 	c.compon=3;
@@ -49,11 +49,11 @@ static bool unhmap_load(MDATA& d,undata::STREAM& s){
 	}
       }
       { //// Gen normals ////
-	d.chunk.push_back(MCHUNK());
-	MCHUNK& c=d.chunk.back();
+	d.chunk.push_back(new CHUNK());
+	CHUNK& c=*d.chunk.back();
 	c.id=3;
-	c.link=1;
-	c.type=MCHUNK::norm;
+	c.surf=1;
+	c.type=CHUNK::normal;
 	c.size=heightmap->height*heightmap->width;
 	c.format=4;
 	c.compon=3;
@@ -71,11 +71,11 @@ static bool unhmap_load(MDATA& d,undata::STREAM& s){
 	}
       }
       { //// Gen texture coords ////
-	d.chunk.push_back(MCHUNK());
-	MCHUNK& c=d.chunk.back();
+	d.chunk.push_back(new CHUNK());
+	CHUNK& c=*d.chunk.back();
 	c.id=4;
-	c.link=1;
-	c.type=MCHUNK::texc;
+	c.surf=1;
+	c.type=CHUNK::texcoord;
 	c.size=heightmap->height*heightmap->width;
 	c.format=4;
 	c.compon=2;

@@ -39,12 +39,13 @@ namespace unvis{
     {NULL,NULL,NULL,NULL}
     // Мой формат образа текстуры (Сплит обычного JPG и JPG градации серого в качестве альфа канала)
     };*/
-
+  
   IMAGE::IMAGE():pixels(NULL){}
   IMAGE::~IMAGE(){}
   void IMAGE::init(){
     if(pixels==NULL)pixels=new unsigned char[width*height*channels];
   }
+  
   void IMAGE::dest(){
     if(pixels!=NULL){
       delete []pixels;
@@ -96,6 +97,7 @@ namespace unvis{
     ibuf.seekg(0,STREAM::beg);
     char sg[4];
     ibuf.read(sg,4);
+    //cout<<"333 "<<sg<<endl;
     if(ibuf.gcount()!=4)return false;
     if(memcmp(sg,&(((IMPNG*)this)->sign),4)==0){
       return ReadPNG(ibuf);

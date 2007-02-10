@@ -10,7 +10,7 @@ COMPILER=gcc
 
 ## Design
 ## modules|&monolith|&runable
-DESIGN=modules monolith runable
+DESIGN=modules monolith #runable
 
 ## Mode
 ## test|real
@@ -20,7 +20,7 @@ MODE=real
 ## Debug
 ## enable|disable
 DEBUG=enable
-DEBUG=disable
+#DEBUG=disable
 
 ## Main name
 ## lunique
@@ -29,3 +29,4 @@ NAME=lunique
 ## Optimize
 ## disable|enspeed|ensize
 OPTIM=enspeed
+OPTIM=disable

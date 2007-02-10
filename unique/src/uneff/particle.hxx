@@ -55,28 +55,29 @@ namespace uneff{//tolua_export
       tquad =GL_QUADS      // Прямоугольники, которые, кстати, можно текстурировать
     };
     
-    vec3   gravity; // Глобальная гравитация
-    vec4   dispers; // Разброс начальных скоростей частиц
-    scalar mass;    // Масса частиц
-    vec2   factor;  // Скорость умирания минимальная и диапазон
-    vec3   source;  // Простаранство-источник
-    scalar quant;   // Размер кванта симуляции (чем меньше тем больше расчетов и медленнее работает)
+    unmath::vec3 gravity; // Gravitation
+    unmath::vec4 dispers; // Dispersion
+    float mass; // Mass
+    unmath::vec2 factor; // Quench speed and it range
+    unmath::vec3 source; // Source area
+    float quant; // Simulation quant
     
-    unsigned int num;// Число частиц
-    int   geompart;  // Тип геометрии для частицы
-    vec4  psize;     // Размер частиц
+    unsigned int num; // Num of particles
+    int geompart; // Particle geometry
+    unmath::vec4 psize; // Particle size
     
     PARTICLE();
     virtual ~PARTICLE();
     
-    void draw(GLenum mode=unobj::RENDERMODE::geom|unobj::RENDERMODE::matl);                  // Прорисовка системы частиц
-    void step(unbase::TIME&);           // Шаг моделирования системы
+    virtual void bind_location();
+    virtual void draw_geom(const unobj::MODE&);
+    void step(const unbase::TIME&);
     
     operator string();
     //tolua_end
     scalar FadeCalc();
-    void drawpart(PART* node);// Рисовка i-той частицы
-    void ReGen(std::deque<PART>::iterator node);   // Регенерация умершей частицы
+    void drawpart(PART*);
+    void ReGen(std::deque<PART>::iterator node);
     //void Gen();
     unsigned int CurNum()const{return particle.size();}
   };//tolua_export

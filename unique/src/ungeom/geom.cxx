@@ -29,15 +29,8 @@ namespace ungeom{
 
   PLANE::PLANE():OBJECT(),size(vec3::one){}
   PLANE::~PLANE(){}
-  void PLANE::draw(GLenum mode){
-    update();
-    
-    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  
-    BindLoc();
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
+  void PLANE::draw_geom(class unobj::MODE&m){
+    if(m.matl)bind_mat();
   
     glBegin(GL_QUADS);
     // Front
@@ -50,13 +43,7 @@ namespace ungeom{
 
     OGL_DEBUG();
   
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    uBindLoc();
-  
-    glPopClientAttrib();
+    if(m.matl)ubind_mat();
   }
   bool PLANE::update(){
     vec3 n=0.5*size;
@@ -87,15 +74,8 @@ namespace ungeom{
 
   */
   BOX::~BOX(){}
-  void BOX::draw(GLenum mode){
-    update();
-
-    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-
-    BindLoc();
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
+  void BOX::draw_geom(const unobj::MODE&m){
+    if(m.matl)bind_mat();
   
     glBegin(GL_QUADS);
     // Front
@@ -138,13 +118,7 @@ namespace ungeom{
 
     OGL_DEBUG();
   
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    uBindLoc();
-  
-    glPopClientAttrib();
+    if(m.matl)ubind_mat();
   }
   bool BOX::update(){
     vec3 n=0.5*size;
@@ -158,18 +132,9 @@ namespace ungeom{
 
   SPHERE::SPHERE():OBJECT(),segment(12,12){}
   SPHERE::~SPHERE(){}
-  void SPHERE::draw(GLenum mode){ // Renderering
-    update();
-
-    glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-
-    glDisable(GL_LIGHTING);
-  
-    BindLoc();
-    BindName(mode);
-    BindMat(mode);
-    BindQuery(mode);
-  
+  void SPHERE::draw_geom(const unobj::MODE&m){ // Renderering
+    if(m.matl)bind_mat();
+    
     for(unsigned int i=0;i<-1+segment.x;i++){
       scalar t=i/(segment.x-1.f);
       scalar t2=(i+1)/(segment.x-1.f);
@@ -190,16 +155,9 @@ namespace ungeom{
       }
       glEnd();
     }
-
     OGL_DEBUG();
-  
-    uBindQuery(mode);
-    uBindMat(mode);
-    uBindName(mode);
-    drawaxis(mode);
-    uBindLoc();
-  
-    glPopClientAttrib();
+    
+    if(m.matl)ubind_mat();
   }
   bool SPHERE::update(){}
   SPHERE::operator string(){return "SPHERE()";}
