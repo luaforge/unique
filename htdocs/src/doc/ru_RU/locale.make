@@ -28,4 +28,4 @@ ru_RU.index_1.title=Описание модулей
   ru_RU.index_1.2.title=Модуль unogl
   ru_RU.index_1.3.title=Модуль ....
 ru_RU.index_2.title=Описание данных
-  ru_RU.index_2.0.title=Формат фала полигональной геометрии
+  ru_RU.index_2.0.title=Формат файла полигональной геометрии
