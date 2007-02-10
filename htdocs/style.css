@@ -54,12 +54,24 @@ body{ margin: 0px 0px 0px 0px;
        height: 20px;
        text-align: center;
        font-weight: bold; }
-.langlink,.langlink:link,.langlink:visited{ text-decoration: none; color: #515151; font-weight: bold; }
-.langlink:hover{ text-decoration: blink; color: #717171; font-weight: bold; }
-.langactv{ text-decoration: none; font-weight: bold; }
-
-.headlink,.headlink:link,.headlink:visited{ text-decoration: none; color: #515151; }
-.headlink:hover{ text-decoration: none; color: #717171; }
+.langlink,
+.langlink:link,
+.langlink:active,
+.langlink:visited{ text-decoration: none;
+                   color: #515151;
+                   font-weight: bold; }
+.langlink:hover{ text-decoration: blink;
+                 color: #717171;
+                 font-weight: bold; }
+.langactv{ text-decoration: none;
+           font-weight: bold; }
+.headlink,
+.headlink:link,
+.headlink:active,
+.headlink:visited{ text-decoration: none;
+                   color: #515151; }
+.headlink:hover{ text-decoration: none;
+                 color: #717171; }
 .head{ width: 224px;
        height: 14px;
        padding: 9px 0px 9px 32px;
@@ -153,13 +165,13 @@ p{ margin: 20px 30px 20px 30px;
    text-align: left;
    color: #616161; }
 p.post{ font-size: 12px;
-   font-weight: normal;
-   text-align: right;
-   color: #515151; }
+        font-weight: normal;
+        text-align: right;
+        color: #515151; }
 p.code{ font-size: 13px;
-       padding: 20px 40px 20px 40px;
-       color: #513151;
-       border: 1px dashed #C0C0C0; }
+        padding: 20px 40px 20px 40px;
+        color: #513151;
+        border: 1px dashed #C0C0C0; }
 #scrshot{ padding: 20px 30px 20px 30px;
           text-align: center;
           width: 640px; height:480px; }
@@ -167,8 +179,14 @@ p.code{ font-size: 13px;
           border: solid 2px #232323;
           width: 640px; height:480px; 
           }
-.scrstext{ background-color: transparent; border: none; width: 480px; }
-.scrsctrl,.scrsctrl:link,.scrsctrl:visited{ font-size: 256px; text-decoration: none; color: #B0B0B0; }
+.scrstext{ background-color: transparent;
+           border: none; width: 480px; }
+.scrsctrl,
+.scrsctrl:link,
+.scrsctrl:active,
+.scrsctrl:visited{ font-size: 256px;
+                   text-decoration: none;
+                   color: #B0B0B0; }
 .scrsctrl:hover{ font-size: 256px; text-decoration:blink; }
 #news{ padding: 20px 40px 20px 40px;
        text-align: center; }
@@ -183,5 +201,31 @@ p.code{ font-size: 13px;
            padding-left: 20px;
            padding-top: 20px;
            text-align: left; }
-a,a:link,a:visited{ color: #731172; }
+a,a:link,a:active,a:visited{ color: #731172; }
 a:hover{ color: #A00000; }
+
+#index{ padding: 20px 40px 20px 40px;
+        color: #513151;
+        border: 1px solid #C0C0C0; }
+.bookindex{ text-align: left; }
+.bookitem{ text-align: left; }
+.bookitem:hover{ }
+.bookitem:before{ content: "";
+                  margin-left: 32px;
+                  text-align: right;
+                  text-decoration: none; }
+.bookitem:after{ content: "";
+                 margin-left: 5px;
+                 text-align: right;
+                 text-decoration: none; }
+.bookitemlink,
+.bookitemlink:link,
+.bookitemlink:active,
+.bookitemlink:visited{ text-align: left;
+                       text-decoration: none;
+                       color: inherit; }
+.bookitemlink:hover{ text-decoration: none;
+                     color: inherit;
+                     border: 1px; }
+.bookreturn{ text-align: center;
+             font-weight: bolder; }

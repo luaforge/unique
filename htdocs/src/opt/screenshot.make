@@ -1,4 +1,4 @@
-screenshot.name=screenshot
+
 screenshot.model=view
 screenshot.template=screenshot
 screenshot.type=jpg

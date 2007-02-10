@@ -1,9 +1,17 @@
+#######################################################################
+##                                                                   ##
+##        .::: PAGE MODELS ::: PAGE TEMPLATES ::: UNITS :::.         ##
+##                                                                   ##
+#######################################################################
+
 ## T.xxxxxxx - template
 ## M.xxxxxxx - module
 
+
 #### $(1) - page name; $(2) - page language;
-T.pagename=$(1).$(2).html
-T.pagesrcn=$(D.src)/$(2)/$(1).html
+T.pagename=$(addsuffix .$(2).html,$(1))
+T.pagesrcn=$(addprefix $(D.src)/$(2)/,$(addsuffix .html,$(1)))
+T.pagemake=$(addprefix $(D.src)/$(2)/,$(addsuffix .make,$(1)))
 
 #### $(1) - page name; $(2) - page header; $(3) - page title; $(4) - page contents;	
 T.page=\
@@ -75,19 +83,25 @@ T.langitem_active=\
 
 T.emptypage=\
 <p>Site are being developed....<p>\
-<p class=post><!-- hhmts start -->Last modified: Thu Feb  8 17:23:17 YEKT 2007 <!-- hhmts end --></p>
+<p class=post><!-- hhmts start -->Last modified: Sat Feb 10 14:39:20 YEKT 2007 <!-- hhmts end --></p>
+
+
+#######################################################################
+##                                                                   ##
+##                .::: PAGE MODEL ::: CONTENT :::.                   ##
+##                                                                   ##
+#######################################################################
 
 #### $(1) - page name, $(2) - page contents, $(3) - language
-M.content=$(2)
+M.content=\
+$(2)
 
-#### $(1) - item name, $(2) - item content, $(3) - page name
-T.news.item=\
-<div class=newsitem>\
-<table><tr>\
-  <td class=newsdate>$(1)</td>\
-  <td class=newstext>$(2)</td>\
-</tr></table>\
-</div>
+
+#######################################################################
+##                                                                   ##
+##                 .::: PAGE MODEL ::: VIEW :::.                     ##
+##                                                                   ##
+#######################################################################
 
 #### $(1) - item names array, $(2) - item texts array, $(3) - page name
 T.screenshot=\
@@ -130,6 +144,13 @@ $(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).view/*.html))),\
 $(1)),\
 $(2))
 
+
+#######################################################################
+##                                                                   ##
+##                 .::: PAGE MODEL ::: LIST :::.                     ##
+##                                                                   ##
+#######################################################################
+
 ####  $(1) - page name, $(2) - page contents, $(3) - page template, $(4) - page language
 M.list=\
 $(subst LISTITEMS,\
@@ -139,3 +160,73 @@ $(call T.$(3).item,$(i),$(shell cat $(D.src)/$(4)/$(1).list/$(i).html),$(1))\
 ),\
 $(2))
 
+#### $(1) - item name, $(2) - item content, $(3) - page name
+T.news.item=\
+<div class=newsitem>\
+<table><tr>\
+  <td class=newsdate>$(1)</td>\
+  <td class=newstext>$(2)</td>\
+</tr></table>\
+</div>
+
+
+#######################################################################
+##                                                                   ##
+##                 .::: PAGE MODEL ::: BOOK :::.                     ##
+##                                                                   ##
+#######################################################################
+
+####  $(1) - page name, $(2) - page contents, $(3) - page template, $(4) - page language
+M.book=\
+$(subst __CONTENT_INDEX__,$(call T.$(3).index,\
+$(foreach p,$(call T.book.index,$(1),$(4)),\
+$(if $(findstring $($(call T.book.pagename,$(1),$(p)).model),bookpage),\
+$(call T.$(3).index.item,$(call T.pagename,$(call T.book.pagename,$(1),$(p)),$(4)),$($(4).$(call T.book.pagename,$(1),$(p)).title),$(p),$(words $(subst ., ,$(p)))),\
+$(call T.$(3).index.item_noexist,$(call T.pagename,$(call T.book.pagename,$(1),$(p)),$(4)),$($(4).$(call T.book.pagename,$(1),$(p)).title),$(p),$(words $(subst ., ,$(p))))\
+))),\
+$(2))
+
+####  $(1) - page name, $(2) - page contents, $(3) - page template, $(4) - page language
+M.bookpage=\
+$(subst __RETURN_TO_INDEX__,\
+$(call T.$($(firstword $(subst _, ,$(1))).template).index.return,$(call T.pagename,$(firstword $(subst _, ,$(1))),$(4)),$($(4).$(firstword $(subst _, ,$(1))).return)),\
+$(call T.$($(firstword $(subst _, ,$(1))).template).content,$(2)))
+
+####  $(1) - page name, $(2) - page language
+T.book.index=$(patsubst %.html,%,$(notdir $(call T.pagesrcn,$(addprefix $(1).book/,$($(1).target)),$(2))))
+
+####  $(1) - page name, $(2) - page item
+T.book.pagename=$(addprefix $(1)_,$(2))
+
+####  $(1) - page name, $(2) - page language
+T.book.depend=$(call T.book.pagename,$(1),\
+$(foreach p,$(call T.book.index,$(1),$(2)),\
+$(if $(findstring $($(call T.book.pagename,$(1),$(p)).model),bookpage),$(p))))
+
+
+####  $(1) - page name, $(2) - page language
+T.book.require=$(subst _,.book/,$(1))
+
+####  $(1) - content
+T.docum.index=\
+$(1)
+
+####  $(1) - content
+T.docum.content=\
+__RETURN_TO_INDEX__\
+<div id=index>\
+$(1)\
+</div>\
+__RETURN_TO_INDEX__
+
+#### $(1) - page file name; $(2) - page view name; $(3) - page index; $(4) - page index level
+T.docum.index.item=\
+<h$(4) class=bookitem>$(3). <a href=\"$(1)\" class=bookitemlink>$(2)</a></h$(3)>
+
+#### $(1) - page file name; $(2) - page view name; $(3) - page index; $(4) - page index level
+T.docum.index.item_noexist=\
+<h$(4) class=bookitem>$(3). $(2)</h$(3)>
+
+#### $(1) - page file name; $(2) - page view name;
+T.docum.index.return=\
+<p class=bookreturn><a href=\"$(1)\" class=bookitemlink>[[[[ $(2) ]]]]</a></p>
