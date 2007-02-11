@@ -42,7 +42,7 @@ U.RD=rmdir $(1)
 ####### >> lua >> #######
 ## M        - interpreter properties
 ## M.XX     - interpreter call {$(1) - arguments}
-M.XX=lua5.1 $(1)
+M.XX="/cygdrive/D/development/lua-5.1.1/lua-5.1.1/src/lua" $(1)
 ####### << lua << #######
 
 
@@ -111,4 +111,10 @@ endif
 ####### << linker << #######
 
 L.l.name += lua51 toluaxx51
+
+lua.L = ../../development/lua-5.1.1/lua-5.1.1/src
+lua.I = ../../development/lua-5.1.1/lua-5.1.1/src
+
+toluaxx.L = ../../development/toluaxx/bin
+toluaxx.I = ../../development/toluaxx/include/toluaxx5.1
 

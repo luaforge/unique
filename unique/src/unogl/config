@@ -5,6 +5,14 @@
 unogl.state = enable
 unogl.dep = unbase unmath
 
+## cygwin-mingw build options ##
+cygwin-mingw.unogl.C.I.opengl = ../../GNUtools/mingw/include/GL
+cygwin-mingw.unogl.C.I += $(cygwin-mingw.unogl.C.I.opengl)
+cygwin-mingw.unogl.L.l += opengl32 glu32 gdi32 user32 winmm
+cygwin-mingw.unogl.platform.glext = glext.h
+cygwin-mingw.unogl.platform.glext.name += WGL_ARB_multisample WGL_ARB_extensions_string WGL_ARB_pixel_format WGL_ARB_pbuffer WGL_EXT_swap_control
+
+
 ## linux-gcc build options ##
 linux-gcc.unogl.C.I.opengl = /usr/include/GL
 linux-gcc.unogl.C.I += $(linux-gcc.unogl.C.I.opengl) /usr/include/X11 /usr/include/X11/extensions/

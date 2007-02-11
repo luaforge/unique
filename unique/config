@@ -1,12 +1,13 @@
 
 ## OS Platform
 ## linux|win32
-PLATFORM=linux
+PLATFORM=cygwin
+#PLATFORM=win32
 
 ## Compiler
 ## gcc|mingw
 COMPILER=gcc
-#COMPILER=mingw
+COMPILER=mingw
 
 ## Design
 ## modules|&monolith|&runable
@@ -20,7 +21,7 @@ MODE=real
 ## Debug
 ## enable|disable
 DEBUG=enable
-#DEBUG=disable
+DEBUG=disable
 
 ## Main name
 ## lunique

@@ -16,3 +16,6 @@ linux-gcc.unbase.L.opts += $(shell pkg-config --libs lua5.1 toluaxx5.1)
 
 linux-mingw.unbase.C.flags += $(shell pkg-config --cflags lua5.1 toluaxx5.1)
 linux-mingw.unbase.L.l += lua51 toluaxx51
+
+cygwin-mingw.unbase.L.L = $(toluaxx.L) $(lua.L)
+cygwin-mingw.unbase.C.I = $(toluaxx.I) $(lua.I)
