@@ -9,6 +9,8 @@
 #  include<glx.h>
 #endif
 
+#undef GL_GLEXT_PROTOTYPES
+
 #include<gl.h>
 #include<glu.h>
 #include<glext.h>

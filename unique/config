@@ -1,6 +1,7 @@
 
 ## OS Platform
-## linux|win32
+## linux|win32|cygwin
+PLATFORM=linux
 PLATFORM=cygwin
 #PLATFORM=win32
 

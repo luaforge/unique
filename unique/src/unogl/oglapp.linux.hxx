@@ -23,6 +23,8 @@ Author:
 #  pragma once
 #  include"graphcontext.hxx"
 
+#undef GL_GLEXT_PROTOTYPES
+
 #  include<glx.h>
 #  include<glext.h>
 #  include<Xlib.h>
