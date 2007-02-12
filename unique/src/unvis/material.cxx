@@ -97,7 +97,7 @@ namespace unvis{
   void MATERIAL::TEXMAP::bind(){
     for(GLuint i=0;i<4;i++){
       if(int(pool[i])>0x1000){
-	glActiveTexture(GL_TEXTURE0+i);
+	unogl::glActiveTexture(GL_TEXTURE0+i);
 	OGL_DEBUG();
 	pool[i]->bind();
       }
@@ -107,7 +107,7 @@ namespace unvis{
   void MATERIAL::TEXMAP::ubind(){
     for(GLuint i=0;i<4;i++){
       if(int(pool[i])>0x1000){
-	glActiveTexture(GL_TEXTURE0+i);
+	unogl::glActiveTexture(GL_TEXTURE0+i);
 	OGL_DEBUG();
 	pool[i]->ubind();
       }

@@ -2,13 +2,13 @@
 ## OS Platform
 ## linux|win32|cygwin
 PLATFORM=linux
-PLATFORM=cygwin
+#PLATFORM=cygwin
 #PLATFORM=win32
 
 ## Compiler
 ## gcc|mingw
 COMPILER=gcc
-COMPILER=mingw
+#COMPILER=mingw
 
 ## Design
 ## modules|&monolith|&runable
