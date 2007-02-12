@@ -35,10 +35,10 @@ namespace ungeom{
     glBegin(GL_QUADS);
     // Front
     glNormal3f(0.0,0.0,-1.0);
-    glMultiTexCoord2f(GL_TEXTURE0,0.0,0.0); glMultiTexCoord2f(GL_TEXTURE1,0.0,0.0); glVertex3f(b.x,b.y,b.z);
-    glMultiTexCoord2f(GL_TEXTURE0,0.0,1.0); glMultiTexCoord2f(GL_TEXTURE1,0.0,1.0); glVertex3f(e.x,b.y,b.z);
-    glMultiTexCoord2f(GL_TEXTURE0,1.0,1.0); glMultiTexCoord2f(GL_TEXTURE1,1.0,1.0); glVertex3f(e.x,e.y,b.z);
-    glMultiTexCoord2f(GL_TEXTURE0,1.0,0.0); glMultiTexCoord2f(GL_TEXTURE1,1.0,0.0); glVertex3f(b.x,e.y,b.z);
+    ungeom::glMultiTexCoord2f(GL_TEXTURE0,0.0,0.0); ungeom::glMultiTexCoord2f(GL_TEXTURE1,0.0,0.0); glVertex3f(b.x,b.y,b.z);
+    ungeom::glMultiTexCoord2f(GL_TEXTURE0,0.0,1.0); ungeom::glMultiTexCoord2f(GL_TEXTURE1,0.0,1.0); glVertex3f(e.x,b.y,b.z);
+    ungeom::glMultiTexCoord2f(GL_TEXTURE0,1.0,1.0); ungeom::glMultiTexCoord2f(GL_TEXTURE1,1.0,1.0); glVertex3f(e.x,e.y,b.z);
+    ungeom::glMultiTexCoord2f(GL_TEXTURE0,1.0,0.0); ungeom::glMultiTexCoord2f(GL_TEXTURE1,1.0,0.0); glVertex3f(b.x,e.y,b.z);
     glEnd();
 
     OGL_DEBUG();
@@ -145,11 +145,11 @@ namespace ungeom{
 	scalar s=j/(segment.x-1.f);
 	scalar theta=2*unmath::cnst::one_pi*s;
 	
-	glMultiTexCoord2f(GL_TEXTURE0,s,t);
+	ungeom::glMultiTexCoord2f(GL_TEXTURE0,s,t);
 	glNormal3f(cos(phi)*cos(theta),sin(phi),cos(phi)*sin(theta));
 	glVertex3f(radius*cos(phi)*cos(theta),radius*sin(phi),-radius*cos(phi)*sin(theta));
 	
-	glMultiTexCoord2f(GL_TEXTURE0,s,t2);
+	ungeom::glMultiTexCoord2f(GL_TEXTURE0,s,t2);
 	glNormal3f(cos(phi2)*cos(theta),sin(phi2),cos(phi2)*sin(theta));
 	glVertex3f(radius*cos(phi2)*cos(theta),radius*sin(phi2),-radius*cos(phi2)*sin(theta));
       }

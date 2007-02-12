@@ -2,8 +2,10 @@
 ## OS Platform
 ## linux|win32|cygwin
 PLATFORM=linux
-#PLATFORM=cygwin
-#PLATFORM=win32
+
+PLATFORM=cygwin
+PLATFORM=win32
+PLATFORM=linux
 
 ## Compiler
 ## gcc|mingw
