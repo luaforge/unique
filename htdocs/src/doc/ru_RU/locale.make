@@ -29,3 +29,5 @@ ru_RU.index_1.title=Описание модулей
   ru_RU.index_1.3.title=Модуль ....
 ru_RU.index_2.title=Описание данных
   ru_RU.index_2.0.title=Формат файла полигональной геометрии
+ru_RU.index_3.title=Моделинг
+  ru_RU.index_3.0.title=Общие рекомендации по моделингу
