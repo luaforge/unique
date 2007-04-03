@@ -40,11 +40,11 @@ define batch_page
 $(info Generate rule for page LANG=$(1),PAGE=$(2),SOURCE=$(3))
 -include $(call T.pagemake,$(3),$(1))
 source.$(1)+=$(call T.pagesrcn,$(3),$(1))
-object.$(1)+=$(call T.pagename,$(2),$(1))
+object.$(1)+=$(call T.pagetarget,$(2),$(1))
 #$(%.page): $(%.file)
 $(call T.pagesrcn,$(3),$(1)):
 	@echo -ne "$$(call T.emptypage)" > $$@
-$(call T.pagename,$(2),$(1)): $(call T.pagesrcn,$(3),$(1)) $$(call T.pagename,$$(call T.$$($(2).model).depend,$(2),$(1)),$(1))
+$(call T.pagetarget,$(2),$(1)): $(call T.pagesrcn,$(3),$(1)) $$(call T.pagetarget,$$(call T.$$($(2).model).depend,$(2),$(1)),$(1))
 	@echo Generate page $$@ LANG=$(1),PAGE=$(2),SOURCE=$(3) Depend $$^
 	@echo -ne "\
 $$(call T.page,$(2),\
@@ -83,9 +83,62 @@ $(foreach l,$(lang),\
 $(eval $(call batch_template,$(l))))
 batch_group=$(addprefix $(1).,$(lang))
 
+##
+##  Images processing
+##
 
-build: $(call batch_group,build)
-clean: $(call batch_group,clean)
-probe: $(call batch_group,probe)
+$(D.img_dst)/%.png: $(D.img_src)/%.dia
+	@echo Create image $*
+	@dia --nosplash --export=$@ --export-to-format=png $^
+$(D.img_dst)/%.png: $(D.img_src)/%.svg
+	@echo Create image $*
+	@inkscape --without-gui --export-bbox-page --export-png=$@ $^
+
+source_image=$(wildcard $(D.img_src)/*.dia $(D.img_src)/*.svg)
+target_image=$(basename $(notdir $(source_image)))
+object_image=$(addsuffix .png,$(addprefix $(D.img_dst)/,$(target_image)))
+
+image.build: $(object_image)
+image.clean:
+	@echo Clean images
+	@rm -f $(object_image)
+image.probe:
+	@echo Generated images
+	@echo source_image=$(source_image)
+	@echo target_image=$(target_image)
+	@echo object_image=$(object_image)
+
+batch_image=$(addprefix image.,$(1))
+
+##
+##  Style Sheet
+##
+
+source_style=$(wildcard $(D.sty_src)/*.css $(D.sty_src)/*.html)
+target_style=$(notdir $(source_style))
+object_style=$(addprefix $(D.sty_dst)/,$(target_style))
+
+$(D.sty_dst)/%.html: $(D.sty_src)/%.html
+	@echo Generate $*
+	@cp $< $@
+$(D.sty_dst)/%.css: $(D.sty_src)/%.css
+	@echo Generate $*
+	@cp $< $@
+
+style.build: $(object_style)
+style.clean:
+	@echo Clean styles
+	@rm -f $(object_style)
+style.probe:
+	@echo Generated styles
+	@echo source_style=$(source_style)
+	@echo target_style=$(target_style)
+	@echo object_style=$(object_style)
+
+
+build: $(call batch_group,build) $(call batch_image,build) style.build
+clean: $(call batch_group,clean) $(call batch_image,clean) style.clean
+probe: $(call batch_group,probe) $(call batch_image,probe) style.probe
 	@echo lang=$(lang)
-
+	@echo build targets: $(call batch_group,build) $(call batch_image,build)
+	@echo clean targets: $(call batch_group,clean) $(call batch_image,clean)

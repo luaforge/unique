@@ -31,3 +31,7 @@ ru_RU.index_2.title=Описание данных
   ru_RU.index_2.0.title=Формат файла полигональной геометрии
 ru_RU.index_3.title=Моделинг
   ru_RU.index_3.0.title=Общие рекомендации по моделингу
+ru_RU.index_4.title=Движок изнутри
+  ru_RU.index_4.0.title=Объектная модель движка
+  ru_RU.index_4.1.title=Как устроен рендеринг
+  ru_RU.index_4.2.title=Физический симулятор

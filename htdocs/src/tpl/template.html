@@ -10,6 +10,7 @@
 
 #### $(1) - page name; $(2) - page language;
 T.pagename=$(addsuffix .$(2).html,$(1))
+T.pagetarget=$(addprefix $(D.dst)/,$(addsuffix .$(2).html,$(1)))
 T.pagesrcn=$(addprefix $(D.src)/$(2)/,$(addsuffix .html,$(1)))
 T.pagemake=$(addprefix $(D.src)/$(2)/,$(addsuffix .make,$(1)))
 
