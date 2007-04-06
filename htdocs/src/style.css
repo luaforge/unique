@@ -242,7 +242,9 @@ a:hover{ color: #A00000; }
 
 #index{ padding: 20px 40px 20px 40px;
         color: #513151;
-        border: 1px solid #C0C0C0; }
+        border: 2px dotted #A0A0A0;
+        background-color: transparent;
+        background-image: url("doc_back.png"); }
 .bookindex{ text-align: left; }
 .bookitem{ text-align: left; }
 .bookitem:hover{ }
