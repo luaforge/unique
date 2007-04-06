@@ -177,6 +177,13 @@ ul{ margin: 4px 10px 4px 10px;
     text-indent: 10px;
     list-style-type: square;
     color: #616161; }
+ol{ margin: 4px 10px 4px 10px;
+    font-size: 14px;
+    font-weight: normal;
+    text-align: justify;
+    text-indent: 10px;
+    list-style-type: number;
+    color: #616161; }
 p.post{ font-size: 12px;
         font-weight: normal;
         text-align: right;
@@ -216,6 +223,22 @@ p.code{ font-size: 13px;
            text-align: left; }
 a,a:link,a:active,a:visited{ color: #731172; }
 a:hover{ color: #A00000; }
+
+.button:after{ display: marker;
+               content: " ";
+               width: 16px;
+               height: 32px;
+               background-image: url("small_button.png"); }
+.button:before{ display: marker;
+                content: " ";
+                width: 16px;
+                height: 32px;
+                background-image: url("small_button.png"); }
+.button{ height: 32px;
+         background-color: transparent;
+         background-image: url("small_button.png");
+         border: none;
+         display: inline; }
 
 #index{ padding: 20px 40px 20px 40px;
         color: #513151;

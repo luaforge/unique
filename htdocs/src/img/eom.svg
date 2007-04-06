@@ -231,6 +231,17 @@
        y1="-141.99069"
        x2="-125"
        y2="-157" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient19747"
+       id="linearGradient2244"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="reflect"
+       x1="340.03125"
+       y1="112"
+       x2="499.96875"
+       y2="12.03125"
+       gradientTransform="translate(9.96875,10.03125)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -244,9 +255,9 @@
      inkscape:pageshadow="2"
      inkscape:zoom="1"
      inkscape:cx="332.07982"
-     inkscape:cy="253.32502"
+     inkscape:cy="293.82502"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer2"
      width="512px"
      height="512px"
      inkscape:window-width="1024"
@@ -269,11 +280,10 @@
   <g
      inkscape:groupmode="layer"
      id="layer2"
-     inkscape:label="back"
-     sodipodi:insensitive="true">
+     inkscape:label="back">
     <path
-       style="opacity:0.1;color:#000000;fill:url(#linearGradient20738);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
-       d="M 34.9375,13.03125 C 21.684188,13.03125 11.03125,24.585245 11.03125,38.9375 L 11.03125,475.0625 C 11.03125,489.41476 21.684189,500.96874 34.9375,500.96875 L 475.0625,500.96875 C 488.31581,500.96875 498.96874,489.41476 498.96875,475.0625 L 498.96875,38.9375 C 498.96875,24.585244 488.3158,13.03125 475.0625,13.03125 L 34.9375,13.03125 z "
+       style="opacity:0.1;color:#000000;fill:url(#linearGradient2244);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
+       d="M 44.90625,23.0625 C 31.652938,23.0625 21,34.616495 21,48.96875 L 21,485.09375 C 21,499.44601 31.652939,510.99999 44.90625,511 L 485.03125,511 C 498.28456,511 508.93749,499.44601 508.9375,485.09375 L 508.9375,48.96875 C 508.9375,34.616494 498.28455,23.0625 485.03125,23.0625 L 44.90625,23.0625 z "
        id="path31466"
        sodipodi:nodetypes="ccccccccc" />
     <path
@@ -295,7 +305,8 @@
   <g
      inkscape:label="main"
      inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     sodipodi:insensitive="true">
     <path
        style="opacity:0.3;color:#000000;fill:url(#linearGradient20738);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
        d="M 34.9375,13.03125 C 21.684188,13.03125 11.03125,24.585245 11.03125,38.9375 L 11.03125,475.0625 C 11.03125,489.41476 21.684189,500.96874 34.9375,500.96875 L 475.0625,500.96875 C 488.31581,500.96875 498.96874,489.41476 498.96875,475.0625 L 498.96875,38.9375 C 498.96875,24.585244 488.3158,13.03125 475.0625,13.03125 L 34.9375,13.03125 z M 43.90625,52.96875 L 466.09375,52.96875 C 478.80784,52.96875 489.03125,63.332834 489.03125,76.21875 L 489.03125,467.78125 C 489.03123,480.66717 478.80785,491.03125 466.09375,491.03125 L 43.90625,491.03125 C 31.192152,491.03123 20.96875,480.66717 20.96875,467.78125 L 20.96875,76.21875 C 20.96875,63.33283 31.192152,52.96875 43.90625,52.96875 z "
@@ -377,15 +388,15 @@
        ry="10.169309" />
     <text
        xml:space="preserve"
-       style="font-size:18.15839767px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="55.837288"
-       y="631.52991"
+       style="font-size:17.5254612px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="66.218025"
+       y="609.51703"
        id="text11922"
-       transform="scale(1.4053268,0.7115783)"><tspan
+       transform="scale(1.356342,0.7372772)"><tspan
          sodipodi:role="line"
          id="tspan11924"
-         x="55.837288"
-         y="631.52991">SpaceN</tspan></text>
+         x="66.218025"
+         y="609.51703">AreaN</tspan></text>
     <rect
        style="opacity:0.7;color:#000000;fill:url(#linearGradient27579);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
        id="rect11938"
@@ -397,15 +408,15 @@
        ry="10.169309" />
     <text
        xml:space="preserve"
-       style="font-size:18.15839767px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="55.837288"
-       y="561.26361"
+       style="font-size:17.81126976px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="65.151031"
+       y="550.53412"
        id="text11940"
-       transform="scale(1.4053268,0.7115783)"><tspan
+       transform="scale(1.3784615,0.7254464)"><tspan
          sodipodi:role="line"
          id="tspan11942"
-         x="55.837288"
-         y="561.26361">Space3</tspan></text>
+         x="65.151031"
+         y="550.53412">Area3</tspan></text>
     <rect
        style="opacity:0.7;color:#000000;fill:url(#linearGradient27563);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
        id="rect11944"
@@ -417,15 +428,15 @@
        ry="10.169309" />
     <text
        xml:space="preserve"
-       style="font-size:18.15839767px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="55.837288"
-       y="505.0506"
+       style="font-size:17.87413406px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="64.920906"
+       y="497.1442"
        id="text11946"
-       transform="scale(1.4053268,0.7115783)"><tspan
+       transform="scale(1.3833268,0.722895)"><tspan
          sodipodi:role="line"
          id="tspan11948"
-         x="55.837288"
-         y="505.0506">Space2</tspan></text>
+         x="64.920906"
+         y="497.1442">Area2</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:24.26208115px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
@@ -439,15 +450,15 @@
          y="424.85773">....</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:18.15839767px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
-       x="55.729294"
-       y="170.87355"
+       style="font-size:17.84952164px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
+       x="65.010803"
+       y="167.96698"
        id="text12925"
-       transform="scale(1.4053268,0.7115783)"><tspan
+       transform="scale(1.3814221,0.7238917)"><tspan
          sodipodi:role="line"
          id="tspan12927"
-         x="55.729294"
-         y="170.87355">Space1</tspan></text>
+         x="65.010803"
+         y="167.96698">Area1</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:24.26208115px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Bitstream Vera Sans"
