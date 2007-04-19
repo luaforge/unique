@@ -84,7 +84,7 @@ T.langitem_active=\
 
 T.emptypage=\
 <p>Site are being developed....<p>\
-<p class=post><!-- hhmts start -->Last modified: Sat Feb 10 14:39:20 YEKT 2007 <!-- hhmts end --></p>
+<p class=post><!-- hhmts start -->Last modified: Thu Apr 19 16:53:02 YEKST 2007 <!-- hhmts end --></p>
 
 
 #######################################################################
@@ -156,10 +156,13 @@ $(2))
 M.list=\
 $(subst LISTITEMS,\
 $(foreach i,\
-$(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).list/*.html))),\
+$(shell echo -ne "$(foreach i,$(basename $(notdir $(wildcard $(D.src)/$(4)/$(1).list/*.html))),\n$i)" | sort -r),\
 $(call T.$(3).item,$(i),$(shell cat $(D.src)/$(4)/$(1).list/$(i).html),$(1))\
 ),\
 $(2))
+
+####  $(1) - page name, $(2) - page language
+M.list.source=$(wildcard $(D.src)/$(2)/$(1).list/*.html)
 
 #### $(1) - item name, $(2) - item content, $(3) - page name
 T.news.item=\
@@ -169,7 +172,6 @@ T.news.item=\
   <td class=newstext>$(2)</td>\
 </tr></table>\
 </div>
-
 
 #######################################################################
 ##                                                                   ##

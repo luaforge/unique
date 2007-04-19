@@ -44,7 +44,7 @@ object.$(1)+=$(call T.pagetarget,$(2),$(1))
 #$(%.page): $(%.file)
 $(call T.pagesrcn,$(3),$(1)):
 	@echo -ne "$$(call T.emptypage)" > $$@
-$(call T.pagetarget,$(2),$(1)): $(call T.pagesrcn,$(3),$(1)) $$(call T.pagetarget,$$(call T.$$($(2).model).depend,$(2),$(1)),$(1))
+$(call T.pagetarget,$(2),$(1)): $(call T.pagesrcn,$(3),$(1)) $$(call T.pagetarget,$$(call T.$$($(2).model).depend,$(2),$(1)),$(1)) $$(call M.$$($(2).model).source,$(2),$(1))
 	@echo Generate page $$@ LANG=$(1),PAGE=$(2),SOURCE=$(3) Depend $$^
 	@echo -ne "\
 $$(call T.page,$(2),\
@@ -67,6 +67,9 @@ $$(call T.page,$(2),\
     ),\
   $$(call M.$$($(2).model),$(2),$$(shell cat $$<),$$($(2).template),$(1))\
   )" > $$@
+probe: probe.$(2).$(1)
+probe.$(2).$(1):
+	@echo Probe for page LANG=$(1),PAGE=$(2),DEPEND=$(call T.$($(2).model).depend,$(2),$(1))
 endef
 
 
