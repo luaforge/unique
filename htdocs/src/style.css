@@ -273,6 +273,7 @@ h6.bookitem{ font-size:  7px; }
                      border: 1px; }
 .bookreturn{ text-align: center;
              font-weight: bolder; }
+img.docum{ float: right; margin-left: 20px; }
 /* tables */
 table.docum{ text-align: left;
              border-collapse: collapse;
