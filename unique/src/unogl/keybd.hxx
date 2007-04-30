@@ -106,8 +106,8 @@ class KEY{
   KEY(unsigned int k, bool s);
   ~KEY();
   
-  unsigned int key;
-  unsigned int code;
+  int key;
+  int code;
   bool state;
 
   operator string();

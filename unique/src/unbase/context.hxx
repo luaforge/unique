@@ -1,8 +1,6 @@
 #pragma once
 #include"unbase.hxx"
 
-#include<map>
-
 namespace unbase{//tolua_export
   // Interface context class
   class CONTEXT{//tolua_export
@@ -31,24 +29,20 @@ namespace unbase{//tolua_export
   //tolua_end
   
   class CONTEXTS{//tolua_export
-  protected:
-    typedef map<string,CONTEXT*> POOL;
-    POOL pool;
   public:
+    typedef map<string,CONTEXT*> CONT;
     typedef map<string,CONTEXT*>::iterator ITER;
-    ITER begin();
-    ITER end();
+    CONT array;
     //tolua_begin
     CONTEXTS();
     ~CONTEXTS();
     void operator()(string&/**n="" asnil**/,CONTEXT*&/**c=NULL**/);
+    //tolua_end
     //CONTEXT *& operator[](string);
-    /**tolua_getindex {**/
     CONTEXT* get(string);
-    /**}**/
-    /**tolua_setindex {**/
     void set(string, CONTEXT*);
-    /**}**/
+    //tolua_begin
+    /**CONTEXT* tolua_index(string,get,set);**/
     operator string();
   };
   //tolua_end

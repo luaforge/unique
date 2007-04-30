@@ -1,5 +1,5 @@
 #pragma once
-#if _LINUX
+#ifdef _LINUX
 #  include"unbase.hxx"
 #  include<deque>
 #  include<keysym.h>
@@ -113,7 +113,7 @@ namespace unogl{
     KEY():key(0),state(false){}
     KEY(unsigned int k,bool s):key(k),state(s){}
     ~KEY(){}
-    
+  
     operator string(){return string("KEY(key==")+key+",state=="+state+")";}
   };
 }

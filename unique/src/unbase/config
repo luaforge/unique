@@ -1,6 +1,6 @@
 ##############################
 #
-#  Unique Engine
+#  Unique Engine, jan,2006
 # *module: unbase
 # *author: PhoenixIV
 # *description:
@@ -10,9 +10,4 @@
 
 unbase.state=enable
 
-linux-gcc.unbase.C.flags += $(shell pkg-config --cflags lua5.1 toluaxx5.1)
-linux-gcc.unbase.L.opts += $(shell pkg-config --libs lua5.1 toluaxx5.1)
-#linux-gcc.unbase.L.l += c dl
-
-linux-mingw.unbase.C.flags += $(shell pkg-config --cflags lua5.1 toluaxx5.1)
-linux-mingw.unbase.L.l += lua51 toluaxx51
+unbase.L.l += dl pthread z #bz2

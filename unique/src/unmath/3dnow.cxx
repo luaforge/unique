@@ -29,7 +29,7 @@ namespace _3DNOW{
 /*    3DNOW!   Optimization    */
   scalar sqrtf_scal(const scalar f){
     scalar r=0.0;
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       movd  mm0, f
 	
@@ -40,8 +40,7 @@ namespace _3DNOW{
 	
 	femms
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq  (%%eax), %%mm0\n"
 	    
@@ -60,7 +59,7 @@ namespace _3DNOW{
 
   scalar len_vec3(const vec3& v){
     scalar r=0.0;
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov   eax, v
 	
@@ -82,8 +81,7 @@ namespace _3DNOW{
 	
 	femms
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq  (%%eax), %%mm0\n"
 	    "movd 8(%%eax), %%mm1\n"
@@ -111,7 +109,7 @@ namespace _3DNOW{
   
   scalar len_vec4(const vec4& v){
     scalar r=0.0;
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov   eax, v
 	
@@ -133,8 +131,7 @@ namespace _3DNOW{
 	
 	femms
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq  (%%eax), %%mm0\n"
 	    "movq 8(%%eax), %%mm1\n"
@@ -161,7 +158,7 @@ namespace _3DNOW{
   }
   
   void norm_vec3(vec3& v){
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov eax, v
 	
@@ -187,8 +184,7 @@ namespace _3DNOW{
 	
 	femms
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq (%%eax), %%mm0\n"
 	    "movd 8(%%eax), %%mm1\n"
@@ -218,7 +214,7 @@ namespace _3DNOW{
   }
   
   void norm_vec4(vec4& v){
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov eax, v
 	
@@ -243,8 +239,7 @@ namespace _3DNOW{
 	
 	femms
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq (%%eax), %%mm0\n"
 	    "movq 8(%%eax), %%mm1\n"
@@ -273,7 +268,7 @@ namespace _3DNOW{
   }
   
   static vec3& sub_vec3_vec3(vec3& r, const vec3& v1, const vec3& v2){
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov eax, v1
 	mov ebx, v2
@@ -290,8 +285,7 @@ namespace _3DNOW{
 	movq   [edx], mm0
 	movd [edx+8], mm1
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq    (%%eax),  %%mm0\n"
 	    "movd   8(%%eax),  %%mm1\n"
@@ -311,7 +305,7 @@ namespace _3DNOW{
   }
   
   static vec4& sub_vec4_vec4(vec4& r, const vec4& v1, const vec4& v2){
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       mov eax, v1
 	mov ebx, v2
@@ -328,8 +322,7 @@ namespace _3DNOW{
 	movq   [edx], mm0
 	movq [edx+8], mm1
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq    (%%eax),  %%mm0\n"
 	    "movq   8(%%eax),  %%mm1\n"
@@ -350,7 +343,7 @@ namespace _3DNOW{
   
   static void dot_vec4_vec4(const vec4& v0, const void *v1, int v1_stride, void *result, int result_stride, int count){
     if(count==0) return;
-#   if _WIN32 && !_MINGW
+#   ifdef _WIN32
     __asm{
       pusha
 	
@@ -385,8 +378,7 @@ namespace _3DNOW{
 	
 	popa
 	}
-#   endif
-#   if _LINUX || _MINGW
+#   else
     __asm__(
 	    "movq (%%eax), %%mm0\n"
 	    "movq 8(%%eax), %%mm1\n"

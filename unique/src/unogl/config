@@ -5,48 +5,12 @@
 unogl.state = enable
 unogl.dep = unbase unmath
 
-## linux-gcc build options ##
-linux-gcc.unogl.C.I.opengl = /usr/include/GL
-linux-gcc.unogl.C.I += $(linux-gcc.unogl.C.I.opengl) /usr/include/X11 /usr/include/X11/extensions/
-linux-gcc.unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
-linux-gcc.unogl.L.l += GL GLU
-linux-gcc.unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
-linux-gcc.unogl.platform.glext = glxext.h
-linux-gcc.unogl.platform.glext.name += GLX_SGI_swap_control GLX_ARB_multisample GLX_SGIX_pbuffer
-#  GLX_SGIX_fbconfig
-
-## linux-mingw build options ##
-linux-mingw.unogl.C.I.opengl = /usr/i586-mingw32msvc/include/GL
-linux-mingw.unogl.C.I += $(linux-mingw.unogl.C.I.opengl)
-linux-mingw.unogl.L.l += opengl32 glu32 gdi32 user32 winmm
-linux-mingw.unogl.platform.glext = wglext.h
-linux-mingw.unogl.platform.glext.name += WGL_ARB_multisample WGL_ARB_extensions_string WGL_ARB_pixel_format WGL_ARB_pbuffer WGL_EXT_swap_control
-#linux-mingw.unogl.platform.glext.name += WGL_ARB_make_current_read # problem in my system
-
-## win32-mingw build options ##
-win32-mingw.unogl.L.l += opengl32 glu32 gdi32 user32 winmm
-
-unogl.glext = glext.h
-unogl.glext.name += GL_VERSION_1_2 GL_VERSION_1_3 GL_VERSION_1_4 GL_VERSION_1_5 GL_VERSION_2_0 GL_VERSION_2_1 # OpenGL version related extensions
-unogl.glext.name += GL_EXT_framebuffer_object # Optional extensions
-#unogl.glext.name += GL_EXT_coordinate_frame GL_EXT_vertex_shader # not detected in my system
-
-unogl.platform.glext = $($(PLATFORM)-$(COMPILER).unogl.platform.glext)
-unogl.platform.glext.name = $($(PLATFORM)-$(COMPILER).unogl.platform.glext.name)
-
-prepare.unogl: $(call C.H,unogl,oglext.func) $(call C.H,unogl,oglext.platform.func)
-preclean.unogl:
-	@$(call U.EH,Clean OpenGL extensions define)
-	@$(call U.EX,$(call U.RM,$(call C.H,unogl,oglext.func)))
-	@$(call U.EH,Clean OpenGL platform related extensions define)
-	@$(call U.EX,$(call U.RM,$(call C.H,unogl,oglext.platform.func)))
-
-$(call C.H,unogl,oglext.func): $(D.SRC)/unogl/config $(addprefix $($(PLATFORM)-$(COMPILER).unogl.C.I.opengl)/,$(unogl.glext))
-	@$(call U.EH,Generate OpenGL extensions to $@)
-	@$(call U.EX,$(call M.XX,$(D.SRC)/unogl/genglext.lua -o $@ $(addprefix -i ,$(unogl.glext.name)) $(addprefix $($(PLATFORM)-$(COMPILER).unogl.C.I.opengl)/,$(unogl.glext))))
-
-$(call C.H,unogl,oglext.platform.func): $(D.SRC)/unogl/config $(addprefix $($(PLATFORM)-$(COMPILER).unogl.C.I.opengl)/,$(unogl.platform.glext))
-	@$(call U.EH,Generate OpenGL platform related extensions to $@)
-	@$(call U.EX,$(call M.XX,$(D.SRC)/unogl/genglext.lua -o $@ $(addprefix -i ,$(unogl.platform.glext.name)) $(addprefix $($(PLATFORM)-$(COMPILER).unogl.C.I.opengl)/,$(unogl.platform.glext))))
-
-
+ifeq ($(PLATFORM),linux)
+  unogl.C.I += /usr/include/GL /usr/include/X11 /usr/include/X11/extensions/
+  unogl.C.flags += $(shell pkg-config --cflags x11 xxf86vm xext)
+  unogl.L.l += GL GLU
+  unogl.L.opts += $(shell pkg-config --libs x11 xxf86vm xext)
+endif
+ifeq ($(PLATFORM),win32)
+  unogl.L.l += opengl32 glu32 gdi32 user32 winmm
+endif

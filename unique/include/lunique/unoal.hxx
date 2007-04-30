@@ -1,2 +1,1 @@
-#include"config.hxx"
-#include UNHEADER(unoal)
+#include "../../src/unoal/unoal.hxx"

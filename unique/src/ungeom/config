@@ -1,6 +1,0 @@
-#
-#  Height Map object library build config
-#
-
-ungeom.state = enable
-ungeom.dep = unbase unmath unogl unvis unobj

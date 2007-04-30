@@ -1,26 +1,18 @@
 
+ifeq ($(DESIGN),monolith)
+  monolith.state = enable
+endif
 
-monolith.state = enable
-monolith.design = option
+monolith.dep = unbase unmath unogl
 
-monolith.dep = $(T.target)
+m.suf=);
+m.pre=\nUNMODULE(
 
-monolith.m.suf=);
-monolith.m.pre=\nUNMODULE(
+$(D.SRC)/monolith/main.cxx: $(D.SRC)/monolith/modules.hxx
 
-monolith.moddef=$(call C.H,monolith,modules)
+$(D.SRC)/monolith/modules.hxx: 
+	@$(call U.RM,$@)
+	@$(call U.EF,/*\n * Automatic generated modules define header\n */,$@)
+	@$(call U.EF,$(addsuffix $(m.suf),$(addprefix $(m.pre),$(monolith.dep))),$@)
 
-$(call C.S,monolith,main): $(monolith.moddef)
-
-prepare.monolith: $(monolith.moddef)
-
-preclean.monolith:
-	@$(call U.EH,Clean modules define $(monolith.moddef))
-	@$(call U.EX,$(call U.RM,$(monolith.moddef)))
-
-$(monolith.moddef): 
-	@$(call U.EH,Generate modules define $@)
-	@$(call U.EX,$(call U.EF,/*,$@))
-	@$(call U.EX,$(call U.EF, * Automatic generated modules define header,$@))
-	@$(call U.EX,$(call U.EF, */,$@))
-	@$(call U.EX,$(call U.EF,$(addsuffix $(monolith.m.suf),$(addprefix $(monolith.m.pre),$(monolith.dep))),$@))
+.PHONY: $(D.SRC)/monolith/modules.hxx

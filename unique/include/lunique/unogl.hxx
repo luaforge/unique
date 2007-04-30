@@ -1,2 +1,1 @@
-#include"config.hxx"
-#include UNHEADER(unogl)
+#include "../../src/unogl/unogl.hxx"

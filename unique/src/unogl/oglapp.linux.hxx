@@ -28,16 +28,12 @@ Author:
 #  include<Xlib.h>
 #  include<xf86vmode.h>
 
-#  include<glxext.h>
-
 namespace unogl{
-# define GLEXT_FUNC(name,type,real) extern PFN##type##PROC name;
-# include"oglext.platform.func.hxx"
-# undef GLEXT_FUNC
+  using namespace unbase;
 
   class GLAPP: public GRAPHCONTEXT{
   public:
-    enum {// Стили окна
+    enum{// Стили окна
       dflt=0, // Пустой стиль
       none=1, // Просто окно
       bord=2, // Окно c рамкой
@@ -68,6 +64,7 @@ namespace unogl{
     XKeyboardControl     xkbcontrol;
     Atom                 xdelwin;
     GLXContext           xcontext;
+    bool                 xDoubleBuffered;
     int                  xscreen;
     XF86VidModeGamma     xgamma;
 
@@ -80,17 +77,13 @@ namespace unogl{
     
     vec2 start;
     vec2 opos;
-    bool ocursor,omode;
-    unsigned int osync;
+    bool ocursor,omode,osync;
     unsigned int mwheel;
     vec3 ogamma;
-
-    virtual void InitExtensionsLocal();
   public:
     vec3 gamma;
     vec2 pos;
-    bool cursor,mode; // cursor visibility / window mode
-    unsigned int sync;// vertical sync
+    bool cursor,mode,sync; // cursor visibility / window mode / vertical sync
     // Methods
     GLAPP();
     ~GLAPP();

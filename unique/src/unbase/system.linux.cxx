@@ -1,4 +1,4 @@
-#if _LINUX
+#ifdef _LINUX
 #include"system.hxx"
 #include<sys/time.h> 
 #include<sys/resource.h> 

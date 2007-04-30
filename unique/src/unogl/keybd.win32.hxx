@@ -1,5 +1,5 @@
 #pragma once
-#if _WIN32 || _MINGW
+#ifdef _WIN32
 #  include"unbase.hxx"
 #  include<deque>
 #  include<windows.h>
@@ -12,7 +12,7 @@ namespace unogl{
       pause= VK_PAUSE,
       esc=   VK_ESCAPE,
       space= VK_SPACE,
-      kend=  VK_END,
+      end=   VK_END,
       home=  VK_HOME,
       left=  VK_LEFT,
       right= VK_RIGHT,
@@ -92,7 +92,6 @@ namespace unogl{
       enter=   VK_RETURN,
       bkspace= VK_BACK,
       tilda=   (unsigned char)0xC0,
-      grave=   (unsigned char)0xC0,
       press=   0x4,
       release= 0x8,
    

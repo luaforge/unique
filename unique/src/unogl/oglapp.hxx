@@ -17,7 +17,7 @@ namespace unogl{
     unmath::vec2 pos;
     bool cursor;
     bool mode;
-    unsigned int sync;
+    bool sync;
     unmath::vec3 gamma;
     
     GLAPP();
