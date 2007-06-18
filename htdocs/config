@@ -1,9 +1,0 @@
-lang=en_EN ru_RU
-
-D.src=src/doc
-D.img_src=src/img
-D.sty_src=src
-
-D.dst=out
-D.img_dst=out
-D.sty_dst=out

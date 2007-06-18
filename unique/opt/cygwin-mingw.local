@@ -1,5 +1,0 @@
-local.I += ../../development/lua-5.1.1/lua-5.1.1/src
-local.I += ../../development/toluaxx/include/toluaxx5.1
-
-local.L += /cygdrive/D/development/lua-5.1.1/lua-5.1.1/src
-local.L += /cygdrive/D/development/toluaxx/bin

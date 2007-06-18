@@ -1,5 +1,0 @@
-Coming soon!
-
-Exporting in batch mode:
-
-    gimp --no-interface --batch '(lunique-texture-export-batch RUN-NONINTERACTIVE 0 0 "<path/to/file.xcf>")' '(gimp-quit 1)'
