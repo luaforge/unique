@@ -597,17 +597,6 @@ class lunique_plugin(gimpplugin.plugin):
 				    opt.set["path"],opt.set["level"],opt.set["limit"])
 	gimp.delete(image)
 
-def lunique_texture_export(filename):
-    plugin=lunique_plugin()
-    plugin.lunique_texture_export_batch(0,0,0,filename)
-
-register(
-  "lunique_texture_export","","","","","","<Toolbox>/Xtns/Languages/Python-Fu/lUnique/_Dummy texture export","",
-  [(PF_STRING,"filename","filename","Path to .xcf file")],
-  [],
-  lunique_texture_export
-  )
-
 ###########################################################################################################
 ##
 ## lUnique GIMP texture tool :: main code section
