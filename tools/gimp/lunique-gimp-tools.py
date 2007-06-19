@@ -386,8 +386,8 @@ try:
     pygtk.require('2.0')
     import gtk
 except ImportError,info:
-    print("ERROR: GTK bindings not found in our python installation..\n"+
-	  "Please resolve this problem and try once again....")
+    print("ERROR: GTK bindings not found in your python installation..\n"+
+	  "Please solve this problem and try again....")
     sys.exit()
 
 ###########################################################################################################
@@ -600,7 +600,7 @@ class InstallDialog(gtk.Dialog):
     name=_(".:: lUnique GIMP Texture Tools installator ::.")
     preface=_("\n\n\n\n\n\n")
     comment=_("""
-    If you seem to be system administrator (root), you can select installation type
+    You seem to be system administrator (root), you can select installation type
     """)
     def __init__(self):
 	sudo_mode=check_sudo_mode()
@@ -625,7 +625,7 @@ class InstallDialog(gtk.Dialog):
 	main.pack_start(label_name)
 	label_preface=gtk.Label(self.preface)
 	main.pack_start(label_preface)
-	label_info=gtk.Label(_("GIMP version ")+full_version+_(" be found! \n"))
+	label_info=gtk.Label(_("GIMP version ")+full_version+_(" found! \n"))
 	main.pack_start(label_info)
 	label_comment=gtk.Label(self.comment)
 	main.pack_start(label_comment)
@@ -865,7 +865,7 @@ def lunique_main():
 	level=arg["level"]
 	limit=arg["limit"]
 	sys.exit(lunique_batch_export(arg["exec"],file,path,level,limit))
-    print(_("Please run this plug-in from GIMP or use with --help option for help, --install option for automatic installation .."))
+    print(_("Please run this plug-in from GIMP or use with --help option for help.."))
     sys.exit(0)
 
 ###########################################################################################################
@@ -1491,7 +1491,7 @@ class lunique_plugin(gimpplugin.plugin):
 ###########################################################################################################
 
 def fail(msg):
-    '''Display and error message and quit'''
+    '''Display error message and quit'''
     gimp.message(msg)
     raise error, msg
 
