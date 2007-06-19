@@ -952,8 +952,10 @@ class PNGOptions(gtk.HBox):
     def on_format_changed(self,o):
 	if self.format_value[self.combo_format.get_active()]=="i":
 	    self.spin_numofc.show()
+	    self.label_numofc.show()
 	else:
 	    self.spin_numofc.hide()
+	    self.label_numofc.hide()
     def load(self,o): # PNG_format, PNG_numofc (for indexed), PNG_compress
 	self.combo_format.set_active(self.format_value.index(param_get(o,"PNG_format",self.format_value[0])))
 	self.spin_numofc.set_value(int(param_get(o,"PNG_numofc",self.numofc_value[0])))
