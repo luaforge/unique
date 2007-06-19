@@ -865,7 +865,7 @@ def lunique_main():
 	level=arg["level"]
 	limit=arg["limit"]
 	sys.exit(lunique_batch_export(arg["exec"],file,path,level,limit))
-    print(_("Please run this plug-in from GIMP or use with --help option for help.."))
+    print(_("Please run this plug-in from GIMP or use with --help option for help, --install option for automatic installation .."))
     sys.exit(0)
 
 ###########################################################################################################
