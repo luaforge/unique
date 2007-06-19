@@ -656,6 +656,14 @@ def lunique_install(selfname):
 	    str(version[0])+"."+str(version[1])+"/plug-ins/"
 	if mode=="system":
 	    install_path="/usr/lib/gimp/"+version[0]+".0/plug-ins/"
+	install_name=install_path+selfname
+	remove_command="rm -f "+install_name
+	try:
+	    open(install_name)
+	except IOError:
+	    pass
+	else:
+	    os.system(remove_command)
 	install_command="cp "+selfname+" "+install_path
 	if os.system(install_command):
 	    msg="" #sys.stderr.read()
