@@ -784,24 +784,31 @@ def lunique_batch_help(selfname):
     print("""
     """+__program__+""" :: batch mode help page
     
+    """+__copyright__+"""
+    
     usage: """+selfname+""" [options]
     Available options:
     --install|-i                          Install plug-in
     --export|-e                           Batch export
     --input|--input-file|-f[ |=]file      Input .xcf file for export
     --output|--output-path|-o[ |=]path    Path for save textures
-    --level|-l                            Texture detail level [0:12]
+    --level|-s                            Texture detail level [0:12]
     --limit|-m                            Texture detail level limit [0:12]
     --help|-h                             This help page
     --version|-v                          Plug-in version number
     --about|--authors|-a                  About authors
+    --license|-l                          License
     """)
+    return 0
 def lunique_batch_version(selfname):
     print("""
     """+__program__+""" :: version info
     
     """+selfname+" "+__version__+"""
+    
+    """+__copyright__+"""
     """)
+    return 0
 def lunique_batch_about(selfname):
     print("""
     """+__program__+""" :: authors info
@@ -811,6 +818,16 @@ def lunique_batch_about(selfname):
     Documentator:
         """+__documentator__+"""
     """)
+    return 0
+def lunique_batch_license(selfname):
+    print("""
+    """+__program__+""" :: license information
+    
+    """+__copyright__+"""
+    
+    """+__license__+"""
+    """)
+    return 0
 
 def lunique_main():
     arg=ArgDict(sys.argv)
@@ -818,17 +835,20 @@ def lunique_main():
     arg.define("export",["--export","-e"])
     arg.define("help",["--help","-h"])
     arg.define("version",["--version","-v"])
+    arg.define("license",["--license","-l"])
     arg.define("about",["--about","--authors","-a"])
     arg.define("output",["--output","--output-path","-o"],"")
     arg.define("input",["--input","--input-file","-f"],"")
-    arg.define("level",["--level","-l"],-1)
+    arg.define("level",["--level","-s"],-1)
     arg.define("limit",["--limit","-m"],-1)
     if arg["help"]:
-	lunique_batch_help(arg["exec"])
+	sys.exit(lunique_batch_help(arg["exec"]))
     if arg["version"]:
-	lunique_batch_version(arg["exec"])
+	sys.exit(lunique_batch_version(arg["exec"]))
     if arg["about"]:
-	lunique_batch_about(arg["exec"])
+	sys.exit(lunique_batch_about(arg["exec"]))
+    if arg["license"]:
+	sys.exit(lunique_batch_license(arg["exec"]))
     if arg["install"]:
 	sys.exit(lunique_install(arg["exec"]))
     if arg["export"]:
